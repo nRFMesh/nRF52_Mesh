@@ -19,9 +19,9 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/battery.c \
   $(PROJ_DIR)/drivers/bme280.c \
   $(PROJ_DIR)/drivers/max44009.c \
+  $(PROJ_DIR)/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
-  $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
   $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
@@ -54,8 +54,8 @@ SRC_FILES += \
 INC_FOLDERS += \
   . \
   $(PROJ_DIR)/drivers \
+  $(PROJ_DIR)/boards/ \
   $(SDK_ROOT)/components \
-  $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
   $(SDK_ROOT)/components/libraries/util \
   $(SDK_ROOT)/components/libraries/balloc \
