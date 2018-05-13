@@ -1,0 +1,3 @@
+[submodule "nRF5_SDK_15.0.0_prf"]
+	path = nRF5_SDK_15.0.0_prf
+	url = https://github.com/nRFMesh/nRF5_SDK_15.0.0_prf.git
