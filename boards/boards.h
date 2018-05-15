@@ -47,6 +47,8 @@
   #include "pca10040.h"
 #elif defined(BOARD_NRF52_SENSOR_TAG)
   #include "nrf52_sensortag.h"
+#elif defined(BOARD_NRF52_DONGLE)
+  #include "nrf52_dongle.h"
 #else
 #error "Board is not defined"
 

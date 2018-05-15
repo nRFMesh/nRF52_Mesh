@@ -27,20 +27,8 @@ def get_local_json():
     return config
 
 # -------------------- config -------------------- 
-def get_local_nodes(rel_file):
-    """fetches the nodes.json file in the local repository
-    - rel_file : reliative path file
-    """
-    nodes = None
-    dirname = os.path.dirname(sys.argv[0])
-    if(len(dirname) == 0):
-        dirname = "."
-    nodes_file = dirname+'/'+rel_file
-    if(os.path.isfile(nodes_file)):
-        #print("loading: ",nodes_file)
-        nodes = json.load(open(nodes_file),object_pairs_hook=OrderedDict)
-    else:
-        print("Fatal error %s not found"%(rel_file))
+def get_local_nodes(nodes_file):
+    nodes = json.load(open(nodes_file),object_pairs_hook=OrderedDict)
     return nodes
 
 def configure_log(config):

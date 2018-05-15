@@ -58,10 +58,10 @@ def read_id():
     global node_id
     global node
     uid = get_uid()
-    node_id = get_node_id_from_uid(uid)
-    node = nodes[node_id]
     print("device uid : %s" % uid )
+    node_id = get_node_id_from_uid(uid)
     print("node mesh id : %s" % node_id )
+    node = nodes[node_id]
     print("name : %s" % node["name"] )
     return
 
