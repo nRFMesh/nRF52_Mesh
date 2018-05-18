@@ -59,6 +59,7 @@ void read_send_bme()
 
 void read_send_light()
 {
+    
     uint32_t light = max44009_read_light(&m_twi);
     mesh_tx_light(light);
     #if(NRF_LOG_LEVEL <= NRF_LOG_LEVEL_INFO)
@@ -84,18 +85,19 @@ void app_rtc_handler()
     static const uint32_t offset_bme    = 1;
     static const uint32_t period_light  = 3;
     static const uint32_t offset_light  = 2;
-    static const uint32_t period_bat    = 3;//30
+    static const uint32_t period_bat    = 30;
     static const uint32_t offset_bat    = 0;
 
     clocks_restart();
+    twi_restart();
 
     if( ((cycle_count+offset_bme) % period_bme)==0)
     {
-        // read_send_bme();
+        read_send_bme();
     }
     if( ((cycle_count+offset_light) % period_light)==0)
     {
-        // read_send_light();
+        read_send_light();
     }
     if( ((cycle_count+offset_bat) % period_bat)==0)
     {
@@ -105,6 +107,7 @@ void app_rtc_handler()
 
     cycle_count++;
 
+    twi_stop();
     clocks_stop();
 
 }
@@ -138,19 +141,16 @@ int main(void)
     NRF_LOG_INFO("Hello from nRF52 Sensors");
     NRF_LOG_INFO("____________________________");
 
-    //twi_scan();
-
-    //max44009_test();
-
-    // err_code = bme280_init(&m_twi);
-    // APP_ERROR_CHECK(err_code);
-    // NRF_LOG_INFO("bme280_init() done");
+    err_code = bme280_init(&m_twi);
+    APP_ERROR_CHECK(err_code);
+    NRF_LOG_INFO("bme280_init() done");
 
     mesh_tx_reset();
     mesh_wait_tx();
     //read_send_battery();//could not be sent after rest with and without wait_tx
 
     // ------------------------- Start Events ------------------------- 
+    twi_stop();
     clocks_stop();//release the hf clock
 
     while(true)

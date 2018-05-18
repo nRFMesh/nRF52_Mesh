@@ -46,6 +46,23 @@ void twi_init(const nrf_drv_twi_t *l_twi)
     nrf_drv_twi_enable(p_twi);
 }
 
+void twi_stop()
+{
+    nrf_drv_twi_disable(p_twi);
+    nrf_drv_twi_uninit(p_twi);
+    //nRF52832 Errata [89] TWI: Static 400 uA current while using GPIOTE
+    *(volatile uint32_t *)0x40003FFC = 0;
+    *(volatile uint32_t *)0x40003FFC;
+    *(volatile uint32_t *)0x40003FFC = 1;
+}
+
+void twi_restart()
+{
+    //due to workaround Errata [89] Reconfiguration of TWI is required before next usage
+    twi_init(p_twi);
+}
+
+
 //found BME280  @ 0x76
 //found MX44009 @ 0x4A
 void twi_scan()

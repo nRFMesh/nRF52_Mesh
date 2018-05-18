@@ -38,6 +38,32 @@ Here a screenshot of the schematics which design files are also available in the
 
 nRF52 Sensor Tag [readme](applications/nrf52_sensortag/README.md)
 
+## Low Power configuration
+|Flag to clear|
+--- |
+| NRFX_UARTE_ENABLED |
+| NRFX_UART_ENABLED | 
+| UART_ENABLED | 
+| UART0_ENABLED |
+| NRF_FPRINTF_ENABLED |
+| NRF_LOG_BACKEND_UART_ENABLED |
+| NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED |
+| NRF_LOG_ENABLED |
+* removed nrf_drv_uart.c from Makefile
+
+* Required nRF52832 Errata [89] TWI: Static 400 uA current while using GPIOTE
+
+
+## Low Power measures
+| Mode | Current |
+--- | --- |
+| RTC + RAM | 9.6 uA |
+| // + Sensors | 22 uA |
+| // without TWI Woraround | 470 uA |
+| Uart Log | 500 uA |
+| Uart Log + HF | 700 uA |
+
+
 # nRF52 Dongle
 Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can reuse a usb dongle from the market that includes a **2104** serial to usb converter. Keyword search on shopping websites : **nRF52832 USB dongle**. Aka "nRF52832-YJ-17017-USB-UART"
 
