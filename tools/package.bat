@@ -1,0 +1,1 @@
+nrfutil pkg generate --hw-version 52 --sd-req 0x80 --application-version 3 --application ..\applications\nrf52_sensortag\_build\nrf52832_xxaa.hex --key-file "%VAULT%\nrf52_priv.pem" app_dfu_package.zip

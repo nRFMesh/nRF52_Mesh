@@ -85,7 +85,7 @@ static void saadc_event_handler(nrf_drv_saadc_evt_t const * p_evt)
         adc_result = p_evt->data.done.p_buffer[0];
 
         m_batt_lvl_in_milli_volts =
-            ADC_RESULT_IN_MILLI_VOLTS(adc_result) + DIODE_FWD_VOLT_DROP_MILLIVOLTS;
+            ADC_RESULT_IN_MILLI_VOLTS(adc_result);//there is no diode protection in the sensorTag + DIODE_FWD_VOLT_DROP_MILLIVOLTS;
     }
     status_done = true;
 }

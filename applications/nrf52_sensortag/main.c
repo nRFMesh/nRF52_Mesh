@@ -13,6 +13,8 @@
 #include "boards.h"
 #include "app_util.h"
 
+#include "nrf_pwr_mgmt.h"
+
 //for the log
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -65,26 +67,45 @@ void read_send_light()
     #endif
 }
 
+void read_send_battery()
+{
+    uint16_t v_bat_mili = get_battery();
+    mesh_tx_battery(v_bat_mili);
+    #if(NRF_LOG_LEVEL <= NRF_LOG_LEVEL_INFO)
+        float v_bat_mili_f  = v_bat_mili;
+        NRF_LOG_INFO("V Bat = "NRF_LOG_FLOAT_MARKER" Volts",NRF_LOG_FLOAT(v_bat_mili_f/1000));
+    #endif
+}
+
 void app_rtc_handler()
 {
     static uint32_t cycle_count = 0;
-    static const uint32_t period_alive  = 6;
     static const uint32_t period_bme    = 3;
+    static const uint32_t offset_bme    = 1;
     static const uint32_t period_light  = 3;
+    static const uint32_t offset_light  = 2;
+    static const uint32_t period_bat    = 3;//30
+    static const uint32_t offset_bat    = 0;
 
-    if( (cycle_count % period_alive)==0)
-    {
-        mesh_tx_alive();
-    }
-    if( (cycle_count % period_bme)==0)
-    {
-        read_send_bme();
-    }
-    if( (cycle_count % period_light)==0)
-    {
-        read_send_light();
-    }
+    clocks_restart();
 
+    if( ((cycle_count+offset_bme) % period_bme)==0)
+    {
+        // read_send_bme();
+    }
+    if( ((cycle_count+offset_light) % period_light)==0)
+    {
+        // read_send_light();
+    }
+    if( ((cycle_count+offset_bat) % period_bat)==0)
+    {
+        read_send_battery();
+    }
+    mesh_wait_tx();
+
+    cycle_count++;
+
+    clocks_stop();
 
 }
 
@@ -96,6 +117,9 @@ int main(void)
     err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
     NRF_LOG_DEFAULT_BACKENDS_INIT();
+
+    err_code = nrf_pwr_mgmt_init();
+    APP_ERROR_CHECK(err_code);
 
     clocks_start();
 
@@ -118,23 +142,20 @@ int main(void)
 
     //max44009_test();
 
-    //err_code = bme280_init(&m_twi);
-    //APP_ERROR_CHECK(err_code);
-    //NRF_LOG_INFO("bme280_init() done");
+    // err_code = bme280_init(&m_twi);
+    // APP_ERROR_CHECK(err_code);
+    // NRF_LOG_INFO("bme280_init() done");
 
     mesh_tx_reset();
-    //mesh_wait_tx();
-
-    float v_bat_mili = get_battery();
-    NRF_LOG_INFO("V Bat = "NRF_LOG_FLOAT_MARKER" Volts",NRF_LOG_FLOAT(v_bat_mili/1000));
+    mesh_wait_tx();
+    //read_send_battery();//could not be sent after rest with and without wait_tx
 
     // ------------------------- Start Events ------------------------- 
+    clocks_stop();//release the hf clock
 
     while(true)
     {
-        __SEV();
-        __WFE();
-        __WFE();
+        nrf_pwr_mgmt_run();
     }
 }
 /*lint -restore */

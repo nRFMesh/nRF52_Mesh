@@ -1,0 +1,1 @@
+nrfutil keys display --key pk --format code %VAULT%\nrf52_priv.pem --out_file nrf52_public.c

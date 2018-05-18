@@ -1,0 +1,1 @@
+nrfutil keys generate %VAULT%\nrf52_priv.pem

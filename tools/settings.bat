@@ -1,0 +1,1 @@
+nrfutil settings generate --family NRF52 --application ..\applications\nrf52_sensortag\_build\nrf52832_xxaa.hex --application-version 3 --bootloader-version 2 --bl-settings-version 1 settings.hex

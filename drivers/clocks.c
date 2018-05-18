@@ -38,6 +38,17 @@ void clocks_start( void )
     
 }
 
+void clocks_restart( void )
+{
+    nrf_drv_clock_hfclk_request(NULL);
+    while(!nrf_drv_clock_hfclk_is_running());
+}
+
+void clocks_stop( void )
+{
+    nrf_drv_clock_hfclk_release();
+}
+
 void rtc_handler(nrf_drv_rtc_int_type_t int_type)
 {
     if (int_type == NRF_DRV_RTC_INT_COMPARE0)

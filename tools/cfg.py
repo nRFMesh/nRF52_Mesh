@@ -1,6 +1,5 @@
 import sys,os
 import json
-import logging as log
 import socket
 from collections import OrderedDict
 
@@ -30,20 +29,3 @@ def get_local_json():
 def get_local_nodes(nodes_file):
     nodes = json.load(open(nodes_file),object_pairs_hook=OrderedDict)
     return nodes
-
-def configure_log(config):
-    log_level_map = {
-        "Debug"     :10,
-        "Info"      :20,
-        "Warning"   :30,
-        "Error"     :40,
-        "Critical"  :50
-    }
-    log.basicConfig(    filename=config["logfile"],
-                        level=log_level_map[config["level"]],
-                        format='%(asctime)s %(name)s %(levelname)-8s %(message)s',
-                        datefmt='%d %H:%M:%S'
-                        )
-    log.getLogger('').addHandler(log.StreamHandler())
-    log.info("log started @ level:%s",config["level"])
-    return
