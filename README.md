@@ -26,20 +26,25 @@ Once in the application directory just use ```make conf``` to call a cmsis [conf
 # nRF52 Sensor Tag
 This board is based on modules, it is very simple to solder and allows selection of any other I²C sensor modules.
 
-<img src="boards/nrf52_sensortag/images/sensor_tag.png" width="600">
+## Design
+### Module
+<img src="boards/nrf52_sensortag/images/module_size.png" width="300">
 
-It is based on a market available nRF52832 module seen below
-
-<img src="boards/nrf52_sensortag/images/module_size.png" width="600">
-
+### Schematics
 Here a screenshot of the schematics which design files are also available in the [board subdirectory](boards/nrf52_sensortag/pcb)
 
 <img src="boards/nrf52_sensortag/images/schematics_pinout.png" width="400">
 
-nRF52 Sensor Tag [readme](applications/nrf52_sensortag/README.md)
+## Mounted PCBs
+It is possible to mount either CR2032 or CR2477
+
+<img src="boards/nrf52_sensortag/images/mounted.png" width="600">
+
+It is based on a market available nRF52832 module seen below
+
 
 ## Low Power configuration
-|Flag to clear|
+|Flags to clear|
 --- |
 | NRFX_UARTE_ENABLED |
 | NRFX_UART_ENABLED | 
@@ -50,7 +55,6 @@ nRF52 Sensor Tag [readme](applications/nrf52_sensortag/README.md)
 | NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED |
 | NRF_LOG_ENABLED |
 * removed nrf_drv_uart.c from Makefile
-
 * Required nRF52832 Errata [89] TWI: Static 400 uA current while using GPIOTE
 
 
