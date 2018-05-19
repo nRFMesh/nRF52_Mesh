@@ -1,6 +1,14 @@
-# What you'll find here
+# What you'll find [here](https://github.com/nRFMesh/nRF52_Mesh)
 * nRF52 boards schematics and applications using the nRF SDK 15
+    * Low power Custom Sensor Tag with BME280 and MAX44009 (currently @22 uA)
+    * Reprogrammed USB dongle from the market with 3d printed pogo-pins adapter (status alive)
 * A light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
+    * Sleepy nodes (low power) and router nodes (always listening)
+    * single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
+    * An alternative to the Bluetooth Mesh and Zigbee Thread IPV6 world
+* Tools and environemt
+    * devices database management and automated parameters flashing
+    * [HomeSmartMesh](https://github.com/HomeSmartMesh/IoT_Frameworks) compatible environment where a raspberry pi collects the data into a time series [influx](https://www.influxdata.com/time-series-database/) Data base and serve a [Graphana](https://grafana.com/grafana) web interface
 
 # Installation
 * GNU Tools ARM Embedded version 6 2017-q2-update, referenced from the SDK Makefile.windows
