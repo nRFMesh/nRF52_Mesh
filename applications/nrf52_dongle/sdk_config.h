@@ -63,7 +63,7 @@
 // <4=> Debug 
 
 #ifndef CLOCKS_CONFIG_LOG_LEVEL
-#define CLOCKS_CONFIG_LOG_LEVEL 3
+#define CLOCKS_CONFIG_LOG_LEVEL 2
 #endif
 
 // </e>

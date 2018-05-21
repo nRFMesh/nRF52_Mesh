@@ -6,7 +6,7 @@ SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := ./esb_low_power_ptx_gcc_nrf52.ld
+  LINKER_SCRIPT  := ./esb_ptx_prx_gcc_nrf52.ld
 
 #  $(PROJ_DIR)/drivers/bme280/bme280.cpp \
 
@@ -187,3 +187,9 @@ SDK_CONFIG_FILE := ./sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 conf:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
+
+paramr:
+	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -r
+
+paramw:
+	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -w

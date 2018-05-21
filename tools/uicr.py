@@ -1,10 +1,26 @@
 import os
 import pylink
 import cfg
+import sys
 
 nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
-#TODO customise to the used application as param
-uicr = cfg.get_local_nodes("../applications/nrf52_sensortag/uicr_map.json")
+
+#  command example
+#  python uicr.py "../applications/nrf52_sensortag/uicr_map.json"
+if(len(sys.argv) > 1):
+    uicr_cfongi_file = sys.argv[1]
+    print("arg0:%s"%(uicr_cfongi_file))
+else:
+    uicr_cfongi_file = "../applications/nrf52_sensortag/uicr_map.json"
+
+#second command line argument to read or write
+if(len(sys.argv) > 2):
+    mode = sys.argv[2]
+    print("arg1:%s"%(mode))
+else:
+    mode = "-x"
+
+uicr = cfg.get_local_nodes(uicr_cfongi_file)
 jlink = pylink.JLink()
 jlink.open(os.environ['SEG_JLEDU'])
 node_id = 0
@@ -107,3 +123,12 @@ def write_config():
         print("write verified")
     return
 
+if(mode == "-r"):
+    start()
+    read_id()
+    read_config()
+elif(mode == "-w"):
+    start()
+    read_id()
+    write_config()
+#else do nothing

@@ -26,6 +26,10 @@
 #include "clocks.h"
 #include "mesh.h"
 
+void app_mesh_handler()
+{
+    NRF_LOG_INFO("app_mesh_handler()");
+}
 
 void app_rtc_handler()
 {
@@ -42,31 +46,32 @@ int main(void)
     err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
     NRF_LOG_DEFAULT_BACKENDS_INIT();
-
-    clocks_start();
-
-    bsp_board_init(BSP_INIT_LEDS);
-
-    bsp_board_led_on(0);
-    nrf_delay_ms(200);
-    bsp_board_leds_off();
-    nrf_delay_ms(200);
-    bsp_board_led_on(0);
-    nrf_delay_ms(200);
-    bsp_board_leds_off();
-
-    err_code = mesh_init();
-    APP_ERROR_CHECK(err_code);
-
-    //only allow interrupts to start after init is done
-    rtc_config(app_rtc_handler);
     // ------------------------- Start App ------------------------- 
-
     NRF_LOG_INFO("__________________________________");
     NRF_LOG_INFO("Hello from the nRF52 UART Dongle");
     NRF_LOG_INFO("__________________________________");
 
-    mesh_tx_reset();
+
+    clocks_start();
+    bsp_board_init(BSP_INIT_LEDS);
+
+
+
+    bsp_board_led_on(0);
+    nrf_delay_ms(200);
+    bsp_board_leds_off();
+    nrf_delay_ms(200);
+    bsp_board_led_on(0);
+    nrf_delay_ms(200);
+    bsp_board_leds_off();
+
+    err_code = mesh_init(app_mesh_handler);
+    APP_ERROR_CHECK(err_code);
+
+    //only allow interrupts to start after init is done
+    rtc_config(app_rtc_handler);
+
+    //mesh_tx_reset();
 
     // ------------------------- Start Events ------------------------- 
 

@@ -194,3 +194,9 @@ SDK_CONFIG_FILE := ./sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 conf:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
+
+paramr:
+	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -r
+
+paramw:
+	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -w

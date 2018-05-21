@@ -4,8 +4,9 @@
 
 #include <stdint.h>
 
+typedef void (*app_mesh_handler_t)(void);
 
-uint32_t mesh_init();
+uint32_t mesh_init(app_mesh_handler_t handler);
 
 void mesh_wait_tx();
 
