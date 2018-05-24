@@ -3,6 +3,7 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include "sdk_common.h"
@@ -27,19 +28,31 @@
 #include "mesh.h"
 #include "app_ser.h"
 
+char message[50];
 
-void app_mesh_handler()
+void blink()
+{
+    bsp_board_led_on(0);
+    nrf_delay_ms(200);
+    bsp_board_leds_off();
+    nrf_delay_ms(200);
+    bsp_board_led_on(0);
+    nrf_delay_ms(200);
+    bsp_board_leds_off();
+}
+
+void app_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("app_mesh_handler()");
+
+    sprintf(message,"rssi:-%d;nodeid:%d;pid:0x%02X\r\n",msg->rssi,msg->source,msg->pid);
+    ser_send(message);
 }
 
 void app_rtc_handler()
 {
     NRF_LOG_INFO("RTC Tick");
     mesh_tx_alive();
-
-    ser_send("rtc:Tick\r\n");
-
 }
 
 int main(void)
@@ -50,7 +63,7 @@ int main(void)
     err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
     NRF_LOG_DEFAULT_BACKENDS_INIT();
-    // ------------------------- Start App ------------------------- 
+
     NRF_LOG_INFO("__________________________________");
     NRF_LOG_INFO("Hello from the nRF52 UART Dongle");
     NRF_LOG_INFO("__________________________________");
@@ -58,16 +71,14 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
-
     ser_init();
 
-    bsp_board_led_on(0);
-    nrf_delay_ms(200);
-    bsp_board_leds_off();
-    nrf_delay_ms(200);
-    bsp_board_led_on(0);
-    nrf_delay_ms(200);
-    bsp_board_leds_off();
+    ser_send("____________________________________\r\n.\r\n");
+    nrf_delay_ms(10);
+    sprintf(message,"nodeid:%d;channel:%d;event:reset\r\n.\r\n",mesh_node_id(),mesh_channel());
+    ser_send(message);
+
+    blink();
 
     err_code = mesh_init(app_mesh_handler);
     APP_ERROR_CHECK(err_code);

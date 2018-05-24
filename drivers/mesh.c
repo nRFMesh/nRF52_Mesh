@@ -37,6 +37,7 @@ NRF_LOG_MODULE_REGISTER();
 static nrf_esb_config_t nrf_esb_config         = NRF_ESB_DEFAULT_CONFIG;
 static nrf_esb_payload_t tx_payload = NRF_ESB_CREATE_PAYLOAD(0, 0x01, 0x00);
 static nrf_esb_payload_t rx_payload;
+static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
 
@@ -45,6 +46,11 @@ static app_mesh_handler_t m_app_mesh_handler;
 uint16_t mesh_node_id()
 {
     return UICR_NODE_ID;
+}
+
+uint8_t mesh_channel()
+{
+    return UICR_RF_CHANNEL;
 }
 
 void mesh_pre_tx()
@@ -101,9 +107,18 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             // Get the most recent element from the RX FIFO.
             while (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
             {
-                //TODO add the message as a structure with (size,control,pid,source,dest,payload)
-                m_app_mesh_handler();
                 NRF_LOG_INFO("Received length:%d ; pid:0x%02X ; src:%d ",rx_payload.length, rx_payload.data[0],rx_payload.data[1]);
+                rx_msg.size = rx_payload.length;
+                rx_msg.control = rx_payload.control;
+                rx_msg.pid = rx_payload.data[0];
+                rx_msg.source = rx_payload.data[1];
+                rx_msg.payload = rx_payload.data+2;
+                rx_msg.rssi = rx_payload.rssi;
+                if((rx_payload.control & 0x80) == 0)//not a broadcast, then should have dest
+                {
+                    rx_msg.dest = rx_payload.data[2];////only relevant in case of Peer2Peer
+                }
+                m_app_mesh_handler(&rx_msg);
             }
 
             // For each LED, set it as indicated in the rx_payload, but invert it for the button

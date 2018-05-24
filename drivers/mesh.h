@@ -4,9 +4,25 @@
 
 #include <stdint.h>
 
-typedef void (*app_mesh_handler_t)(void);
+//should match NRF_ESB_MAX_PAYLOAD_LENGTH
+#define MAX_MESH_MESSAGE_SIZE 32
+
+typedef struct 
+{
+    uint8_t size;
+    uint8_t control;
+    uint8_t pid;
+    uint8_t source;
+    uint8_t dest;
+    int8_t  rssi;       //Radio Signal Strength Indication
+    uint8_t *payload;
+}message_t;
+
+
+typedef void (*app_mesh_handler_t)(message_t*);
 
 uint16_t mesh_node_id();
+uint8_t mesh_channel();
 
 uint32_t mesh_init(app_mesh_handler_t handler);
 

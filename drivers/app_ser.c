@@ -48,25 +48,10 @@ void ser_init()
 
     ret = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
     APP_ERROR_CHECK(ret);
-
-    static char tx_message[] = "ser:Hello World;app:dongle\r\n";
-
-    ret = nrf_serial_write(&serial_uart,
-                           tx_message,
-                           strlen(tx_message),
-                           NULL,
-                           NRF_SERIAL_MAX_TIMEOUT);
-    (void)nrf_serial_flush(&serial_uart, 0);
 }
 
-//TODO send_buffer
-
-//might be called from ISR
+//Non blocking mode, using 0 as parameter
 void ser_send(char* message)
 {
-    nrf_serial_write(&serial_uart,
-                           message,
-                           strlen(message),
-                           NULL,
-                           0);
+    nrf_serial_write(&serial_uart,message,strlen(message),NULL,0);
 }
