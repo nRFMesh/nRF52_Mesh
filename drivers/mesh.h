@@ -6,6 +6,8 @@
 
 typedef void (*app_mesh_handler_t)(void);
 
+uint16_t mesh_node_id();
+
 uint32_t mesh_init(app_mesh_handler_t handler);
 
 void mesh_wait_tx();

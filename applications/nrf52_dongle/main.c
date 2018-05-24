@@ -25,6 +25,8 @@
 //apps
 #include "clocks.h"
 #include "mesh.h"
+#include "app_ser.h"
+
 
 void app_mesh_handler()
 {
@@ -35,6 +37,8 @@ void app_rtc_handler()
 {
     NRF_LOG_INFO("RTC Tick");
     mesh_tx_alive();
+
+    ser_send("rtc:Tick\r\n");
 
 }
 
@@ -55,7 +59,7 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
-
+    ser_init();
 
     bsp_board_led_on(0);
     nrf_delay_ms(200);
@@ -71,15 +75,13 @@ int main(void)
     //only allow interrupts to start after init is done
     rtc_config(app_rtc_handler);
 
-    //mesh_tx_reset();
+    mesh_tx_reset();
 
     // ------------------------- Start Events ------------------------- 
 
     while(true)
     {
-        __SEV();
-        __WFE();
-        __WFE();
+        nrf_delay_ms(100);
     }
 }
 /*lint -restore */

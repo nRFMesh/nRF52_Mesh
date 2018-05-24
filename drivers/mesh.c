@@ -42,6 +42,10 @@ static volatile bool esb_tx_complete = false;
 
 static app_mesh_handler_t m_app_mesh_handler;
 
+uint16_t mesh_node_id()
+{
+    return UICR_NODE_ID;
+}
 
 void mesh_pre_tx()
 {
