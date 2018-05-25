@@ -106,3 +106,5 @@ Making a needle adapter is made easier with 3d printing. The used pogo pin is se
 The adapter model still in preparation can be found [here](https://a360.co/2IcKZK9). It should look something like this:
 
 <img src="boards/nrf52_dongle/images/adapter.png" width="300" title="Adapter">
+<br/>
+<img src="boards/nrf52_dongle/images/pogo-pin adapter.jpg" width="300" title="Adapter">
