@@ -55,7 +55,7 @@ uint8_t mesh_channel()
 
 void mesh_pre_tx()
 {
-    if(UICR_LISTENING)
+    if(UICR_LISTENING == 0xBABA)
     {
         NRF_LOG_INFO("pre tx -> stop rx");
         nrf_esb_stop_rx();
@@ -72,7 +72,7 @@ void mesh_pre_tx()
 
 void mesh_post_tx()
 {
-    if(UICR_LISTENING)
+    if(UICR_LISTENING == 0xBABA)
     {
         NRF_LOG_DEBUG("post tx -> start rx");
         //TODO create a light switch nrf_esb_switch_tx() without going through complete disable and enable
@@ -146,7 +146,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     nrf_esb_config.payload_length           = 8;
     nrf_esb_config.bitrate                  = NRF_ESB_BITRATE_2MBPS;
     nrf_esb_config.event_handler            = nrf_esb_event_handler;
-    if(UICR_LISTENING)
+    if(UICR_LISTENING == 0xBABA)
     {
         nrf_esb_config.mode                     = NRF_ESB_MODE_PRX;
     }
@@ -176,7 +176,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     tx_payload.pipe    = 0;
     tx_payload.data[0] = 0x00;
 
-    if(UICR_LISTENING)
+    if(UICR_LISTENING == 0xBABA)
     {
         err_code = nrf_esb_start_rx();
         VERIFY_SUCCESS(err_code);
@@ -184,7 +184,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
 
     NRF_LOG_INFO("nodeId %d",UICR_NODE_ID);
     NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
-    NRF_LOG_INFO("listening %d",UICR_LISTENING);
+    NRF_LOG_INFO("listening 0x%X",UICR_LISTENING);
 
     return NRF_SUCCESS;
 }
