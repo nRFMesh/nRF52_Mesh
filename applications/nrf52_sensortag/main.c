@@ -36,6 +36,11 @@
 /* TWI instance. */
 static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
+void app_mesh_handler(message_t* msg)
+{
+    NRF_LOG_INFO("app_mesh_handler()");
+}
+
 void read_send_bme()
 {
     bme280_measure();
@@ -128,7 +133,7 @@ int main(void)
 
     battery_init();
 
-    err_code = mesh_init();
+    err_code = mesh_init(app_mesh_handler);//in case of rf rx
     APP_ERROR_CHECK(err_code);
 
     twi_init(&m_twi);
