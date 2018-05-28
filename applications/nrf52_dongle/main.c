@@ -28,7 +28,7 @@
 #include "mesh.h"
 #include "app_ser.h"
 
-char message[50];
+char message[100];
 
 void blink()
 {
@@ -45,7 +45,7 @@ void app_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("app_mesh_handler()");
 
-    sprintf(message,"rssi:-%d;nodeid:%d;pid:0x%02X\r\n",msg->rssi,msg->source,msg->pid);
+    mesh_parse_raw(msg,message);
     ser_send(message);
 }
 
@@ -73,9 +73,9 @@ int main(void)
     bsp_board_init(BSP_INIT_LEDS);
     ser_init();
 
-    ser_send("____________________________________\r\n.\r\n");
+    ser_send("____________________________________\r\n");
     nrf_delay_ms(10);
-    sprintf(message,"nodeid:%d;channel:%d;event:reset\r\n.\r\n",mesh_node_id(),mesh_channel());
+    sprintf(message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
     ser_send(message);
 
     blink();

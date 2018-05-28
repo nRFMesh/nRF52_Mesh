@@ -9,15 +9,16 @@
 
 typedef struct 
 {
-    uint8_t size;
     uint8_t control;
     uint8_t pid;
     uint8_t source;
     uint8_t dest;
     int8_t  rssi;       //Radio Signal Strength Indication
+    uint8_t payload_length;
     uint8_t *payload;
 }message_t;
 
+extern const char * const pid_name[];
 
 typedef void (*app_mesh_handler_t)(message_t*);
 
@@ -33,11 +34,12 @@ void mesh_tx_alive();
 
 void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size);
 
-uint32_t mesh_tx_light_on();
-uint32_t mesh_tx_light_off();
 uint32_t mesh_tx_button(uint8_t state);
 void mesh_tx_light(uint32_t light);
 void mesh_tx_battery(uint16_t voltage);
 void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press);
+
+void mesh_parse_raw(message_t* msg,char * p_msg);
+void mesh_parse_data_raw(message_t* msg,char * p_msg);
 
 #endif /*__MESH_H__*/

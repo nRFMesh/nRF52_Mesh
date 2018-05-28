@@ -50,7 +50,7 @@ def write_uicr_customer(reg_name,val):
     reg_nb = int(reg_name.lstrip("CUSTOMER_"))
     address = 0x10001080 + 4*reg_nb
     if((type(val) is str) or (type(val) is unicode)):
-        words_list = [int(val)]
+            words_list = [int(val,0)]
     else:
         words_list = [val]
     jlink.memory_write32(address,words_list)
@@ -113,7 +113,7 @@ def write_config():
                 test_pass = False
         else:
             test_val = read_uicr_customer(reg)
-            if(test_val != int(node[param])):
+            if(test_val != int(node[param],0)):
                 test_pass = False
             
     if(not test_pass):

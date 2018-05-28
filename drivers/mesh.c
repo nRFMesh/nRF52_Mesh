@@ -9,6 +9,8 @@
 #include "nrf_esb_error_codes.h"
 
 #include "nrf_delay.h"
+#include <stdio.h>
+
 
 #define NRF_LOG_MODULE_NAME mesh
 
@@ -24,15 +26,48 @@ NRF_LOG_MODULE_REGISTER();
 
 #define Mesh_Pid_Alive 0x05
 #define Mesh_Pid_Reset 0x04
+#define Mesh_Pid_Button 0x06
+
 //light was 16bit redefined u32 bit
 #define Mesh_Pid_Light 0x07
 //bme280 no more with uncalibrated params
 #define Mesh_Pid_bme        0x0A
 #define Mesh_Pid_Battery    0x15
 
+#define MESH_IS_BROADCAST(val) ((val & 0x80) == 0x80)
+
+#define MESH_Broadcast_Header_Length 4
+#define MESH_P2P_Header_Length 5
+
+
+const char * const pid_name[] = {  "",          //0x00
+                                "ping",         //0x01
+                                "request_pid",  //0x02
+                                "0x03",         //0x03
+                                "reset",        //0x04
+                                "alive",        //0x05
+                                "button",       //0x06
+                                "light",        //0x07
+                                "temperature",  //0x08
+                                "heat",         //0x09
+                                "bme",          //0x0A
+                                "rgb",          //0x0B
+                                "magnet",       //0x0C
+                                "dimmer",       //0x0D
+                                "light_rgb",    //0x0E
+                                "gesture",      //0x0F
+                                "proximity",    //0x10
+                                "humidity",     //0x11
+                                "pressure",     //0x12
+                                "acceleration", //0x13
+                                "light_n",      //0x14
+                                "Battery",      //0x15
+                                "" };    
+
 #define UICR_NODE_ID    NRF_UICR->CUSTOMER[0]
 #define UICR_RF_CHANNEL NRF_UICR->CUSTOMER[1]
 #define UICR_LISTENING  NRF_UICR->CUSTOMER[3]
+#define UICR_is_router()  (NRF_UICR->CUSTOMER[4] == 0xBABA)
 
 static nrf_esb_config_t nrf_esb_config         = NRF_ESB_DEFAULT_CONFIG;
 static nrf_esb_payload_t tx_payload = NRF_ESB_CREATE_PAYLOAD(0, 0x01, 0x00);
@@ -42,6 +77,8 @@ static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
 
 static app_mesh_handler_t m_app_mesh_handler;
+
+void mesh_tx_message(message_t* msg);
 
 uint16_t mesh_node_id()
 {
@@ -85,6 +122,66 @@ void mesh_post_tx()
     }
 }
 
+void mesh_message_2_esb_payload(message_t *msg,nrf_esb_payload_t *p_tx_payload)
+{
+    //esb only parameters
+    p_tx_payload->noack    = true;//TODO check
+    p_tx_payload->pipe     = 0;//always 0 to clarify
+
+    p_tx_payload->control = msg->control;
+    p_tx_payload->fid = msg->pid;
+    p_tx_payload->source = msg->source;
+    p_tx_payload->dest = msg->dest;
+
+    //start_payload required for ESB internal positioning of the payload
+    if(MESH_IS_BROADCAST(msg->control))
+    {
+        p_tx_payload->start_payload = MESH_Broadcast_Header_Length;
+    }
+    else
+    {
+        p_tx_payload->start_payload = MESH_P2P_Header_Length;
+    }
+
+    //this is the total ESB packet length
+    p_tx_payload->length   = msg->payload_length + p_tx_payload->start_payload;
+    memcpy(p_tx_payload->data,msg->payload,msg->payload_length);
+}
+
+void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
+{
+    msg->control = p_rx_payload->control;
+    msg->pid = p_rx_payload->fid;
+    msg->source = p_rx_payload->source;
+    msg->dest = p_rx_payload->dest;//255 if broadcast
+    msg->rssi = p_rx_payload->rssi;
+    //pointer given but not to be used beyond the callback
+    msg->payload_length = p_rx_payload->length - p_rx_payload->start_payload;
+    if(msg->payload_length > 0)
+    {
+        msg->payload = p_rx_payload->data + p_rx_payload->start_payload;
+    }
+}
+
+void mesh_repeater_handler(message_t* msg)
+{
+    if(UICR_is_router())
+    {
+        uint8_t ttl = msg->control & 0x0F;
+        if(ttl>0)
+        {
+            ttl--;
+            msg->control &= 0xF0;//clear ttl
+            msg->control |= ttl;
+            mesh_tx_message(msg);
+        }
+    }
+    //app would get a damaged ttl, but should not be using it
+    if(m_app_mesh_handler != NULL)
+    {
+        m_app_mesh_handler(msg);
+    }
+}
 
 void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 {
@@ -108,17 +205,10 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             while (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
             {
                 NRF_LOG_INFO("Received length:%d ; pid:0x%02X ; src:%d ",rx_payload.length, rx_payload.data[0],rx_payload.data[1]);
-                rx_msg.size = rx_payload.length;
-                rx_msg.control = rx_payload.control;
-                rx_msg.pid = rx_payload.data[0];
-                rx_msg.source = rx_payload.data[1];
-                rx_msg.payload = rx_payload.data+2;
-                rx_msg.rssi = rx_payload.rssi;
-                if((rx_payload.control & 0x80) == 0)//not a broadcast, then should have dest
-                {
-                    rx_msg.dest = rx_payload.data[2];////only relevant in case of Peer2Peer
-                }
-                m_app_mesh_handler(&rx_msg);
+
+                mesh_esb_2_message_payload(&rx_payload,&rx_msg);
+
+                mesh_repeater_handler(&rx_msg);
             }
 
             // For each LED, set it as indicated in the rx_payload, but invert it for the button
@@ -143,7 +233,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     nrf_esb_config.retransmit_count         = 0;
     nrf_esb_config.selective_auto_ack       = true;//false is not supported : payload.noack  decides
     nrf_esb_config.protocol                 = NRF_ESB_PROTOCOL_ESB_DPL;
-    nrf_esb_config.payload_length           = 8;
+    nrf_esb_config.payload_length           = 8;//Not used by DPL as then the MAX is configured
     nrf_esb_config.bitrate                  = NRF_ESB_BITRATE_2MBPS;
     nrf_esb_config.event_handler            = nrf_esb_event_handler;
     if(UICR_LISTENING == 0xBABA)
@@ -189,101 +279,55 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     return NRF_SUCCESS;
 }
 
-uint32_t mesh_tx_button(uint8_t state)
-{
-    mesh_pre_tx();
-    uint32_t err_code;
-    tx_payload.length   = 3;//payload + header (crc length not included)
-    tx_payload.control = 0x80 | 2;// broadcast | ttl = 2
-    tx_payload.noack    = true;//it is a broadcast
-    tx_payload.pipe     = 0;
-    
-    tx_payload.data[0] = 0x06;//pid
-    tx_payload.data[1] = UICR_NODE_ID;//source - on_off_tag
-    tx_payload.data[2] = state;//Up or Down
-    
-    tx_payload.noack = true;
-    esb_completed = false;
-    err_code = nrf_esb_write_payload(&tx_payload);
-    VERIFY_SUCCESS(err_code);
-
-    return NRF_SUCCESS;
-}
-
-uint32_t mesh_tx_light_on()
-{
-    mesh_pre_tx();
-    uint32_t err_code;
-    tx_payload.length   = 4;//payload + header (crc length not included)
-    tx_payload.control = 0x7B;// light
-    tx_payload.noack    = true;//it is a broadcast
-    tx_payload.pipe     = 0;
-    
-    tx_payload.data[0] = UICR_NODE_ID;//source
-    tx_payload.data[1] = 0x19;//dest
-    tx_payload.data[2] = 0xA0;//msb
-    tx_payload.data[3] = 0x00;//lsb
-    
-    tx_payload.noack = true;
-    esb_completed = false;
-    err_code = nrf_esb_write_payload(&tx_payload);
-    VERIFY_SUCCESS(err_code);
-
-    return NRF_SUCCESS;
-}
-
-uint32_t mesh_tx_light_off()
-{
-    mesh_pre_tx();
-    uint32_t err_code;
-    tx_payload.length   = 4;//payload + header (crc length not included)
-    tx_payload.control = 0x7B;// light
-    tx_payload.noack    = true;//it is a broadcast
-    tx_payload.pipe     = 0;
-    
-    tx_payload.data[0] = UICR_NODE_ID;//source
-    tx_payload.data[1] = 0x19;//dest
-    tx_payload.data[2] = 0x00;//msb
-    tx_payload.data[3] = 0x00;//lsb
-    
-    tx_payload.noack = true;
-    esb_completed = false;
-    err_code = nrf_esb_write_payload(&tx_payload);
-    VERIFY_SUCCESS(err_code);
-
-    return NRF_SUCCESS;
-}
-
 void mesh_wait_tx()
 {
     while(!esb_completed);
 }
 
-uint32_t mesh_tx_pid(uint8_t pid)
+/**
+ * @doxdocgen
+ * 
+ * @param msg : the message structure to be transmitted 
+ */
+void mesh_tx_message(message_t* msg)
 {
     mesh_pre_tx();
-    esb_tx_complete = false;//reset the check
 
-    tx_payload.length   = 2;//payload + header (crc length not included)
-    tx_payload.control = 0x80 | 2;// broadcast | ttl = 2
-    tx_payload.noack    = true;//it is a broadcast
-    tx_payload.pipe     = 0;
+    mesh_message_2_esb_payload(msg,&tx_payload);
 
-    tx_payload.data[0] = pid;
-    
-    tx_payload.data[1] = UICR_NODE_ID;//source
-    
-    tx_payload.noack = true;
-    uint32_t err_code = nrf_esb_write_payload(&tx_payload);
-    
-    //TODO this log causes a crash due to conflict with LOG usage from ISR
-    //cannot delay the ISR call but could disable interrupts or lock the LOG usage
-    //NRF_LOG_INFO("nrf_esb_write_payload(%d)",err_code);
-    
-    VERIFY_SUCCESS(err_code);
+    esb_completed = false;//reset the check
+    nrf_esb_write_payload(&tx_payload);
+    while(!esb_completed);
+}
 
-    //wait till the transmission is complete
-    while(!esb_tx_complete);
+uint32_t mesh_tx_button(uint8_t state)
+{
+    message_t msg;
+
+    msg.control = 0x80 | 2;         // broadcast | ttl = 2
+    msg.pid     = Mesh_Pid_Button;
+    msg.source  = UICR_NODE_ID;
+    msg.payload = &state;       //this will only be used from within the context of this function
+    msg.payload_length = 1;
+
+    mesh_tx_message(&msg);
+
+    return NRF_SUCCESS;
+}
+
+
+
+uint32_t mesh_tx_pid(uint8_t pid)
+{
+    message_t msg;
+
+    msg.control = 0x80 | 2;         // broadcast | ttl = 2
+    msg.pid     = pid;
+    msg.source  = UICR_NODE_ID;
+    msg.payload_length = 0;
+
+    mesh_tx_message(&msg);
+
     return NRF_SUCCESS;
 }
 
@@ -292,35 +336,27 @@ void mesh_tx_reset()
     mesh_tx_pid(Mesh_Pid_Reset);
 }
 
+/**
+ * @brief Broadcast an alive packet
+ * 
+ */
 void mesh_tx_alive()
 {
     mesh_tx_pid(Mesh_Pid_Alive);
 }
 
+
 void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
 {
-    mesh_pre_tx();
-    esb_completed = false;//reset the check
+    message_t msg;
 
-    tx_payload.length   = 2 + size;//length,ctrl payload(pid,source,rf_payload)(crc not included in length)
-    tx_payload.control = 0x80 | 2;// broadcast | ttl = 2
-    tx_payload.noack    = true;//it is a broadcast
-    tx_payload.pipe     = 0;
+    msg.control = 0x80 | 2;         // broadcast | ttl = 2
+    msg.pid     = pid;
+    msg.source  = UICR_NODE_ID;
+    msg.payload = data;
+    msg.payload_length = size;
 
-    tx_payload.data[0] = pid;//acceleration
-    
-    tx_payload.data[1] = UICR_NODE_ID;//source
-
-    for(int i=0;i<size;i++)
-    {
-        tx_payload.data[i+2]     = data[i];
-    }
-    
-    tx_payload.noack = true;
-    nrf_esb_write_payload(&tx_payload);
-
-    //wait till the transmission is complete
-    while(!esb_completed);
+    mesh_tx_message(&msg);
 }
 
 void mesh_tx_light(uint32_t light)
@@ -352,4 +388,51 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
     data[10]= 0xFF & (uint8_t)(press >> 8);
     data[11]= 0xFF & (uint8_t)(press );
     mesh_tx_data(Mesh_Pid_bme,data,12);
+}
+
+void mesh_parse_raw(message_t* msg,char * p_msg)
+{ 
+    int add;
+    add = sprintf(p_msg,"rssi:-%d;nodeid:%d;control:0x%02X",msg->rssi,msg->source,msg->control);
+    p_msg += add;
+    if(msg->pid <= 0x15)//sizeof(pid_name)
+    {
+        add = sprintf(p_msg,";pid:%s",pid_name[msg->pid]);
+        p_msg += add;
+    }
+    else
+    {
+        add = sprintf(p_msg,";pid:0x%02X",msg->pid);
+        p_msg += add;
+    }
+    if(msg->payload_length > 0)
+    {
+        add = sprintf(p_msg,";length:%d;data:0x",msg->payload_length);
+        p_msg += add;
+    }
+    for(int i=0;i<msg->payload_length;i++)
+    {
+        add = sprintf(p_msg,"%02X ",msg->payload[i]);
+        p_msg += add;
+    }
+    sprintf(p_msg,"\r\n");
+}
+
+void mesh_parse_data_raw(message_t* msg,char * p_msg)
+{ 
+    int add;
+    add = sprintf(p_msg,"0x%02X 0x%02X 0x%02X 0x%02X",msg->control,msg->pid,msg->source,msg->dest);
+    p_msg += add;
+    //CRC takes two bytes
+    if(msg->payload_length > 0)
+    {
+        add = sprintf(p_msg,"; (%d) payload: 0x",msg->payload_length);
+        p_msg += add;
+    }
+    for(int i=0;i<msg->payload_length;i++)
+    {
+        add = sprintf(p_msg,"%02X ",msg->payload[i]);
+        p_msg += add;
+    }
+    sprintf(p_msg,"\r\n");
 }
