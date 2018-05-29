@@ -94,7 +94,6 @@ void mesh_pre_tx()
 {
     if(UICR_LISTENING == 0xBABA)
     {
-        NRF_LOG_INFO("pre tx -> stop rx");
         nrf_esb_stop_rx();
         //TODO create a light switch nrf_esb_switch_rx() without going through complete disable and enable
         //------------------------------------------------------------------------------------------------
@@ -102,7 +101,7 @@ void mesh_pre_tx()
         nrf_esb_config.mode = NRF_ESB_MODE_PTX;
         nrf_esb_init(&nrf_esb_config);
         //no start_tx as mesh_tx is a replacement for the call
-        NRF_LOG_INFO("switch to TX done");
+        NRF_LOG_DEBUG("switch to TX mode");
     }
 
 }
@@ -111,14 +110,13 @@ void mesh_post_tx()
 {
     if(UICR_LISTENING == 0xBABA)
     {
-        NRF_LOG_DEBUG("post tx -> start rx");
         //TODO create a light switch nrf_esb_switch_tx() without going through complete disable and enable
         //------------------------------------------------------------------------------------------------
         nrf_esb_disable();
         nrf_esb_config.mode = NRF_ESB_MODE_PRX;
         nrf_esb_init(&nrf_esb_config);
         nrf_esb_start_rx();
-        NRF_LOG_DEBUG("switch to RX done");
+        NRF_LOG_DEBUG("switch to RX mode");
     }
 }
 
@@ -128,42 +126,57 @@ void mesh_message_2_esb_payload(message_t *msg,nrf_esb_payload_t *p_tx_payload)
     p_tx_payload->noack    = true;//TODO check
     p_tx_payload->pipe     = 0;//always 0 to clarify
 
-    p_tx_payload->control = msg->control;
-    p_tx_payload->fid = msg->pid;
-    p_tx_payload->source = msg->source;
-    p_tx_payload->dest = msg->dest;
+    p_tx_payload->data[1] = msg->control;
+    p_tx_payload->data[2] = msg->pid;
+    p_tx_payload->data[3] = msg->source;
 
-    //start_payload required for ESB internal positioning of the payload
+    uint8_t start_payload;
     if(MESH_IS_BROADCAST(msg->control))
     {
-        p_tx_payload->start_payload = MESH_Broadcast_Header_Length;
+        start_payload = MESH_Broadcast_Header_Length;
     }
     else
     {
-        p_tx_payload->start_payload = MESH_P2P_Header_Length;
+        p_tx_payload->data[4] = msg->dest;
+        start_payload = MESH_P2P_Header_Length;
     }
 
     //this is the total ESB packet length
-    p_tx_payload->length   = msg->payload_length + p_tx_payload->start_payload;
-    memcpy(p_tx_payload->data,msg->payload,msg->payload_length);
+    p_tx_payload->length   = msg->payload_length + start_payload;
+    p_tx_payload->data[0] = p_tx_payload->length;
+    memcpy( p_tx_payload->data+start_payload,
+            msg->payload,
+            msg->payload_length);
 }
 
 void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
 {
-    msg->control = p_rx_payload->control;
-    msg->pid = p_rx_payload->fid;
-    msg->source = p_rx_payload->source;
-    msg->dest = p_rx_payload->dest;//255 if broadcast
+    msg->control = p_rx_payload->data[1];
+    msg->pid = p_rx_payload->data[2];
+    msg->source = p_rx_payload->data[3];
+
     msg->rssi = p_rx_payload->rssi;
-    //pointer given but not to be used beyond the callback
-    msg->payload_length = p_rx_payload->length - p_rx_payload->start_payload;
+    //dest is processed by esb rx function
+    uint8_t payload_start;
+    if(MESH_IS_BROADCAST(msg->control))
+    {
+        msg->dest = 255;
+        payload_start = 4;
+    }
+    else
+    {
+        msg->dest = p_rx_payload->data[4];
+        payload_start = 5;
+    }
+    msg->payload_length = p_rx_payload->length - payload_start;
+
     if(msg->payload_length > 0)
     {
-        msg->payload = p_rx_payload->data + p_rx_payload->start_payload;
+        msg->payload = p_rx_payload->data + payload_start;
     }
 }
 
-void mesh_repeater_handler(message_t* msg)
+void mesh_rx_handler(message_t* msg)
 {
     if(UICR_is_router())
     {
@@ -185,35 +198,35 @@ void mesh_repeater_handler(message_t* msg)
 
 void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 {
-    NRF_LOG_DEBUG("ESB EVENT");
     switch (p_event->evt_id)
     {
         case NRF_ESB_EVENT_TX_SUCCESS:
-            NRF_LOG_DEBUG("TX SUCCESS EVENT");
+            NRF_LOG_DEBUG("ESB TX SUCCESS EVENT");
             mesh_post_tx();
             esb_tx_complete = true;
             break;
         case NRF_ESB_EVENT_TX_FAILED:
-            NRF_LOG_DEBUG("TX FAILED EVENT");
+            NRF_LOG_DEBUG("ESB TX FAILED EVENT");
             (void) nrf_esb_flush_tx();
             mesh_post_tx();
             esb_tx_complete = true;
             break;
         case NRF_ESB_EVENT_RX_RECEIVED:
-            NRF_LOG_DEBUG("RX RECEIVED EVENT");
+            NRF_LOG_DEBUG("ESB RX RECEIVED EVENT");
             // Get the most recent element from the RX FIFO.
             while (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
             {
-                NRF_LOG_INFO("Received length:%d ; pid:0x%02X ; src:%d ",rx_payload.length, rx_payload.data[0],rx_payload.data[1]);
-
                 mesh_esb_2_message_payload(&rx_payload,&rx_msg);
-
-                mesh_repeater_handler(&rx_msg);
+                NRF_LOG_INFO("src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
+                mesh_rx_handler(&rx_msg);
             }
 
             // For each LED, set it as indicated in the rx_payload, but invert it for the button
             // which is pressed. This is because the ack payload from the PRX is reflecting the
             // state from before receiving the packet.
+            break;
+        default:
+            NRF_LOG_ERROR("ESB Unhandled Event (%d)",p_event->evt_id);
             break;
     }
 
@@ -297,7 +310,7 @@ void mesh_tx_message(message_t* msg)
 
     esb_completed = false;//reset the check
     nrf_esb_write_payload(&tx_payload);
-    while(!esb_completed);
+    //should not wait for esb_completed here as does not work from ISR context
 }
 
 uint32_t mesh_tx_button(uint8_t state)

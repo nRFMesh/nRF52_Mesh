@@ -51,7 +51,7 @@ void app_mesh_handler(message_t* msg)
 
 void app_rtc_handler()
 {
-    NRF_LOG_INFO("RTC Tick");
+    NRF_LOG_INFO("---RTC Tick---");
     mesh_tx_alive();
 }
 

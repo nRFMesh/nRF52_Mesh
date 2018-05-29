@@ -10,6 +10,8 @@
 #include "app_error.h"
 #include "app_util.h"
 
+#if(APP_SERIAL_ENABLED == 1)
+
 static void sleep_handler(void)
 {
     __WFE();
@@ -40,7 +42,7 @@ NRF_SERIAL_CONFIG_DEF(serial_config, NRF_SERIAL_MODE_IRQ,
                       &serial_queues, &serial_buffs, NULL, sleep_handler);
 
 
-NRF_SERIAL_UART_DEF(serial_uart, 0);
+NRF_SERIAL_UART_DEF(serial_uart, APP_SERIAL_INSTANCE);
 
 void ser_init()
 {
@@ -55,3 +57,12 @@ void ser_send(char* message)
 {
     nrf_serial_write(&serial_uart,message,strlen(message),NULL,0);
 }
+
+#else
+void ser_init()
+{
+}
+void ser_send(char* message)
+{
+}
+#endif /*APP_SERIAL_ENABLED*/

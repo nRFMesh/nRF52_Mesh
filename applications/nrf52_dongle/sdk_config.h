@@ -49,8 +49,11 @@
 
 // <h> Application
 
-// <h> APP_SERIAL - Application serial port configuration
+// <e> APP_SERIAL_ENABLED - Application serial port activation
 //==========================================================
+#ifndef APP_SERIAL_ENABLED
+#define APP_SERIAL_ENABLED 0
+#endif
 
 // <o> APP_SERIAL_TX_PIN - UART TX pin 
 #ifndef APP_SERIAL_TX_PIN
@@ -85,7 +88,16 @@
 #define APP_SERIAL_BAUDRATE 30801920
 #endif
 
-// </h>
+// <o> APP_SERIAL_INSTANCE  - Default Baudrate
+ 
+// <0=> UART HW INSTANCE 0
+// <1=> UART HW INSTANCE 1
+
+#ifndef APP_SERIAL_INSTANCE
+#define APP_SERIAL_INSTANCE 0
+#endif
+
+// </e>
 
 // <e> CLOCKS_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
@@ -140,7 +152,7 @@
 // <4=> Debug 
 
 #ifndef MESH_CONFIG_LOG_LEVEL
-#define MESH_CONFIG_LOG_LEVEL 3
+#define MESH_CONFIG_LOG_LEVEL 4
 #endif
 
 // </e>
@@ -1187,7 +1199,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 0
+#define NRF_LOG_BACKEND_UART_ENABLED 1
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN
@@ -1242,7 +1254,7 @@
 // <e> NRF_LOG_ENABLED - Logging module for nRF5 SDK
 //==========================================================
 #ifndef NRF_LOG_ENABLED
-#define NRF_LOG_ENABLED 0
+#define NRF_LOG_ENABLED 1
 #endif
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================
