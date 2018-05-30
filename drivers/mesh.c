@@ -95,9 +95,10 @@ void mesh_pre_tx()
     if(UICR_LISTENING == 0xBABA)
     {
         nrf_esb_stop_rx();
-        //TODO create a light switch nrf_esb_switch_rx() without going through complete disable and enable
-        //------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------^
+        //disable and enable might be removed if write starts_tx automatically
         nrf_esb_disable();
+        //.mode is only used for test of start_tx_transaction
         nrf_esb_config.mode = NRF_ESB_MODE_PTX;
         nrf_esb_init(&nrf_esb_config);
         //no start_tx as mesh_tx is a replacement for the call
