@@ -28,7 +28,8 @@
 #include "mesh.h"
 #include "app_ser.h"
 
-char message[100];
+char uart_message[100];
+char rf_message[100];
 
 void blink()
 {
@@ -45,18 +46,17 @@ void app_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("app_mesh_handler()");
 
-    mesh_parse(msg,message);
-    ser_send(message);
+    mesh_parse(msg,rf_message);
+    ser_send(rf_message);
 }
 
 void app_rtc_handler()
 {
-    static int loop = 0;
-    NRF_LOG_INFO("---RTC Tick--- (%d)",loop++);
-    mesh_tx_alive();
+    uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
+    NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
 
-    sprintf(message,"---RTC Tick---(%d)\r\n",loop);
-    ser_send(message);
+    sprintf(uart_message,"id:%d:alive:%lu\r\n",mesh_node_id(),alive_count);
+    ser_send(uart_message);
 }
 
 int main(void)
@@ -79,8 +79,8 @@ int main(void)
 
     ser_send("____________________________________\r\n");
     nrf_delay_ms(10);
-    sprintf(message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
-    ser_send(message);
+    sprintf(uart_message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
+    ser_send(uart_message);
 
     blink();
 

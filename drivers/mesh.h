@@ -30,7 +30,7 @@ uint32_t mesh_init(app_mesh_handler_t handler);
 void mesh_wait_tx();
 
 void mesh_tx_reset();
-void mesh_tx_alive();
+uint32_t mesh_tx_alive();
 
 void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size);
 

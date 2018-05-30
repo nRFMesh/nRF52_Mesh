@@ -381,7 +381,7 @@ void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
  * @brief Broadcast an alive packet
  * 
  */
-void mesh_tx_alive()
+uint32_t mesh_tx_alive()
 {
     static uint32_t live_count = 0;
 
@@ -394,7 +394,7 @@ void mesh_tx_alive()
 
     mesh_tx_data(Mesh_Pid_Alive,data,5);
     
-    live_count++;
+    return live_count++;//returns the first used value before the increment
 }
 
 
@@ -444,7 +444,7 @@ int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
         live_count |= data[2] << 8;
         live_count |= data[3];
         uint8_t tx_power = data[4];
-        return sprintf(p_msg,";count:%lu;tx_power:%d",live_count,tx_power);
+        return sprintf(p_msg,";alive:%lu;tx_power:%d",live_count,tx_power);
     }
 }
 
