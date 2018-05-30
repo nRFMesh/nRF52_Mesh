@@ -39,7 +39,8 @@ void mesh_tx_light(uint32_t light);
 void mesh_tx_battery(uint16_t voltage);
 void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press);
 
+void mesh_parse(message_t* msg,char * p_msg);
 void mesh_parse_raw(message_t* msg,char * p_msg);
-void mesh_parse_data_raw(message_t* msg,char * p_msg);
+void mesh_parse_bytes(message_t* msg,char * p_msg);
 
 #endif /*__MESH_H__*/

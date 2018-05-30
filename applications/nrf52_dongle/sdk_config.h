@@ -52,7 +52,7 @@
 // <e> APP_SERIAL_ENABLED - Application serial port activation
 //==========================================================
 #ifndef APP_SERIAL_ENABLED
-#define APP_SERIAL_ENABLED 0
+#define APP_SERIAL_ENABLED 1
 #endif
 
 // <o> APP_SERIAL_TX_PIN - UART TX pin 
@@ -1199,7 +1199,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 1
+#define NRF_LOG_BACKEND_UART_ENABLED 0
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN

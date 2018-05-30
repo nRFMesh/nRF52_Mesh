@@ -198,6 +198,7 @@ void mesh_rx_handler(message_t* msg)
 
 void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 {
+    static uint32_t count = 0;
     switch (p_event->evt_id)
     {
         case NRF_ESB_EVENT_TX_SUCCESS:
@@ -217,7 +218,7 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
             {
                 mesh_esb_2_message_payload(&rx_payload,&rx_msg);
-                NRF_LOG_INFO("ESB - pipe: (%d) -> pid:%d ; length:%d",rx_payload.pipe,rx_payload.pid,rx_payload.length);
+                NRF_LOG_INFO("ESB Rx %d- pipe: (%d) -> pid:%d ; length:%d",count++,rx_payload.pipe,rx_payload.pid,rx_payload.length);
                 NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
                 mesh_rx_handler(&rx_msg);
             }
@@ -362,16 +363,6 @@ void mesh_tx_reset()
     mesh_tx_pid(Mesh_Pid_Reset);
 }
 
-/**
- * @brief Broadcast an alive packet
- * 
- */
-void mesh_tx_alive()
-{
-    mesh_tx_pid(Mesh_Pid_Alive);
-}
-
-
 void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
 {
     message_t msg;
@@ -384,6 +375,28 @@ void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
 
     mesh_tx_message(&msg);
 }
+
+/**
+ * @brief Broadcast an alive packet
+ * 
+ */
+void mesh_tx_alive()
+{
+    static uint32_t live_count = 0;
+
+    uint8_t data[5];
+    data[0] = 0xFF & (uint8_t)(live_count >> 24);
+    data[1] = 0xFF & (uint8_t)(live_count >> 16);
+    data[2] = 0xFF & (uint8_t)(live_count >> 8);
+    data[3] = 0xFF & (uint8_t)(live_count );
+    data[4] = NRF_RADIO->TXPOWER;
+
+    mesh_tx_data(Mesh_Pid_Alive,data,5);
+    
+    live_count++;
+}
+
+
 
 void mesh_tx_light(uint32_t light)
 {
@@ -416,6 +429,47 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
     mesh_tx_data(Mesh_Pid_bme,data,12);
 }
 
+int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 5)
+    {
+        return sprintf(p_msg,"size not 5 but:%d",size);
+    }
+    else
+    {
+        uint32_t live_count;
+        live_count  = data[0] << 24;
+        live_count |= data[1] << 16;
+        live_count |= data[2] << 8;
+        live_count |= data[3];
+        uint8_t tx_power = data[4];
+        return sprintf(p_msg,";count:%lu;tx_power:%d",live_count,tx_power);
+    }
+}
+
+void mesh_parse(message_t* msg,char * p_msg)
+{ 
+    int add;
+    add = sprintf(p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d",msg->rssi,msg->source,msg->control,msg->source);
+    p_msg += add;
+    switch(msg->pid)
+    {
+        case Mesh_Pid_Alive:
+            {
+                add = rx_alive(p_msg,msg->payload,msg->payload_length);
+                p_msg += add;
+            }
+            break;
+        default:
+        {
+            add = sprintf(p_msg,";pid:0x%02X",msg->pid);
+            p_msg += add;
+        }
+        break;
+    }
+    sprintf(p_msg,"\r\n");
+}
+
 void mesh_parse_raw(message_t* msg,char * p_msg)
 { 
     int add;
@@ -444,7 +498,7 @@ void mesh_parse_raw(message_t* msg,char * p_msg)
     sprintf(p_msg,"\r\n");
 }
 
-void mesh_parse_data_raw(message_t* msg,char * p_msg)
+void mesh_parse_bytes(message_t* msg,char * p_msg)
 { 
     int add;
     add = sprintf(p_msg,"0x%02X 0x%02X 0x%02X 0x%02X",msg->control,msg->pid,msg->source,msg->dest);
