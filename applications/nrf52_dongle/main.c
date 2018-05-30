@@ -51,8 +51,13 @@ void app_mesh_handler(message_t* msg)
 
 void app_rtc_handler()
 {
-    NRF_LOG_INFO("---RTC Tick---");
-    mesh_tx_alive();
+    static int loop = 0;
+    NRF_LOG_INFO("---RTC Tick--- (%d)",loop++);
+    //mesh_tx_alive();
+    //mesh_tx_battery(3100);
+
+    sprintf(message,"---RTC Tick---(%d)\r\n",loop);
+    ser_send(message);
 }
 
 int main(void)
@@ -84,15 +89,28 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    rtc_config(app_rtc_handler);
+    //rtc_config(app_rtc_handler);
 
-    mesh_tx_reset();
+    //mesh_tx_reset();
+
+    /*while(true)
+    {
+        clocks_restart();
+        nrf_delay_ms(3000);
+        //mesh_tx_alive();
+        int32_t temp    = 32;
+        uint32_t hum    = 100;
+        uint32_t press  = 1000;
+        mesh_tx_bme(temp,hum,press);
+        mesh_wait_tx();
+        //mesh_tx_button(1);
+    }*/
 
     // ------------------------- Start Events ------------------------- 
 
     while(true)
     {
-        nrf_delay_ms(100);
+        __WFE();
     }
 }
 /*lint -restore */

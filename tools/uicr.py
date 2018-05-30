@@ -90,7 +90,10 @@ def read_config():
             print("reg %s => (mesh_id target/db :%d / %s)"%(reg,val,node_id))
         else:
             val = read_uicr_customer(reg)
-            print("reg %s => (%s target/db :%d / %s)"%(reg,param,val,node[param]))
+            if(param in node):
+                print("reg %s => (%s target/db :%d / %s)"%(reg,param,val,node[param]))
+            else:
+                print("reg %s => (%s target/db :%d / N.A)"%(reg,param,val))
     return
 
 def write_config():
@@ -101,8 +104,11 @@ def write_config():
             print("reg %s <= (mesh_id:%s)"%(reg,node_id))
             write_uicr_customer(            reg,node_id)
         else:
-            print("reg %s <= (%s:%s)"%(reg,param,node[param]))
-            write_uicr_customer(            reg,node[param])
+            if(param in node):
+                print("reg %s <= (%s:%s)"%(reg,param,node[param]))
+                write_uicr_customer(            reg,node[param])
+            else:
+                print("reg %s X (%s: N.A)"%(reg,param))
 
     test_pass = True
 
@@ -113,8 +119,10 @@ def write_config():
                 test_pass = False
         else:
             test_val = read_uicr_customer(reg)
-            if(test_val != int(node[param],0)):
-                test_pass = False
+            if(param in node):
+                if(test_val != int(node[param],0)):
+                    test_pass = False
+            #else: do nothing as test is kept pass if param not in db node(id)
             
     if(not test_pass):
         print("Verification failed")

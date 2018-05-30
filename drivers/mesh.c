@@ -123,8 +123,8 @@ void mesh_post_tx()
 void mesh_message_2_esb_payload(message_t *msg,nrf_esb_payload_t *p_tx_payload)
 {
     //esb only parameters
-    p_tx_payload->noack    = true;//TODO check
-    p_tx_payload->pipe     = 0;//always 0 to clarify
+    p_tx_payload->noack    = true;//Never request an ESB acknowledge
+    p_tx_payload->pipe     = 0;//pipe is the selection of the address to use
 
     p_tx_payload->data[1] = msg->control;
     p_tx_payload->data[2] = msg->pid;
@@ -212,12 +212,13 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             esb_tx_complete = true;
             break;
         case NRF_ESB_EVENT_RX_RECEIVED:
-            NRF_LOG_DEBUG("ESB RX RECEIVED EVENT");
+            NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
             // Get the most recent element from the RX FIFO.
-            while (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
+            while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
             {
                 mesh_esb_2_message_payload(&rx_payload,&rx_msg);
-                NRF_LOG_INFO("src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
+                NRF_LOG_INFO("ESB - pipe: (%d) -> pid:%d ; length:%d",rx_payload.pipe,rx_payload.pid,rx_payload.length);
+                NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
                 mesh_rx_handler(&rx_msg);
             }
 
@@ -258,7 +259,8 @@ uint32_t mesh_init(app_mesh_handler_t handler)
         nrf_esb_config.mode                     = NRF_ESB_MODE_PTX;
     }
 
-    nrf_esb_config.crc                      = NRF_ESB_CRC_16BIT;
+    //nrf_esb_config.crc                      = NRF_ESB_CRC_16BIT;
+    nrf_esb_config.crc                      = NRF_ESB_CRC_OFF;
 
     err_code = nrf_esb_init(&nrf_esb_config);
     VERIFY_SUCCESS(err_code);
@@ -279,15 +281,20 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     tx_payload.pipe    = 0;
     tx_payload.data[0] = 0x00;
 
+    NRF_LOG_INFO("nodeId %d",UICR_NODE_ID);
+    NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
+
     if(UICR_LISTENING == 0xBABA)
     {
         err_code = nrf_esb_start_rx();
         VERIFY_SUCCESS(err_code);
+        NRF_LOG_INFO("listening : 0x%X",UICR_LISTENING);
+    }
+    else
+    {
+        NRF_LOG_INFO("Not listening : 0x%X",UICR_LISTENING);
     }
 
-    NRF_LOG_INFO("nodeId %d",UICR_NODE_ID);
-    NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
-    NRF_LOG_INFO("listening 0x%X",UICR_LISTENING);
 
     return NRF_SUCCESS;
 }
@@ -302,15 +309,21 @@ void mesh_wait_tx()
  * 
  * @param msg : the message structure to be transmitted 
  */
-void mesh_tx_message(message_t* msg)
+void mesh_tx_message(message_t* p_msg)
 {
     mesh_pre_tx();
 
-    mesh_message_2_esb_payload(msg,&tx_payload);
+    mesh_message_2_esb_payload(p_msg,&tx_payload);
 
     esb_completed = false;//reset the check
-    nrf_esb_write_payload(&tx_payload);
+    NRF_LOG_DEBUG("________________TX esb payload length = %d________________",tx_payload.data[0]);
+    /*for(int i=1;i<tx_payload.data[0];i++)
+    {
+        NRF_LOG_DEBUG("0x%02X",tx_payload.data[i]);
+    }*/
     //should not wait for esb_completed here as does not work from ISR context
+
+    nrf_esb_write_payload(&tx_payload);
 }
 
 uint32_t mesh_tx_button(uint8_t state)

@@ -98,6 +98,17 @@ Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can
 | RTS | P0.08 |
 | LED1 | P0.28 |
 | LED2 | P0.29 |
+
+## Switch between serial UART and LOG over UART
+run
+
+```make conf```
+
+then switch both :
+* nRF_Log/NRF_LOG_BACKEND_UART_ENABLED
+* Application/APP_SERIAL_ENABLED
+don't forget to save
+
 ## Needle adapter
 Making a needle adapter is made easier with 3d printing. The used pogo pin is seen below
 
