@@ -58,7 +58,7 @@ void rf_mesh_handler(message_t* msg)
  * @param msg contains a pointer to the DMA buffer, so do not keep it after the call
  * @param size safe managemnt with known size
  */
-#define UART_MIRROR
+//#define UART_MIRROR
 void app_serial_handler(const char*msg,uint8_t size)
 {
     uart_rx_size+= size;
@@ -80,10 +80,13 @@ void app_serial_handler(const char*msg,uint8_t size)
 void app_rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
+    
     NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
-
-    sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,uart_rx_size);
-    ser_send(rtc_message);
+    #ifdef UART_SELF_ALIVE
+        sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,uart_rx_size);
+        ser_send(rtc_message);
+    #endif
+    UNUSED_VARIABLE(alive_count);
 }
 
 int main(void)

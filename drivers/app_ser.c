@@ -161,7 +161,7 @@ int sprint_buf(char*str,const char*msg,uint8_t size)
     total+=add;
     for(int i=0;i<size;i++)
     {
-        add = sprintf(str,"%02X ",msg[i]);
+        add = sprintf(str,"%02X",msg[i]);
         str+=add;
         total+=add;
     }

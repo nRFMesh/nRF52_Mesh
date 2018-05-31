@@ -20,6 +20,8 @@
 
 #include "nrf_delay.h"
 #include <stdio.h>
+//for sprint_buf
+#include "app_ser.h"
 
 #define NRF_LOG_MODULE_NAME mesh
 
@@ -182,6 +184,8 @@ void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
 
 void mesh_rx_handler(message_t* msg)
 {
+    uint8_t ctrl_backup = msg->control;
+
     if(UICR_is_router())
     {
         uint8_t ttl = msg->control & 0x0F;
@@ -193,9 +197,10 @@ void mesh_rx_handler(message_t* msg)
             mesh_tx_message(msg);
         }
     }
-    //app would get a damaged ttl, but should not be using it
+    
     if(m_app_mesh_handler != NULL)
     {
+        msg->control = ctrl_backup;
         m_app_mesh_handler(msg);
     }
 }
@@ -315,16 +320,16 @@ void mesh_wait_tx()
 
 
 
-//-----------------------------------------------------------------
-//------------------------- Mesh Protocol -------------------------
-//-----------------------------------------------------------------
+//--------------------------------------------------------------------------
+//------------------------- Messages Serialisation -------------------------
+//--------------------------------------------------------------------------
 
 
 
 /**
- * @doxdocgen
+ * @brief Transmits a message structure
  * 
- * @param msg : the message structure to be transmitted 
+ * @param msg : the message structure to be converted to an esb buffer and sent through nrf_esb_write_payload
  */
 void mesh_tx_message(message_t* p_msg)
 {
@@ -343,6 +348,12 @@ void mesh_tx_message(message_t* p_msg)
     //nrf_esb_start_tx();//as the previous mode does not start it due to .mode
 }
 
+/**
+ * @brief Transmits a button message
+ * 
+ * @param state button state press 0 or release 1
+ * @return uint32_t NRF_SUCCESS
+ */
 uint32_t mesh_tx_button(uint8_t state)
 {
     message_t msg;
@@ -358,8 +369,12 @@ uint32_t mesh_tx_button(uint8_t state)
     return NRF_SUCCESS;
 }
 
-
-
+/**
+ * @brief Sends a simple message that has no payload, by providing only the pid
+ * 
+ * @param pid the application protocol id : e.g. reset,...
+ * @return uint32_t 
+ */
 uint32_t mesh_tx_pid(uint8_t pid)
 {
     message_t msg;
@@ -374,6 +389,12 @@ uint32_t mesh_tx_pid(uint8_t pid)
     return NRF_SUCCESS;
 }
 
+/**
+ * @brief Sends a reset message, used usually when a device wakes up from reset
+ * Combined in a database, it keeps history of when the device was first started
+ * Of whether the device has reset du to any error
+ * 
+ */
 void mesh_tx_reset()
 {
     mesh_tx_pid(Mesh_Pid_Reset);
@@ -393,7 +414,8 @@ void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
 }
 
 /**
- * @brief Broadcast an alive packet
+ * @brief Broadcast an alive packet with associated payload information
+ * The payload contains a livecounter (uint32_t) and the RF transmission power (int8_t)
  * 
  */
 uint32_t mesh_tx_alive()
@@ -445,6 +467,11 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
     mesh_tx_data(Mesh_Pid_bme,data,12);
 }
 
+//----------------------------------------------------------------------------
+//------------------------- Messages Deserialisation -------------------------
+//----------------------------------------------------------------------------
+
+
 int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
 {
     if(size != 5)
@@ -459,30 +486,135 @@ int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
         live_count |= data[2] << 8;
         live_count |= data[3];
         uint8_t tx_power = data[4];
-        return sprintf(p_msg,";alive:%lu;tx_power:%d",live_count,tx_power);
+        return sprintf(p_msg,"alive:%lu;tx_power:%d",live_count,tx_power);
     }
 }
+
+int rx_button(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 1)
+    {
+        return sprintf(p_msg,"size not 1 but:%u",size);
+    }
+    else
+    {
+        return sprintf(p_msg,"button:%u",data[0]);
+    }
+}
+
+int rx_light(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 4)
+    {
+        return sprintf(p_msg,"size not 4 but:%d",size);
+    }
+    else
+    {
+        uint32_t    light  = data[3] << 24;
+                    light |= data[2] << 16;
+                    light |= data[1] <<  8;
+                    light |= data[0];
+        return sprintf(p_msg,"light:%lu",light);
+    }
+}
+
+int rx_bme(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 12)
+    {
+        return sprintf(p_msg,"size not 12 but:%u",size);
+    }
+    else
+    {
+        int32_t temp  = data[0] << 24;
+                temp |= data[1] << 16;
+                temp |= data[2] <<  8;
+                temp |= data[3];
+        int32_t mst = temp / 100;
+        int32_t lst = temp % 100;
+        if(lst<0)
+        {
+            lst*=-1;
+        }
+        uint32_t hum  = data[4] << 24;
+                hum |= data[5] << 16;
+                hum |= data[6] <<  8;
+                hum |= data[7];
+        uint32_t msh = hum>>10;
+        uint32_t lsh = hum & 0x3FF;
+        uint32_t press  = data[8]  << 24;
+                press |= data[9]  << 16;
+                press |= data[10] <<  8;
+                press |= data[11];
+        uint32_t msp = press / (256 * 100);
+        uint32_t lsp = (press/256) % 100;
+        return sprintf(p_msg,"temp:%ld.%02ld;hum:%lu.%03lu;press:%lu.%02lu",mst,lst,msh,lsh,msp,lsp);
+    }
+}
+
+int rx_battery(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 2)
+    {
+        return sprintf(p_msg,"size not 2 but:%d",size);
+    }
+    else
+    {
+        uint16_t 	bat_val = data[0] << 8;
+                    bat_val |= data[1];
+        uint16_t msv = bat_val / 1000;
+        uint16_t lsv = bat_val % 1000;
+        return sprintf(p_msg,"battery:%u.%03u",msv,lsv);
+    }
+}
+
 
 void mesh_parse(message_t* msg,char * p_msg)
 { 
     int add;
-    add = sprintf(p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d",msg->rssi,msg->source,msg->control,msg->source);
+    add = sprintf(p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->source,msg->control,msg->source);
     p_msg += add;
     switch(msg->pid)
     {
         case Mesh_Pid_Alive:
             {
                 add = rx_alive(p_msg,msg->payload,msg->payload_length);
-                p_msg += add;
+            }
+            break;
+        case Mesh_Pid_Reset:
+            {
+                add = sprintf(p_msg,"reset:1");
+            }
+            break;
+        case Mesh_Pid_Button:
+            {
+                add = rx_button(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_Light:
+            {
+                add = rx_light(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_bme:
+            {
+                add = rx_bme(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_Battery:
+            {
+                add = rx_battery(p_msg,msg->payload,msg->payload_length);
             }
             break;
         default:
         {
-            add = sprintf(p_msg,";pid:0x%02X",msg->pid);
+            add = sprintf(p_msg,"payload:");
             p_msg += add;
+            add = sprint_buf(p_msg,(const char*)msg->payload,msg->payload_length);
         }
         break;
     }
+    p_msg += add;
     sprintf(p_msg,"\r\n");
 }
 
@@ -548,14 +680,9 @@ void mesh_parse_bytes(message_t* msg,char * p_msg)
  * supported commands :
  * * msg:0x00112233445566...
  * where 0:length, 1:control , 2:source , 3:dest/payload , 4:payload,...
- * * other commands:
- * mrd/mwr : memory read/write<br>
- * idr/w : mesh id read/write<br>
- * slr/w : sleep period read/write<br>
- * lir/w : listening<br>
- * rtr/w : routing functions<br>
- * rfr/w : Radio Frequency channel read/write<br>
- * others : retries, acknowledge delay, test_rf<br>
+ * * cmd:0x00112233445566
+ * where 0x00 is the command id
+ * the rest are the command parameters including : crc_cfg, header_cfg, bitrate,...
  * @param size number of characters in msg
  */
 void mesh_handle_cmd(const char*msg,uint8_t size)
