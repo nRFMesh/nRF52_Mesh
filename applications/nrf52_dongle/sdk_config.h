@@ -55,16 +55,6 @@
 #define APP_SERIAL_ENABLED 1
 #endif
 
-// <o> APP_SERIAL_TX_PIN - UART TX pin 
-#ifndef APP_SERIAL_TX_PIN
-#define APP_SERIAL_TX_PIN 6
-#endif
-
-// <o> APP_SERIAL_RX_PIN - UART RX pin 
-#ifndef APP_SERIAL_RX_PIN
-#define APP_SERIAL_RX_PIN 5
-#endif
-
 // <o> APP_SERIAL_BAUDRATE  - Default Baudrate
  
 // <323584=> 1200 baud 

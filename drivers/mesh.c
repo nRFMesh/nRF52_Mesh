@@ -1,3 +1,13 @@
+/** @file mesh.c
+ *
+ * @author Wassim FILALI
+ *
+ * @compiler arm gcc
+ *
+ *
+ * $Date: 31.05.2018 adding doxy header and mesh commander functions
+ *
+*/
 
 #include "mesh.h"
 
@@ -10,7 +20,6 @@
 
 #include "nrf_delay.h"
 #include <stdio.h>
-
 
 #define NRF_LOG_MODULE_NAME mesh
 
@@ -64,10 +73,7 @@ const char * const pid_name[] = {  "",          //0x00
                                 "Battery",      //0x15
                                 "" };    
 
-#define UICR_NODE_ID    NRF_UICR->CUSTOMER[0]
-#define UICR_RF_CHANNEL NRF_UICR->CUSTOMER[1]
-#define UICR_LISTENING  NRF_UICR->CUSTOMER[3]
-#define UICR_is_router()  (NRF_UICR->CUSTOMER[4] == 0xBABA)
+#include "uicr_user_defines.h"
 
 static nrf_esb_config_t nrf_esb_config         = NRF_ESB_DEFAULT_CONFIG;
 static nrf_esb_payload_t tx_payload = NRF_ESB_CREATE_PAYLOAD(0, 0x01, 0x00);
@@ -79,6 +85,15 @@ static volatile bool esb_tx_complete = false;
 static app_mesh_handler_t m_app_mesh_handler;
 
 void mesh_tx_message(message_t* msg);
+
+
+
+//-------------------------------------------------------------
+//------------------------- Mesh Core -------------------------
+//-------------------------------------------------------------
+
+
+
 
 uint16_t mesh_node_id()
 {
@@ -92,7 +107,7 @@ uint8_t mesh_channel()
 
 void mesh_pre_tx()
 {
-    if(UICR_LISTENING == 0xBABA)
+    if(UICR_is_listening())
     {
         nrf_esb_stop_rx();
         NRF_LOG_DEBUG("switch to IDLE mode that aloows TX");
@@ -102,7 +117,7 @@ void mesh_pre_tx()
 
 void mesh_post_tx()
 {
-    if(UICR_LISTENING == 0xBABA)
+    if(UICR_is_listening())
     {
         nrf_esb_start_rx();
         NRF_LOG_DEBUG("switch to RX mode");
@@ -240,7 +255,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     nrf_esb_config.payload_length           = 8;//Not used by DPL as then the MAX is configured
     nrf_esb_config.bitrate                  = NRF_ESB_BITRATE_2MBPS;
     nrf_esb_config.event_handler            = nrf_esb_event_handler;
-    if(UICR_LISTENING == 0xBABA)
+    if(UICR_is_listening())
     {
         nrf_esb_config.mode                     = NRF_ESB_MODE_PRX;
     }
@@ -250,7 +265,7 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     }
 
     //nrf_esb_config.crc                      = NRF_ESB_CRC_16BIT;
-    nrf_esb_config.crc                      = NRF_ESB_CRC_OFF;
+    nrf_esb_config.crc                      = NRF_ESB_CRC_OFF;//TODO #3 set back crc usage
 
     err_code = nrf_esb_init(&nrf_esb_config);
     VERIFY_SUCCESS(err_code);
@@ -274,15 +289,15 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     NRF_LOG_INFO("nodeId %d",UICR_NODE_ID);
     NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
 
-    if(UICR_LISTENING == 0xBABA)
+    if(UICR_is_listening())
     {
         err_code = nrf_esb_start_rx();
         VERIFY_SUCCESS(err_code);
-        NRF_LOG_INFO("listening : 0x%X",UICR_LISTENING);
+        NRF_LOG_INFO("UICR listening");
     }
     else
     {
-        NRF_LOG_INFO("Not listening : 0x%X",UICR_LISTENING);
+        NRF_LOG_INFO("UICR Not listening");
     }
 
 
@@ -297,6 +312,14 @@ void mesh_wait_tx()
 {
     while(!esb_completed);
 }
+
+
+
+//-----------------------------------------------------------------
+//------------------------- Mesh Protocol -------------------------
+//-----------------------------------------------------------------
+
+
 
 /**
  * @doxdocgen
@@ -508,4 +531,34 @@ void mesh_parse_bytes(message_t* msg,char * p_msg)
         p_msg += add;
     }
     sprintf(p_msg,"\r\n");
+}
+
+
+
+//------------------------------------------------------------------
+//------------------------- Mesh Commander -------------------------
+//------------------------------------------------------------------
+
+
+/**
+ * @brief executes teh command immidiatly
+ * Future extension should use a command fifo
+ * 
+ * @param msg contains a command line to execute a mesh rf function
+ * supported commands :
+ * * msg:0x00112233445566...
+ * where 0:length, 1:control , 2:source , 3:dest/payload , 4:payload,...
+ * * other commands:
+ * mrd/mwr : memory read/write<br>
+ * idr/w : mesh id read/write<br>
+ * slr/w : sleep period read/write<br>
+ * lir/w : listening<br>
+ * rtr/w : routing functions<br>
+ * rfr/w : Radio Frequency channel read/write<br>
+ * others : retries, acknowledge delay, test_rf<br>
+ * @param size number of characters in msg
+ */
+void mesh_handle_cmd(const char*msg,uint8_t size)
+{
+
 }

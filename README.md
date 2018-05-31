@@ -31,7 +31,18 @@ Once in the application directory just use ```make conf``` to call a cmsis [conf
 ### Automated mesh devices configuration
  User data flashing is done with Pylink which reads in [uicr.py](tools\uicr.py) the registers of the attached device, look it up in the **NODES_CONFIG** file, retrives which parameters should be flashed, the mapping of parameters to CUSTOMER_X registers come from "uicr_map.json".
 
+## simple board switch
+The repo contais a directory for boards declaration "boards/" and a directory for applications "applications/". Although every application targets a particular board, it is possible to use any application for any other board. In the makefile a sinlge line has to be edited
 
+    USED_BOARD := BOARD_NRF52_SENSOR_TAG
+
+# Doxygen Documentation
+* install [Doxygen](www.doxygen.org/)
+* run
+
+    gen_doc.bat
+
+Yes this is only wrapping ```doxygen Doxyfile``` but just take it as a workspace local alias
 # nRF52 Sensor Tag
 This board is based on modules, it is very simple to solder and allows selection of any other I²C sensor modules.
 

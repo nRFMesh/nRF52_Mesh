@@ -2,6 +2,10 @@ PROJECT_NAME     := nRF52_Dongle
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
+#BOARD selection : BOARD_NRF52_DONGLE, BOARD_NRF52_SENSOR_TAG
+#USED_BOARD := BOARD_NRF52_DONGLE
+USED_BOARD := BOARD_NRF52_SENSOR_TAG
+
 SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
 
@@ -53,8 +57,9 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   . \
-  $(PROJ_DIR)/drivers \
+  $(PROJ_DIR)/applications \
   $(PROJ_DIR)/boards/ \
+  $(PROJ_DIR)/drivers \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
   $(SDK_ROOT)/components/libraries/util \
@@ -96,7 +101,7 @@ OPT = -O0 -g3
 
 # C flags common to all targets
 CFLAGS += $(OPT)
-CFLAGS += -DBOARD_NRF52_DONGLE
+CFLAGS += -D$(USED_BOARD)
 CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DESB_PRESENT
@@ -120,7 +125,7 @@ ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-ASMFLAGS += -DBOARD_NRF52_DONGLE
+ASMFLAGS += -D$(USED_BOARD)
 ASMFLAGS += -DBSP_DEFINES_ONLY
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DESB_PRESENT
@@ -197,7 +202,7 @@ conf:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
 
 paramr:
-	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -r
+	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -r
 
 paramw:
-	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -w
+	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -w

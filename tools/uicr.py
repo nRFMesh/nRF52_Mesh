@@ -6,12 +6,12 @@ import sys
 nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
 
 #  command example
-#  python uicr.py "../applications/nrf52_sensortag/uicr_map.json"
+#  python uicr.py "../applications/uicr_map.json"
 if(len(sys.argv) > 1):
     uicr_cfongi_file = sys.argv[1]
     print("arg0:%s"%(uicr_cfongi_file))
 else:
-    uicr_cfongi_file = "../applications/nrf52_sensortag/uicr_map.json"
+    uicr_cfongi_file = "../applications/uicr_map.json"
 
 #second command line argument to read or write
 if(len(sys.argv) > 2):

@@ -21,14 +21,15 @@ static void sleep_handler(void)
 
 /**
  * @brief Construct a new nrf serial drv uart config def object
- * APP_SERIAL_RX_PIN is coming from the sdk_config.h application section
- * APP_SERIAL_TX_PIN is coming from the sdk_config.h application section
- * NRF_UARTE_HWFC_DISABLED is beeing hardcoded here
+ * RX_PIN_NUMBER comes from the board definition
+ * TX_PIN_NUMBER comes from the board definition
+ * CTS,RTS  : Forced to NRF_UARTE_PSEL_DISCONNECTED
+ * Flow     : Forced to NRF_UARTE_HWFC_DISABLED
  * 
  */
 NRF_SERIAL_DRV_UART_CONFIG_DEF(m_uart0_drv_config,
-                      APP_SERIAL_RX_PIN, APP_SERIAL_TX_PIN,
-                      RTS_PIN_NUMBER, CTS_PIN_NUMBER,
+                      RX_PIN_NUMBER, TX_PIN_NUMBER,
+                      NRF_UARTE_PSEL_DISCONNECTED, NRF_UARTE_PSEL_DISCONNECTED,
                       NRF_UARTE_HWFC_DISABLED, NRF_UART_PARITY_EXCLUDED,
                       APP_SERIAL_BAUDRATE,
                       UART_DEFAULT_CONFIG_IRQ_PRIORITY);
@@ -55,12 +56,33 @@ NRF_SERIAL_UART_DEF(serial_uart, APP_SERIAL_INSTANCE);
 
 static app_serial_handler_t m_app_serial_handler;
 
-//static char uart_cmd[128];
+static char uart_cmd[128];
+static uint8_t uart_cmd_count=0;
 
 uint32_t ser_evt_tx_count = 0;
 uint32_t ser_evt_rx_count = 0;
 uint32_t ser_evt_drv_err_count = 0;
 uint32_t ser_evt_fifo_err_count = 0;
+
+void serial_rx_handler(const char* msg,uint8_t size)
+{
+    for(int i=0;i<size;i++)
+    {
+        char c = msg[i];
+        if( (c == '\r') || (c == '\n') || (c == 0) )
+        {
+            if(uart_cmd_count > 0)
+            {
+                m_app_serial_handler(uart_cmd,uart_cmd_count);
+                uart_cmd_count = 0;
+            }
+        }
+        else
+        {
+            uart_cmd[uart_cmd_count++] = c;
+        }
+    }
+}
 
 /**
  * @brief the DMA handles a batch of 4 bytes and triggers an event after every 4 bytes
@@ -76,7 +98,13 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
             ser_evt_tx_count++;
         break;
         case NRF_SERIAL_EVENT_RX_DATA:
-            ser_evt_rx_count++;
+            {
+                ser_evt_rx_count++;
+                size_t read;
+                char buffer[16];//max expected per event
+                nrf_serial_read(&serial_uart, &buffer, sizeof(buffer), &read, 0);
+                serial_rx_handler(buffer,read);
+            }
         break;
         case NRF_SERIAL_EVENT_DRV_ERR:
             ser_evt_drv_err_count++;
@@ -96,7 +124,7 @@ void ser_init(app_serial_handler_t handler)
     ret = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
     APP_ERROR_CHECK(ret);
 
-    //ret = nrf_serial_read(&serial_uart, &uart_cmd, sizeof(uart_cmd), NULL, 0);
+    //ret = nrf_serial_read(&serial_uart, &uart_cmd, 4, NULL, 0);
     //APP_ERROR_CHECK(ret);
 }
 
@@ -104,7 +132,8 @@ void ser_init(app_serial_handler_t handler)
  * @brief This function is non blocking, using 0 as parameter
  * Internal buffers and fifos are thus beeing used
  * 
- * @param message A null terminated string
+ * @param message A null terminated string, this address will directly be used by the DAM
+ * pointer, so do not pass any temporary local variable
  */
 //Non blocking mode, using 0 as parameter
 void ser_send(char* message)
@@ -120,3 +149,23 @@ void ser_send(char* message)
 {
 }
 #endif /*APP_SERIAL_ENABLED*/
+
+//thse functions are now HW dependent
+
+int sprint_buf(char*str,const char*msg,uint8_t size)
+{
+    int total=0;
+    int add;
+    add = sprintf(str,"0x");
+    str+=add;
+    total+=add;
+    for(int i=0;i<size;i++)
+    {
+        add = sprintf(str,"%02X ",msg[i]);
+        str+=add;
+        total+=add;
+    }
+    add = sprintf(str,"\r\n");
+    total+=add;
+    return total;
+}

@@ -54,8 +54,9 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   . \
-  $(PROJ_DIR)/drivers \
+  $(PROJ_DIR)/applications \
   $(PROJ_DIR)/boards/ \
+  $(PROJ_DIR)/drivers \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
   $(SDK_ROOT)/components/libraries/util \
@@ -196,7 +197,7 @@ conf:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
 
 paramr:
-	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -r
+	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -r
 
 paramw:
-	C:\Python27\python.exe ../../tools/uicr.py uicr_map.json -w
+	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -w

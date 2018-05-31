@@ -19,7 +19,7 @@
 #include "nrf_log.h"
 NRF_LOG_MODULE_REGISTER();
 
-#define UICR_SLEEP_SEC     NRF_UICR->CUSTOMER[2]
+#include "uicr_user_defines.h"
 
 
 const nrf_drv_rtc_t rtc = NRF_DRV_RTC_INSTANCE(0); /**< Declaring an instance of nrf_drv_rtc for RTC0. */

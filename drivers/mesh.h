@@ -20,12 +20,16 @@ typedef struct
 
 extern const char * const pid_name[];
 
+//------------------------- Mesh Core -------------------------
+
 typedef void (*app_mesh_handler_t)(message_t*);
 
 uint16_t mesh_node_id();
 uint8_t mesh_channel();
 
 uint32_t mesh_init(app_mesh_handler_t handler);
+
+//------------------------- Mesh protocol -------------------------
 
 void mesh_wait_tx();
 
@@ -42,5 +46,9 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press);
 void mesh_parse(message_t* msg,char * p_msg);
 void mesh_parse_raw(message_t* msg,char * p_msg);
 void mesh_parse_bytes(message_t* msg,char * p_msg);
+
+//------------------------- Mesh Commander -------------------------
+
+void mesh_handle_cmd(const char*msg,uint8_t size);
 
 #endif /*__MESH_H__*/

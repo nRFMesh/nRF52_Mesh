@@ -21,15 +21,17 @@
 
 // --------------------- inputs from sdk_config --------------------- 
 // ---> TWI0_ENABLED ---> TWI1_ENABLED
-
+#include "uicr_user_defines.h"
 //drivers
 //apps
 #include "clocks.h"
 #include "mesh.h"
 #include "app_ser.h"
 
+char rtc_message[100];
 char uart_message[100];
 char rf_message[100];
+uint32_t uart_rx_size=0;
 
 void blink()
 {
@@ -47,17 +49,41 @@ void rf_mesh_handler(message_t* msg)
     NRF_LOG_INFO("rf_mesh_handler()");
 
     mesh_parse(msg,rf_message);
-    //ser_send(rf_message);
+    ser_send(rf_message);
 }
-extern uint32_t ser_evt_rx_count;
+
+/**
+ * @brief called only with a full line message ending with '\r', '\n' or '0'
+ * 
+ * @param msg contains a pointer to the DMA buffer, so do not keep it after the call
+ * @param size safe managemnt with known size
+ */
+#define UART_MIRROR
+void app_serial_handler(const char*msg,uint8_t size)
+{
+    uart_rx_size+= size;
+    //the input (msg) is really the RX DMA pointer location
+    //and the output (uart_message) is reall the TX DMA pointer location
+    //so have to copy here to avoid overwriting
+    #ifdef UART_MIRROR
+        memcpy(uart_message,msg,size);
+        sprintf(uart_message+size,"\r\n");//Add line ending and NULL terminate it with sprintf
+        ser_send(uart_message);
+    #endif
+
+    if(UICR_is_rf_cmd())
+    {
+        mesh_handle_cmd(msg,size);
+    }
+}
 
 void app_rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
     NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
 
-    sprintf(uart_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,ser_evt_rx_count);
-    ser_send(uart_message);
+    sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,uart_rx_size);
+    ser_send(rtc_message);
 }
 
 int main(void)
@@ -76,13 +102,13 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
-    ser_init(NULL);
+    ser_init(app_serial_handler);
 
     //Cannot use non-blocking with buffers from const code memory
-    sprintf(uart_message,"____________________________________\r\n");
-    ser_send(uart_message);
-    sprintf(uart_message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
-    ser_send(uart_message);
+    sprintf(rtc_message,"____________________________________\r\n");
+    ser_send(rtc_message);
+    sprintf(rtc_message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
+    ser_send(rtc_message);
 
     blink();
 
