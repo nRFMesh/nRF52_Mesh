@@ -4,7 +4,10 @@
 
 #include <stdint.h>
 
-void ser_init();
+typedef void (*app_serial_handler_t)(uint8_t*,uint8_t);
+
+
+void ser_init(app_serial_handler_t handler);
 void ser_send(char* message);
 
 #endif /*__APP_SER_H__*/

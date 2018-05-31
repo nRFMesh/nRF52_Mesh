@@ -47,15 +47,16 @@ void rf_mesh_handler(message_t* msg)
     NRF_LOG_INFO("rf_mesh_handler()");
 
     mesh_parse(msg,rf_message);
-    ser_send(rf_message);
+    //ser_send(rf_message);
 }
+extern uint32_t ser_evt_rx_count;
 
-void rtc_handler()
+void app_rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
     NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
 
-    sprintf(uart_message,"id:%d:alive:%lu\r\n",mesh_node_id(),alive_count);
+    sprintf(uart_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,ser_evt_rx_count);
     ser_send(uart_message);
 }
 
@@ -75,10 +76,11 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
-    ser_init();
+    ser_init(NULL);
 
-    ser_send("____________________________________\r\n");
-    nrf_delay_ms(10);
+    //Cannot use non-blocking with buffers from const code memory
+    sprintf(uart_message,"____________________________________\r\n");
+    ser_send(uart_message);
     sprintf(uart_message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
     ser_send(uart_message);
 
@@ -88,7 +90,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    rtc_config(rtc_handler);
+    rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
 

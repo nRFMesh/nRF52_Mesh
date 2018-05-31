@@ -99,15 +99,20 @@ Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can
 | LED1 | P0.28 |
 | LED2 | P0.29 |
 
-## Switch between serial UART and LOG over UART
+### Switch between serial UART and LOG over UART
 run
 
-```make conf```
+    make conf
 
-then switch both :
+then switch both flags :
 * nRF_Log/NRF_LOG_BACKEND_UART_ENABLED
 * Application/APP_SERIAL_ENABLED
 don't forget to save
+
+### Serial mode
+* NRF_SERIAL_MODE_IRQ flag is not used by the driver and has equivalent function as NRF_SERIAL_MODE_DMA
+
+* ser_send() must be used with a variable in memory as DMA cannot read from Code in Flash
 
 ## Needle adapter
 Making a needle adapter is made easier with 3d printing. The used pogo pin is seen below
