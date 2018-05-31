@@ -42,15 +42,15 @@ void blink()
     bsp_board_leds_off();
 }
 
-void app_mesh_handler(message_t* msg)
+void rf_mesh_handler(message_t* msg)
 {
-    NRF_LOG_INFO("app_mesh_handler()");
+    NRF_LOG_INFO("rf_mesh_handler()");
 
     mesh_parse(msg,rf_message);
     ser_send(rf_message);
 }
 
-void app_rtc_handler()
+void rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
     NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
@@ -84,11 +84,11 @@ int main(void)
 
     blink();
 
-    err_code = mesh_init(app_mesh_handler);
+    err_code = mesh_init(rf_mesh_handler);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    rtc_config(app_rtc_handler);
+    rtc_config(rtc_handler);
 
     mesh_tx_reset();
 

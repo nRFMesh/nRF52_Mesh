@@ -95,14 +95,7 @@ void mesh_pre_tx()
     if(UICR_LISTENING == 0xBABA)
     {
         nrf_esb_stop_rx();
-        //------------------------------------------------------------------------------------------------^
-        //disable and enable might be removed if write starts_tx automatically
-        nrf_esb_disable();
-        //.mode is only used for test of start_tx_transaction
-        nrf_esb_config.mode = NRF_ESB_MODE_PTX;
-        nrf_esb_init(&nrf_esb_config);
-        //no start_tx as mesh_tx is a replacement for the call
-        NRF_LOG_DEBUG("switch to TX mode");
+        NRF_LOG_DEBUG("switch to IDLE mode that aloows TX");
     }
 
 }
@@ -111,11 +104,6 @@ void mesh_post_tx()
 {
     if(UICR_LISTENING == 0xBABA)
     {
-        //TODO create a light switch nrf_esb_switch_tx() without going through complete disable and enable
-        //------------------------------------------------------------------------------------------------
-        nrf_esb_disable();
-        nrf_esb_config.mode = NRF_ESB_MODE_PRX;
-        nrf_esb_init(&nrf_esb_config);
         nrf_esb_start_rx();
         NRF_LOG_DEBUG("switch to RX mode");
     }
@@ -301,6 +289,10 @@ uint32_t mesh_init(app_mesh_handler_t handler)
     return NRF_SUCCESS;
 }
 
+/**
+ * @brief can be used before going into sleep as RADIO does not operate in low power
+ * This will return either after success or failure event
+ */
 void mesh_wait_tx()
 {
     while(!esb_completed);
@@ -319,13 +311,13 @@ void mesh_tx_message(message_t* p_msg)
 
     esb_completed = false;//reset the check
     NRF_LOG_DEBUG("________________TX esb payload length = %d________________",tx_payload.data[0]);
-    /*for(int i=1;i<tx_payload.data[0];i++)
-    {
-        NRF_LOG_DEBUG("0x%02X",tx_payload.data[i]);
-    }*/
     //should not wait for esb_completed here as does not work from ISR context
 
+    //NRF_ESB_TXMODE_AUTO is used no need to call nrf_esb_start_tx()
+    //which could be used for a precise time transmission
     nrf_esb_write_payload(&tx_payload);
+    
+    //nrf_esb_start_tx();//as the previous mode does not start it due to .mode
 }
 
 uint32_t mesh_tx_button(uint8_t state)
