@@ -46,20 +46,25 @@ def get_uid():
     res = "0x%02X %02X %02X %02X %02X %02X %02X %02X"%(d[3],d[2],d[1],d[0],d[7],d[6],d[5],d[4])
     return res
 
-def write_uicr_customer(reg_name,val):
-    reg_nb = int(reg_name.lstrip("CUSTOMER_"))
-    address = 0x10001080 + 4*reg_nb
-    if((type(val) is str) or (type(val) is unicode)):
-            words_list = [int(val,0)]
-    else:
-        words_list = [val]
-    jlink.memory_write32(address,words_list)
-    return
-
 def read_uicr_customer(reg_name):
     reg_nb = int(reg_name.lstrip("CUSTOMER_"))
     address = 0x10001080 + 4*reg_nb
     return jlink.memory_read32(address,1)[0]
+
+def write_uicr_customer(reg_name,val):
+    pre_val = read_uicr_customer(reg_name)
+    test_val = int(val,0)
+    if(pre_val == test_val):
+        print("%s already has 0x%04X, new write not required"%(reg_name,test_val))
+    else:
+        reg_nb = int(reg_name.lstrip("CUSTOMER_"))
+        address = 0x10001080 + 4*reg_nb
+        if((type(val) is str) or (type(val) is unicode)):
+                words_list = [int(val,0)]
+        else:
+            words_list = [val]
+        jlink.memory_write32(address,words_list)
+    return
 
 def start():
     jlink.set_tif(pylink.enums.JLinkInterfaces.SWD)
