@@ -22,12 +22,14 @@ extern const char * const pid_name[];
 
 //------------------------- Mesh Core -------------------------
 
-typedef void (*app_mesh_handler_t)(message_t*);
+typedef void (*app_mesh_rf_handler_t)(message_t*);
+
+typedef void (*app_mesh_cmd_handler_t)(const char*,uint8_t);
 
 uint16_t mesh_node_id();
 uint8_t mesh_channel();
 
-uint32_t mesh_init(app_mesh_handler_t handler);
+uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler);
 
 //------------------------- Mesh protocol -------------------------
 
@@ -49,6 +51,6 @@ void mesh_parse_bytes(message_t* msg,char * p_msg);
 
 //------------------------- Mesh Commander -------------------------
 
-void mesh_handle_cmd(const char*msg,uint8_t size);
+void mesh_text_request(const char*text,uint8_t length);
 
 #endif /*__MESH_H__*/

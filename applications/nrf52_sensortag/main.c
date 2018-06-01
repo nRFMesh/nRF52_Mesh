@@ -133,7 +133,7 @@ int main(void)
 
     battery_init();
 
-    err_code = mesh_init(app_mesh_handler);//in case of rf rx
+    err_code = mesh_init(app_mesh_handler,NULL);//in case of rf rx, cmd handler not required
     APP_ERROR_CHECK(err_code);
 
     twi_init(&m_twi);

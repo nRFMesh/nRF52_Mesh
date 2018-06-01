@@ -89,6 +89,56 @@ It is based on a market available nRF52832 module seen below
 
 
 # nRF52 Dongle
+## Software
+### RF to Serial Gateway
+The node connected through serial port will report messages in text format
+1. Local Events
+
+Upon startup such message is sent
+
+    nodeid:75;channel:10;reset:1
+
+2. Listening
+
+Upon activation of the uicr config ```is_listening``` the node starts acting as a gatewy that will report messages through serial in text mode
+
+    rssi:-50;id:73;ctrl:0x81;src:73;alive:68;tx_power:0
+
+3. commands requests and responses
+
+It is possible to reconfigure the Node on runtime and manage manage a mesh network by sending messages
+
+    cmd:0x0102
+    cmd:0x<command id><arguments>
+
+| Command id | Function |
+--- | --- |
+| 0x01 | Set RF Channel |
+| 0x02 | Get RF Channel |
+| 0x03 | Set Tx Power |
+| 0x04 | Get Tx Power |
+| 0x05 | Set Bitrate |
+| 0x06 | Get Bitrate |
+
+
+
+### Switch between serial SERIAL and LOG over UART
+run
+
+    make conf
+
+then switch both flags :
+* nRF_Log/NRF_LOG_BACKEND_UART_ENABLED
+* Application/APP_SERIAL_ENABLED
+don't forget to save
+
+### Serial mode
+* NRF_SERIAL_MODE_IRQ flag is not used by the driver and has equivalent function as NRF_SERIAL_MODE_DMA
+
+* ser_send() must be used with a variable in memory as DMA cannot read from Code in Flash
+
+## Hardware
+
 Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can reuse a usb dongle from the market that includes a **2104** serial to usb converter. Keyword search on shopping websites : **nRF52832 USB dongle**. Aka "nRF52832-YJ-17017-USB-UART"
 
 <img src="boards/nrf52_dongle/images/dongle.png" width="200">
@@ -110,20 +160,6 @@ Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can
 | LED1 | P0.28 |
 | LED2 | P0.29 |
 
-### Switch between serial UART and LOG over UART
-run
-
-    make conf
-
-then switch both flags :
-* nRF_Log/NRF_LOG_BACKEND_UART_ENABLED
-* Application/APP_SERIAL_ENABLED
-don't forget to save
-
-### Serial mode
-* NRF_SERIAL_MODE_IRQ flag is not used by the driver and has equivalent function as NRF_SERIAL_MODE_DMA
-
-* ser_send() must be used with a variable in memory as DMA cannot read from Code in Flash
 
 ## Needle adapter
 Making a needle adapter is made easier with 3d printing. The used pogo pin is seen below

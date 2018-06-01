@@ -20,6 +20,7 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/clocks.c \
   $(PROJ_DIR)/drivers/mesh.c \
   $(PROJ_DIR)/drivers/app_ser.c \
+  $(PROJ_DIR)/drivers/utils.c \
   $(PROJ_DIR)/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
@@ -206,3 +207,8 @@ paramr:
 
 paramw:
 	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -w
+
+#TODO why 'applications' does not exist ?
+doc1:
+	cd $(PROJ_DIR)
+	doxygen Doxyfile

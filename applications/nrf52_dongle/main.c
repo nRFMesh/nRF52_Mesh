@@ -1,6 +1,15 @@
-/**
- * Home Smart Mesh
- */
+/** @file main.c
+ *
+ * main entry for the application nRF52_dongle
+ * 
+ * @author Wassim FILALI
+ *
+ * @compiler arm gcc
+ *
+ *
+ * $Date: 01.06.2018 adding doxy header this file existed since the repo creation
+ *
+*/
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -28,10 +37,12 @@
 #include "mesh.h"
 #include "app_ser.h"
 
-char rtc_message[100];
-char uart_message[100];
-char rf_message[100];
+char rtc_message[128];
+char uart_message[128];
+char rf_message[128];
 uint32_t uart_rx_size=0;
+
+extern uint32_t ser_evt_tx_count;
 
 void blink()
 {
@@ -44,19 +55,33 @@ void blink()
     bsp_board_leds_off();
 }
 
+static bool sending = false;
+
+void app_serial_tx_handler()
+{
+    sending = false;
+}
+/**
+ * @brief callback from the RF Mesh stack on valid packet received for this node
+ * 
+ * @param msg message structure with packet parameters and payload
+ */
 void rf_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("rf_mesh_handler()");
 
+    //TODO this waiting could be replaced by a fifo
+    while(sending);
+    sending = true;
     mesh_parse(msg,rf_message);
     ser_send(rf_message);
 }
 
 /**
- * @brief called only with a full line message ending with '\r', '\n' or '0'
- * 
+ * @brief called only with a full line message coming from UART 
+ * ending with '\r', '\n' or '0'
  * @param msg contains a pointer to the DMA buffer, so do not keep it after the call
- * @param size safe managemnt with known size
+ * @param size safe managemnt with known size, does not include the ending char '\r' or other
  */
 //#define UART_MIRROR
 void app_serial_handler(const char*msg,uint8_t size)
@@ -73,10 +98,31 @@ void app_serial_handler(const char*msg,uint8_t size)
 
     if(UICR_is_rf_cmd())
     {
-        mesh_handle_cmd(msg,size);
+        mesh_text_request(msg,size);
     }
 }
 
+/**
+ * @brief Callback from after completion of the cmd request
+ * Note this is a call back as some undefined latency and events might happen
+ * before the response is ready, thus the requests cannot always return immidiatly
+ * 
+ * @param text 
+ * @param length 
+ */
+void mesh_cmd_response(const char*text,uint8_t length)
+{
+    memcpy(uart_message,text,length);
+    sprintf(uart_message+length,"\r\n");//Add line ending and NULL terminate it with sprintf
+    ser_send(uart_message);
+}
+
+
+/**
+ * @brief application rtc event which is a configurable period delay
+ * through the uicr config "sleep" in the nodes databse
+ * 
+ */
 void app_rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
@@ -105,17 +151,16 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
-    ser_init(app_serial_handler);
+    ser_init(app_serial_handler,app_serial_tx_handler);
 
     //Cannot use non-blocking with buffers from const code memory
-    sprintf(rtc_message,"____________________________________\r\n");
-    ser_send(rtc_message);
-    sprintf(rtc_message,"nodeid:%d;channel:%d;event:reset\r\n",mesh_node_id(),mesh_channel());
+    //reset is a status which single event is reset, that status takes the event name
+    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",mesh_node_id(),mesh_channel());
     ser_send(rtc_message);
 
     blink();
 
-    err_code = mesh_init(rf_mesh_handler);
+    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done

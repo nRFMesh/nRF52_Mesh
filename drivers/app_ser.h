@@ -5,12 +5,10 @@
 #include <stdint.h>
 
 typedef void (*app_serial_handler_t)(const char*,uint8_t);
+typedef void (*app_serial_tx_handler_t)(void);
 
 
-void ser_init(app_serial_handler_t handler);
+void ser_init(app_serial_handler_t handler,app_serial_tx_handler_t tx_handler);
 void ser_send(char* message);
-
-//utilities
-int sprint_buf(char*str,const char*msg,uint8_t size);
 
 #endif /*__APP_SER_H__*/

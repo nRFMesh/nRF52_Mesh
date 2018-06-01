@@ -21,7 +21,7 @@
 #include "nrf_delay.h"
 #include <stdio.h>
 //for sprint_buf
-#include "app_ser.h"
+#include "utils.h"
 
 #define NRF_LOG_MODULE_NAME mesh
 
@@ -41,14 +41,31 @@ NRF_LOG_MODULE_REGISTER();
 
 //light was 16bit redefined u32 bit
 #define Mesh_Pid_Light 0x07
+#define Mesh_Pid_Temperature 0x08
 //bme280 no more with uncalibrated params
 #define Mesh_Pid_bme        0x0A
+//following rgb is led color control
+#define Mesh_Pid_led_rgb    0x0B
+#define Mesh_Pid_light_rgb  0x0E
+#define Mesh_Pid_Humidity   0x11
+#define Mesh_Pid_Pressure   0x12
+#define Mesh_Pid_accell     0x13
+#define Mesh_Pid_new_light  0x14
 #define Mesh_Pid_Battery    0x15
 
 #define MESH_IS_BROADCAST(val) ((val & 0x80) == 0x80)
+//Ack if bits 1,2 == 1,0 => MASK 0x60, VAL 0x40
+#define MESH_IS_ACKNOWLEDGE(val) ((val & 0x60) == 0x40)
 
 #define MESH_Broadcast_Header_Length 4
 #define MESH_P2P_Header_Length 5
+
+#define MESH_cmd_rf_chan_set        0x01
+#define MESH_cmd_rf_chan_get        0x02
+#define MESH_cmd_tx_power_set       0x03
+#define MESH_cmd_tx_power_get       0x04
+#define MESH_cmd_bitrate_set        0x05
+#define MESH_cmd_bitrate_get        0x06
 
 
 const char * const pid_name[] = {  "",          //0x00
@@ -83,8 +100,11 @@ static nrf_esb_payload_t rx_payload;
 static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
+static volatile bool esb_rx_complete = true;//on startup no pending rx
 
-static app_mesh_handler_t m_app_mesh_handler;
+static app_mesh_rf_handler_t m_app_rf_handler;
+
+static app_mesh_cmd_handler_t m_app_cmd_handler;
 
 void mesh_tx_message(message_t* msg);
 
@@ -106,6 +126,12 @@ uint8_t mesh_channel()
 {
     return UICR_RF_CHANNEL;
 }
+
+uint8_t mesh_get_channel()
+{
+    return NRF_RADIO->FREQUENCY;
+}
+
 
 void mesh_pre_tx()
 {
@@ -198,10 +224,11 @@ void mesh_rx_handler(message_t* msg)
         }
     }
     
-    if(m_app_mesh_handler != NULL)
+    if(m_app_rf_handler != NULL)
     {
+        
         msg->control = ctrl_backup;
-        m_app_mesh_handler(msg);
+        m_app_rf_handler(msg);
     }
 }
 
@@ -222,19 +249,25 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             esb_tx_complete = true;
             break;
         case NRF_ESB_EVENT_RX_RECEIVED:
-            NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
-            // Get the most recent element from the RX FIFO.
-            while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
+            //TODO unsafe mutex, should disable interrupts between get and set
+            if(esb_rx_complete)//otherwise re-entrant will be handled in the while loop
             {
-                mesh_esb_2_message_payload(&rx_payload,&rx_msg);
-                NRF_LOG_INFO("ESB Rx %d- pipe: (%d) -> pid:%d ; length:%d",count++,rx_payload.pipe,rx_payload.pid,rx_payload.length);
-                NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
-                mesh_rx_handler(&rx_msg);
-            }
+                esb_rx_complete = false;
+                NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
+                // Get the most recent element from the RX FIFO.
+                while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
+                {
+                    mesh_esb_2_message_payload(&rx_payload,&rx_msg);
+                    NRF_LOG_INFO("ESB Rx %d- pipe: (%d) -> pid:%d ; length:%d",count++,rx_payload.pipe,rx_payload.pid,rx_payload.length);
+                    NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
+                    mesh_rx_handler(&rx_msg);
+                }
 
-            // For each LED, set it as indicated in the rx_payload, but invert it for the button
-            // which is pressed. This is because the ack payload from the PRX is reflecting the
-            // state from before receiving the packet.
+                // For each LED, set it as indicated in the rx_payload, but invert it for the button
+                // which is pressed. This is because the ack payload from the PRX is reflecting the
+                // state from before receiving the packet.
+                esb_rx_complete = true;
+            }
             break;
         default:
             NRF_LOG_ERROR("ESB Unhandled Event (%d)",p_event->evt_id);
@@ -245,14 +278,15 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 }
 
 
-uint32_t mesh_init(app_mesh_handler_t handler)
+uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler)
 {
     uint32_t err_code;
     uint8_t base_addr_0[4] = {0xE7, 0xE7, 0xE7, 0xE7};
     uint8_t base_addr_1[4] = {0xC2, 0xC2, 0xC2, 0xC2};
     uint8_t addr_prefix[8] = {0xE7, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8 };
 
-    m_app_mesh_handler = handler;
+    m_app_rf_handler = rf_handler;
+    m_app_cmd_handler = cmd_handler;
 
     nrf_esb_config.retransmit_count         = 0;
     nrf_esb_config.selective_auto_ack       = true;//false is not supported : payload.noack  decides
@@ -474,11 +508,11 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
 
 int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
 {
-    if(size != 5)
+    if(size == 0)
     {
-        return sprintf(p_msg,"size not 5 but:%d",size);
+        return sprintf(p_msg,"alive:1");
     }
-    else
+    else if(size == 5)
     {
         uint32_t live_count;
         live_count  = data[0] << 24;
@@ -487,6 +521,10 @@ int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
         live_count |= data[3];
         uint8_t tx_power = data[4];
         return sprintf(p_msg,"alive:%lu;tx_power:%d",live_count,tx_power);
+    }
+    else
+    {
+        return sprintf(p_msg,"size not 0, not 5 but:%d",size);
     }
 }
 
@@ -504,11 +542,13 @@ int rx_button(char * p_msg,uint8_t*data,uint8_t size)
 
 int rx_light(char * p_msg,uint8_t*data,uint8_t size)
 {
-    if(size != 4)
+    if(size == 2)
     {
-        return sprintf(p_msg,"size not 4 but:%d",size);
+        uint16_t    light  = data[1] << 8;
+                    light |= data[0];
+        return sprintf(p_msg,"deprecated_light:%u",light);
     }
-    else
+    else if(size == 4)
     {
         uint32_t    light  = data[3] << 24;
                     light |= data[2] << 16;
@@ -516,13 +556,128 @@ int rx_light(char * p_msg,uint8_t*data,uint8_t size)
                     light |= data[0];
         return sprintf(p_msg,"light:%lu",light);
     }
+    else
+    {
+        return sprintf(p_msg,"size not 4, not 2 but:%d",size);
+    }
+}
+
+int rx_new_light(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size == 2)
+    {
+        uint16_t    light  = data[1] << 8;
+                    light |= data[0];
+        return sprintf(p_msg,"deprecated_new_light:%u",light);
+    }
+    else
+    {
+        return sprintf(p_msg,"size not 2 but:%d",size);
+    }
+}
+
+int rx_led_rgb(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size == 3)
+    {
+        uint8_t    red  =      data[0];
+        uint8_t    green  =    data[1];
+        uint8_t    blue  =     data[2];
+        return sprintf(p_msg,"led_r:%u;led_g:%u;led_b:%u",red,green,blue);
+    }
+    else if(size == 0)
+    {
+        return 0;//no addition as this is an ack
+    }
+    else
+    {
+        return sprintf(p_msg,"size not 8, not 0 but:%u",size);
+    }
+}
+
+int rx_light_rgb(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 8)
+    {
+        return sprintf(p_msg,"size not 8 but:%u",size);
+    }
+    else
+    {
+        uint16_t    ambient  =  data[0] << 8;
+                    ambient |=  data[1];
+        uint16_t    red  =      data[2] << 8;
+                    red |=      data[3];
+        uint16_t    green  =    data[4] << 8;
+                    green |=    data[5];
+        uint16_t    blue  =     data[6] << 8;
+                    blue |=     data[7];
+        return sprintf(p_msg,"ambient:%u;red:%u;green:%u;blue:%u",ambient,red,green,blue);
+    }
+}
+
+int rx_temperature(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 4)
+    {
+        return sprintf(p_msg,"size not 4 but:%d",size);
+    }
+    else
+    {
+        uint32_t    temperature  = data[3] << 24;
+                    temperature |= data[2] << 16;
+                    temperature |= data[1] <<  8;
+                    temperature |= data[0];
+        return sprintf(p_msg,"deprecated_temp:%lu",temperature);
+    }
+}
+
+int rx_humidity(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 4)
+    {
+        return sprintf(p_msg,"size not 4 but:%d",size);
+    }
+    else
+    {
+        uint32_t    humidity  = data[3] << 24;
+                    humidity |= data[2] << 16;
+                    humidity |= data[1] <<  8;
+                    humidity |= data[0];
+        return sprintf(p_msg,"deprecated_hum:%lu",humidity);
+    }
+}
+
+int rx_pressure(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 4)
+    {
+        return sprintf(p_msg,"size not 4 but:%d",size);
+    }
+    else
+    {
+        uint32_t    pressure  = data[3] << 24;
+                    pressure |= data[2] << 16;
+                    pressure |= data[1] <<  8;
+                    pressure |= data[0];
+        return sprintf(p_msg,"deprecated_press:%lu",pressure);
+    }
 }
 
 int rx_bme(char * p_msg,uint8_t*data,uint8_t size)
 {
     if(size != 12)
     {
-        return sprintf(p_msg,"size not 12 but:%u",size);
+        if(size == 8)
+        {
+            int add = sprintf(p_msg,"deprecated_bme_reg:");
+            p_msg += add;
+            add+=sprint_buf(p_msg,(const char*)data,size);
+            return add;
+        }
+        else
+        {
+            return sprintf(p_msg,"size not 12 but:%u",size);
+        }
     }
     else
     {
@@ -568,53 +723,112 @@ int rx_battery(char * p_msg,uint8_t*data,uint8_t size)
     }
 }
 
+int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 6)
+    {
+        return sprintf(p_msg,"size not 6 but:%d",size);
+    }
+    else
+    {
+        int16_t 	accell_x =  data[0] << 8;
+                    accell_x |= data[1];
+        int16_t 	accell_y =  data[2] << 8;
+                    accell_y |= data[3];
+        int16_t 	accell_z =  data[4] << 8;
+                    accell_z |= data[5];
+        return sprintf(p_msg,"accell_x:%d;accell_y:%d;accell_z:%d",accell_x,accell_y,accell_z);
+    }
+}
 
 void mesh_parse(message_t* msg,char * p_msg)
 { 
-    int add;
-    add = sprintf(p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->source,msg->control,msg->source);
-    p_msg += add;
+    p_msg += sprintf(  p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->pid,msg->control,msg->source);
+    if(!(MESH_IS_BROADCAST(msg->control)))
+    {
+        p_msg += sprintf(  p_msg,"dest:%d;",msg->dest);
+    }
+    if(MESH_IS_ACKNOWLEDGE(msg->control))
+    {
+        p_msg += sprintf(  p_msg,"ack:1;");
+    }
     switch(msg->pid)
     {
         case Mesh_Pid_Alive:
             {
-                add = rx_alive(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_alive(p_msg,msg->payload,msg->payload_length);
             }
             break;
         case Mesh_Pid_Reset:
             {
-                add = sprintf(p_msg,"reset:1");
+                p_msg += sprintf(p_msg,"reset:1");
             }
             break;
         case Mesh_Pid_Button:
             {
-                add = rx_button(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_button(p_msg,msg->payload,msg->payload_length);
             }
             break;
         case Mesh_Pid_Light:
             {
-                add = rx_light(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_light(p_msg,msg->payload,msg->payload_length);
             }
             break;
+        case Mesh_Pid_light_rgb:
+            {
+                p_msg += rx_light_rgb(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_led_rgb:
+            {
+                p_msg += rx_led_rgb(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_Temperature:
+        {
+                p_msg += rx_temperature(p_msg,msg->payload,msg->payload_length);
+        }
+        break;
+        case Mesh_Pid_Humidity:
+        {
+                p_msg += rx_humidity(p_msg,msg->payload,msg->payload_length);
+        }
+        break;
+        case Mesh_Pid_Pressure:
+        {
+                p_msg += rx_pressure(p_msg,msg->payload,msg->payload_length);
+        }
+        break;
         case Mesh_Pid_bme:
             {
-                add = rx_bme(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_bme(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_accell:
+            {
+                p_msg += rx_accell(p_msg,msg->payload,msg->payload_length);
             }
             break;
         case Mesh_Pid_Battery:
             {
-                add = rx_battery(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_battery(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
+        case Mesh_Pid_new_light:
+            {
+                p_msg += rx_new_light(p_msg,msg->payload,msg->payload_length);
             }
             break;
         default:
         {
-            add = sprintf(p_msg,"payload:");
-            p_msg += add;
-            add = sprint_buf(p_msg,(const char*)msg->payload,msg->payload_length);
+            if(msg->payload_length > 0)
+            {
+                p_msg += sprintf(p_msg,"payload:");
+                p_msg += sprint_buf(p_msg,(const char*)msg->payload,msg->payload_length);
+            }
         }
         break;
     }
-    p_msg += add;
     sprintf(p_msg,"\r\n");
 }
 
@@ -673,19 +887,73 @@ void mesh_parse_bytes(message_t* msg,char * p_msg)
 
 
 /**
+ * @brief Executes a command received in a binary format
+ * 
+ * @param data the array starting with <cmd_id> followed by <param0><param1>,...
+ * @param size the total size including the first byte of cmd_id
+ */
+void mesh_execute_cmd(uint8_t*data,uint8_t size)
+{
+    char resp[32];
+    uint8_t resp_len;
+    switch(data[0])
+    {
+        case MESH_cmd_rf_chan_set:
+        {
+            mesh_wait_tx();//in case any action was ongoing
+            nrf_esb_stop_rx();
+            nrf_esb_set_rf_channel(data[1]);
+            nrf_esb_start_rx();
+            resp_len = sprintf(resp,"cmd:set_channel;set:%u;get:%u",data[1],mesh_get_channel());
+        }
+        break;
+        case MESH_cmd_rf_chan_get:
+        {
+            resp_len = sprintf(resp,"cmd:get_channel;channel:%u",mesh_get_channel());
+        }
+        break;
+        default:
+        {
+            resp_len = sprintf(resp,"cmd:0x%02X;len:%d",data[0],size);
+        }
+        break;
+    }
+    m_app_cmd_handler(resp,resp_len);
+}
+
+/**
  * @brief executes teh command immidiatly
  * Future extension should use a command fifo
  * 
- * @param msg contains a command line to execute a mesh rf function
+ * @param text contains a command line to execute a mesh rf function
  * supported commands :
  * * msg:0x00112233445566...
  * where 0:length, 1:control , 2:source , 3:dest/payload , 4:payload,...
  * * cmd:0x00112233445566
  * where 0x00 is the command id
  * the rest are the command parameters including : crc_cfg, header_cfg, bitrate,...
- * @param size number of characters in msg
+ * @param length number of characters in msg
  */
-void mesh_handle_cmd(const char*msg,uint8_t size)
+void mesh_text_request(const char*text,uint8_t length)
 {
-
+    if(strbegins(text,"msg:"))
+    {
+        uint8_t data[32];//TODO define global max cmd size
+        uint8_t size;
+        if(text2bin(text+4,length-4,data,&size))
+        {
+            char resp[32];
+            uint8_t resp_len = sprintf(resp,"msg_len:%d",size);
+            m_app_cmd_handler(resp,resp_len);
+        }
+    }
+    else if(strbegins(text,"cmd:"))
+    {
+        uint8_t data[32];//TODO define global max cmd size
+        uint8_t size;
+        if(text2bin(text+4,length-4,data,&size))
+        {
+            mesh_execute_cmd(data,size);
+        }
+    }
 }

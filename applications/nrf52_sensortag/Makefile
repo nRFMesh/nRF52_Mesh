@@ -19,6 +19,7 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/battery.c \
   $(PROJ_DIR)/drivers/bme280.c \
   $(PROJ_DIR)/drivers/max44009.c \
+  $(PROJ_DIR)/drivers/utils.c \
   $(PROJ_DIR)/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \

@@ -55,6 +55,7 @@ NRF_SERIAL_CONFIG_DEF(serial_config, NRF_SERIAL_MODE_DMA,
 NRF_SERIAL_UART_DEF(serial_uart, APP_SERIAL_INSTANCE);
 
 static app_serial_handler_t m_app_serial_handler;
+static app_serial_tx_handler_t m_app_serial_tx_handler;
 
 static char uart_cmd[128];
 static uint8_t uart_cmd_count=0;
@@ -96,6 +97,7 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
     {
         case NRF_SERIAL_EVENT_TX_DONE:
             ser_evt_tx_count++;
+            m_app_serial_tx_handler();
         break;
         case NRF_SERIAL_EVENT_RX_DATA:
             {
@@ -115,11 +117,12 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
     }
 }
 
-void ser_init(app_serial_handler_t handler)
+void ser_init(app_serial_handler_t handler,app_serial_tx_handler_t tx_handler)
 {
     ret_code_t ret;
 
     m_app_serial_handler = handler;
+    m_app_serial_tx_handler = tx_handler;
 
     ret = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
     APP_ERROR_CHECK(ret);
@@ -150,22 +153,3 @@ void ser_send(char* message)
 }
 #endif /*APP_SERIAL_ENABLED*/
 
-//thse functions are now HW dependent
-
-int sprint_buf(char*str,const char*msg,uint8_t size)
-{
-    int total=0;
-    int add;
-    add = sprintf(str,"0x");
-    str+=add;
-    total+=add;
-    for(int i=0;i<size;i++)
-    {
-        add = sprintf(str,"%02X",msg[i]);
-        str+=add;
-        total+=add;
-    }
-    add = sprintf(str,"\r\n");
-    total+=add;
-    return total;
-}
