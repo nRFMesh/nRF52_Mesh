@@ -11,7 +11,6 @@
 #include "app_util.h"
 
 #if(APP_SERIAL_ENABLED == 1)
-
 static void sleep_handler(void)
 {
     __WFE();
@@ -40,7 +39,7 @@ NRF_SERIAL_DRV_UART_CONFIG_DEF(m_uart0_drv_config,
 NRF_SERIAL_QUEUES_DEF(serial_queues, SERIAL_FIFO_TX_SIZE, SERIAL_FIFO_RX_SIZE);
 
 
-#define SERIAL_BUFF_TX_SIZE 5
+#define SERIAL_BUFF_TX_SIZE 10
 #define SERIAL_BUFF_RX_SIZE 2
 
 NRF_SERIAL_BUFFERS_DEF(serial_buffs, SERIAL_BUFF_TX_SIZE, SERIAL_BUFF_RX_SIZE);
@@ -64,6 +63,7 @@ uint32_t ser_evt_tx_count = 0;
 uint32_t ser_evt_rx_count = 0;
 uint32_t ser_evt_drv_err_count = 0;
 uint32_t ser_evt_fifo_err_count = 0;
+uint32_t ser_tx_err_count = 0;
 
 void serial_rx_handler(const char* msg,uint8_t size)
 {
@@ -141,15 +141,28 @@ void ser_init(app_serial_handler_t handler,app_serial_tx_handler_t tx_handler)
 //Non blocking mode, using 0 as parameter
 void ser_send(char* message)
 {
-    nrf_serial_write(&serial_uart,message,strlen(message),NULL,0);
+    ret_code_t ret;
+    do
+    {
+        //has a mutex protection over the TX queue, can be busy, thus retry
+        //15 ms is max for 120 chars @115200
+        ret = nrf_serial_write(&serial_uart,message,strlen(message),NULL,0);
+    }while(ret == NRF_ERROR_BUSY);
+    if(ret == NRF_ERROR_TIMEOUT)
+    {
+        ser_tx_err_count++;
+    }
+    else if(ret != NRF_SUCCESS)
+    {
+        ser_tx_err_count++;
+    }
 }
-
 #else
-void ser_init(app_serial_handler_t handler)
-{
-}
-void ser_send(char* message)
-{
-}
+    void ser_init(app_serial_handler_t handler)
+    {
+    }
+    void ser_send(char* message)
+    {
+    }
 #endif /*APP_SERIAL_ENABLED*/
 

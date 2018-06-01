@@ -37,12 +37,15 @@
 #include "mesh.h"
 #include "app_ser.h"
 
-char rtc_message[128];
-char uart_message[128];
-char rf_message[128];
+#include "nrf_mtx.h"
+
+char rtc_message[64];
+char uart_message[64];
 uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
+
+nrf_mtx_t rf_message_mtx;
 
 void blink()
 {
@@ -55,11 +58,9 @@ void blink()
     bsp_board_leds_off();
 }
 
-static bool sending = false;
-
 void app_serial_tx_handler()
 {
-    sending = false;
+    //TODO remove
 }
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -69,12 +70,11 @@ void app_serial_tx_handler()
 void rf_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("rf_mesh_handler()");
-
-    //TODO this waiting could be replaced by a fifo
-    while(sending);
-    sending = true;
+    char rf_message[128];
+    while(!nrf_mtx_trylock(&rf_message_mtx));
     mesh_parse(msg,rf_message);
     ser_send(rf_message);
+    nrf_mtx_unlock(&rf_message_mtx);
 }
 
 /**
@@ -151,6 +151,9 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
+
+    nrf_mtx_init(&rf_message_mtx);
+
     ser_init(app_serial_handler,app_serial_tx_handler);
 
     //Cannot use non-blocking with buffers from const code memory

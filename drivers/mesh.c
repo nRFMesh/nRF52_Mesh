@@ -270,6 +270,7 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             }
             break;
         default:
+            esb_completed = true;
             NRF_LOG_ERROR("ESB Unhandled Event (%d)",p_event->evt_id);
             break;
     }
