@@ -23,6 +23,13 @@
 //for sprint_buf
 #include "utils.h"
 
+#if defined( __GNUC__ ) && (__LINT__ == 0)
+    // This is required if one wants to use floating-point values in 'printf'
+    // (by default this feature is not linked together with newlib-nano).
+    // Please note, however, that this adds about 13 kB code footprint...
+    __ASM(".global _printf_float");
+#endif
+
 #define NRF_LOG_MODULE_NAME mesh
 
 #if (MESH_CONFIG_LOG_ENABLED == 1)
@@ -769,7 +776,16 @@ int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
                     accell_y |= data[3];
         int16_t 	accell_z =  data[4] << 8;
                     accell_z |= data[5];
-        return sprintf(p_msg,"accell_x:%d;accell_y:%d;accell_z:%d",accell_x,accell_y,accell_z);
+        float   x =  accell_x;
+                x /= 16384;
+        float   y =  accell_y;
+                y /= 16384;
+        float   z =  accell_z;
+                z /= 16384;
+        //note only +-2g AFS is used
+        //although one lsb is 0.00006 it is truncated to 0.001
+        int sres = sprintf(p_msg,"accx:%0.3f;accy:%0.3f;accz:%0.3f",x,y,z);
+        return sres;
     }
 }
 
