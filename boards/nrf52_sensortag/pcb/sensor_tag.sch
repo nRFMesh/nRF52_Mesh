@@ -203,7 +203,6 @@
 <text x="1.778" y="-0.635" size="1.27" layer="21">Scl</text>
 <text x="1.778" y="-3.175" size="1.27" layer="21">Sda</text>
 <text x="1.778" y="-5.715" size="1.27" layer="21">Int</text>
-<text x="10.16" y="-5.08" size="1.4224" layer="21" rot="R90">APDS9960</text>
 </package>
 </packages>
 <symbols>
@@ -446,38 +445,44 @@ small coin cell</text>
 <packages>
 <package name="NRF_TAG_DEBUG">
 <wire x1="-8.89" y1="2.54" x2="-8.89" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="-8.89" y1="-2.54" x2="8.89" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="-8.89" y1="-2.54" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="-1.27" y1="-2.54" x2="8.89" y2="-2.54" width="0.127" layer="21"/>
 <wire x1="8.89" y1="-2.54" x2="8.89" y2="2.54" width="0.127" layer="21"/>
-<wire x1="8.89" y1="2.54" x2="-8.89" y2="2.54" width="0.127" layer="21"/>
-<text x="-8.509" y="1.143" size="1.27" layer="21">Debug</text>
-<text x="-8.509" y="-2.159" size="1.27" layer="21">Tx</text>
-<text x="-0.635" y="-2.159" size="1.27" layer="21">G</text>
-<text x="2.032" y="-2.159" size="1.27" layer="21">V</text>
-<text x="4.572" y="-2.159" size="1.27" layer="21">D</text>
-<text x="7.112" y="-2.159" size="1.27" layer="21">C</text>
+<wire x1="8.89" y1="2.54" x2="-1.27" y2="2.54" width="0.127" layer="21"/>
+<text x="-0.508" y="-2.032" size="1.27" layer="21">Debug</text>
+<text x="-8.509" y="1.143" size="1.27" layer="21">Tx</text>
+<text x="-3.048" y="1.143" size="1.27" layer="21">G</text>
+<text x="1.905" y="1.143" size="1.27" layer="21">V</text>
+<text x="4.445" y="1.143" size="1.27" layer="21">D</text>
+<text x="6.985" y="1.143" size="1.27" layer="21">C</text>
 <pad name="TX" x="-7.62" y="0" drill="0.6"/>
 <pad name="RX" x="-5.08" y="0" drill="0.6"/>
 <pad name="GND" x="0" y="0" drill="0.6"/>
 <pad name="VCC" x="2.54" y="0" drill="0.6"/>
 <pad name="SWDIO" x="5.08" y="0" drill="0.6"/>
 <pad name="SWDCLK" x="7.62" y="0" drill="0.6"/>
-<pad name="NC" x="-2.54" y="0" drill="0.6" shape="square"/>
-<text x="-5.969" y="-2.159" size="1.27" layer="21">Rx</text>
+<pad name="GND1" x="-2.54" y="0" drill="0.6" shape="square"/>
+<text x="-5.969" y="1.143" size="1.27" layer="21">Rx</text>
+<text x="-0.635" y="1.143" size="1.27" layer="21">G</text>
+<text x="-8.128" y="-2.159" size="1.27" layer="21">UART</text>
+<wire x1="-1.27" y1="2.54" x2="-8.89" y2="2.54" width="0.127" layer="21"/>
+<wire x1="-1.27" y1="2.54" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
 <symbol name="NRF_TAG_DEBUG">
 <pin name="RX" x="-5.08" y="10.16" length="middle"/>
-<pin name="GND" x="-5.08" y="5.08" length="middle"/>
-<pin name="VCC" x="-5.08" y="0" length="middle"/>
-<pin name="SWDIO" x="-5.08" y="-5.08" length="middle"/>
-<pin name="SWCLK" x="-5.08" y="-10.16" length="middle"/>
-<wire x1="-2.54" y1="17.78" x2="-2.54" y2="-12.7" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="-12.7" x2="17.78" y2="-12.7" width="0.254" layer="94"/>
-<wire x1="17.78" y1="-12.7" x2="17.78" y2="17.78" width="0.254" layer="94"/>
+<pin name="GND" x="-5.08" y="0" length="middle"/>
+<pin name="VCC" x="-5.08" y="-5.08" length="middle"/>
+<pin name="SWDIO" x="-5.08" y="-10.16" length="middle"/>
+<pin name="SWCLK" x="-5.08" y="-15.24" length="middle"/>
+<wire x1="-2.54" y1="17.78" x2="-2.54" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="-17.78" x2="17.78" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="17.78" y1="-17.78" x2="17.78" y2="17.78" width="0.254" layer="94"/>
 <wire x1="17.78" y1="17.78" x2="-2.54" y2="17.78" width="0.254" layer="94"/>
 <text x="6.604" y="7.366" size="2.54" layer="94">Debug</text>
 <pin name="TX" x="-5.08" y="15.24" length="middle"/>
+<pin name="GND1" x="-5.08" y="5.08" length="middle"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -489,6 +494,7 @@ small coin cell</text>
 <device name="" package="NRF_TAG_DEBUG">
 <connects>
 <connect gate="G$1" pin="GND" pad="GND"/>
+<connect gate="G$1" pin="GND1" pad="GND1"/>
 <connect gate="G$1" pin="RX" pad="RX"/>
 <connect gate="G$1" pin="SWCLK" pad="SWDCLK"/>
 <connect gate="G$1" pin="SWDIO" pad="SWDIO"/>
@@ -569,7 +575,7 @@ Big coin cell</text>
 <instance part="U$2" gate="G$1" x="33.02" y="58.42"/>
 <instance part="U$3" gate="G$1" x="-48.26" y="50.8"/>
 <instance part="U$4" gate="G$1" x="-7.62" y="-5.08"/>
-<instance part="U$5" gate="G$1" x="-68.58" y="0" rot="R180"/>
+<instance part="U$5" gate="G$1" x="-68.58" y="-5.08" rot="R180"/>
 <instance part="U$6" gate="G$1" x="33.02" y="-17.78"/>
 </instances>
 <busses>
@@ -606,12 +612,15 @@ Big coin cell</text>
 <wire x1="-63.5" y1="-5.08" x2="-30.48" y2="-5.08" width="0.1524" layer="91"/>
 <wire x1="-30.48" y1="-5.08" x2="-30.48" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="-30.48" y1="-10.16" x2="-17.78" y2="-10.16" width="0.1524" layer="91"/>
-<label x="-30.48" y="-10.16" size="1.778" layer="95" rot="R180"/>
+<label x="-30.48" y="-12.7" size="1.778" layer="95" rot="R180"/>
 <wire x1="-17.78" y1="-10.16" x2="-12.7" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="-17.78" y1="-10.16" x2="-17.78" y2="-22.86" width="0.1524" layer="91"/>
 <pinref part="U$6" gate="G$1" pin="GND"/>
 <wire x1="-17.78" y1="-22.86" x2="20.32" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="-17.78" y="-10.16"/>
+<pinref part="U$5" gate="G$1" pin="GND1"/>
+<wire x1="-63.5" y1="-10.16" x2="-30.48" y2="-10.16" width="0.1524" layer="91"/>
+<junction x="-30.48" y="-10.16"/>
 </segment>
 <segment>
 <pinref part="U$3" gate="G$1" pin="GND"/>
@@ -709,17 +718,17 @@ Big coin cell</text>
 <segment>
 <pinref part="U$3" gate="G$1" pin="P0_06"/>
 <pinref part="U$5" gate="G$1" pin="TX"/>
-<wire x1="-58.42" y1="35.56" x2="-58.42" y2="-15.24" width="0.1524" layer="91"/>
-<wire x1="-58.42" y1="-15.24" x2="-63.5" y2="-15.24" width="0.1524" layer="91"/>
+<wire x1="-58.42" y1="35.56" x2="-58.42" y2="-20.32" width="0.1524" layer="91"/>
+<wire x1="-58.42" y1="-20.32" x2="-63.5" y2="-20.32" width="0.1524" layer="91"/>
 <label x="-61.976" y="28.956" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="RX" class="0">
 <segment>
 <pinref part="U$3" gate="G$1" pin="P0_07"/>
-<wire x1="-53.34" y1="35.56" x2="-53.34" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="-53.34" y1="35.56" x2="-53.34" y2="-15.24" width="0.1524" layer="91"/>
 <pinref part="U$5" gate="G$1" pin="RX"/>
-<wire x1="-53.34" y1="-10.16" x2="-63.5" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="-53.34" y1="-15.24" x2="-63.5" y2="-15.24" width="0.1524" layer="91"/>
 <label x="-52.324" y="28.702" size="1.778" layer="95"/>
 </segment>
 </net>
