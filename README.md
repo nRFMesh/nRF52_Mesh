@@ -111,14 +111,17 @@ It is possible to reconfigure the Node on runtime and manage manage a mesh netwo
     cmd:0x0102
     cmd:0x<command id><arguments>
 
-| Command id | Function |
---- | --- |
-| 0x01 | Set RF Channel |
-| 0x02 | Get RF Channel |
-| 0x03 | Set Tx Power |
-| 0x04 | Get Tx Power |
-| 0x05 | Set Bitrate |
+| Command id | Function | Parameters |
+--- | --- | --- |
+| 0x01 | Set RF Channel | 0:2400 MHz - 100:2500 MHz|
+| 0x02 | Get RF Channel | |
+| 0x03 | Set Tx Power | 0x04: +4dBm - 0xD8: -40dBm|
+| 0x04 | Get Tx Power | |
+| 0x05 | Set Bitrate | tbd |
 | 0x06 | Get Bitrate |
+| 0x07 | Set CRC | 0 : No CRC - 1 : 8bit - 2 : 16 bit|
+| 0x08 | Get CRC |  |
+
 
 
 

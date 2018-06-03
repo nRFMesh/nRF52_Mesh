@@ -66,6 +66,8 @@ NRF_LOG_MODULE_REGISTER();
 #define MESH_cmd_tx_power_get       0x04
 #define MESH_cmd_bitrate_set        0x05
 #define MESH_cmd_bitrate_get        0x06
+#define MESH_cmd_crc_set            0x07
+#define MESH_cmd_crc_get            0x08
 
 
 const char * const pid_name[] = {  "",          //0x00
@@ -131,6 +133,36 @@ uint8_t mesh_get_channel()
 {
     return NRF_RADIO->FREQUENCY;
 }
+
+bool mesh_set_crc(uint8_t crc)
+{
+    switch(crc)
+    {
+        case NRF_ESB_CRC_16BIT:
+            NRF_RADIO->CRCINIT = 0xFFFFUL;      // Initial value
+            NRF_RADIO->CRCPOLY = 0x11021UL;     // CRC poly: x^16+x^12^x^5+1
+            break;
+        
+        case NRF_ESB_CRC_8BIT:
+            NRF_RADIO->CRCINIT = 0xFFUL;        // Initial value
+            NRF_RADIO->CRCPOLY = 0x107UL;       // CRC poly: x^8+x^2^x^1+1
+            break;
+        
+        case NRF_ESB_CRC_OFF:
+            break;
+        
+        default:
+            return false;
+    }
+    NRF_RADIO->CRCCNF = crc;
+    return true;
+}
+
+uint8_t mesh_get_crc()
+{
+    return (uint8_t)NRF_RADIO->CRCCNF;
+}
+
 
 
 void mesh_pre_tx()
@@ -304,8 +336,7 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
         nrf_esb_config.mode                     = NRF_ESB_MODE_PTX;
     }
 
-    //nrf_esb_config.crc                      = NRF_ESB_CRC_16BIT;
-    nrf_esb_config.crc                      = NRF_ESB_CRC_OFF;//TODO #3 set back crc usage
+    nrf_esb_config.crc                      = NRF_ESB_CRC_16BIT;
 
     err_code = nrf_esb_init(&nrf_esb_config);
     VERIFY_SUCCESS(err_code);
@@ -911,6 +942,20 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size)
         case MESH_cmd_rf_chan_get:
         {
             resp_len = sprintf(resp,"cmd:get_channel;channel:%u",mesh_get_channel());
+        }
+        break;
+        case MESH_cmd_crc_set:
+        {
+            mesh_wait_tx();//in case any action was ongoing
+            nrf_esb_stop_rx();
+            mesh_set_crc(data[1]);
+            nrf_esb_start_rx();
+            resp_len = sprintf(resp,"cmd:set_crc;set:%u;get:%u",data[1],mesh_get_crc());
+        }
+        break;
+        case MESH_cmd_crc_get:
+        {
+            resp_len = sprintf(resp,"cmd:get_crc;crc:%u",mesh_get_crc());
         }
         break;
         default:
