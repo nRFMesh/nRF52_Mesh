@@ -4,5 +4,7 @@
     "sleep"         : "CUSTOMER_2",
     "is_listening"  : "CUSTOMER_3",
     "is_router"     : "CUSTOMER_4",
-    "is_rf_cmd"     : "CUSTOMER_5"
+    "is_rf_cmd"     : "CUSTOMER_5",
+    "is_rf2uart"    : "CUSTOMER_6",
+    "is_testmode"   : "CUSTOMER_7"
 }

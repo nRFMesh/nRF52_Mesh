@@ -33,6 +33,8 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
 
 //------------------------- Mesh protocol -------------------------
 
+void mesh_consume_rx_messages();
+
 void mesh_wait_tx();
 
 void mesh_tx_reset();

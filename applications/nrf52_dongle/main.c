@@ -58,10 +58,6 @@ void blink()
     bsp_board_leds_off();
 }
 
-void app_serial_tx_handler()
-{
-    //TODO remove
-}
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
  * 
@@ -70,11 +66,12 @@ void app_serial_tx_handler()
 void rf_mesh_handler(message_t* msg)
 {
     NRF_LOG_INFO("rf_mesh_handler()");
-    char rf_message[128];
-    while(!nrf_mtx_trylock(&rf_message_mtx));
-    mesh_parse(msg,rf_message);
-    ser_send(rf_message);
-    nrf_mtx_unlock(&rf_message_mtx);
+    if(UICR_is_rf2uart())
+    {
+        char rf_message[128];
+        mesh_parse(msg,rf_message);
+        ser_send(rf_message);
+    }
 }
 
 /**
@@ -152,9 +149,11 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
+    //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
+
     nrf_mtx_init(&rf_message_mtx);
 
-    ser_init(app_serial_handler,app_serial_tx_handler);
+    ser_init(app_serial_handler);
 
     //Cannot use non-blocking with buffers from const code memory
     //reset is a status which single event is reset, that status takes the event name
@@ -175,7 +174,7 @@ int main(void)
 
     while(true)
     {
-        __WFE();
+        mesh_consume_rx_messages();
     }
 }
 /*lint -restore */

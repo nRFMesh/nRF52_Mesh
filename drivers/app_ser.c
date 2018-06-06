@@ -54,7 +54,6 @@ NRF_SERIAL_CONFIG_DEF(serial_config, NRF_SERIAL_MODE_DMA,
 NRF_SERIAL_UART_DEF(serial_uart, APP_SERIAL_INSTANCE);
 
 static app_serial_handler_t m_app_serial_handler;
-static app_serial_tx_handler_t m_app_serial_tx_handler;
 
 static char uart_cmd[128];
 static uint8_t uart_cmd_count=0;
@@ -97,7 +96,6 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
     {
         case NRF_SERIAL_EVENT_TX_DONE:
             ser_evt_tx_count++;
-            m_app_serial_tx_handler();
         break;
         case NRF_SERIAL_EVENT_RX_DATA:
             {
@@ -117,12 +115,11 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
     }
 }
 
-void ser_init(app_serial_handler_t handler,app_serial_tx_handler_t tx_handler)
+void ser_init(app_serial_handler_t handler)
 {
     ret_code_t ret;
 
     m_app_serial_handler = handler;
-    m_app_serial_tx_handler = tx_handler;
 
     ret = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
     APP_ERROR_CHECK(ret);
@@ -146,7 +143,7 @@ void ser_send(char* message)
     {
         //has a mutex protection over the TX queue, can be busy, thus retry
         //15 ms is max for 120 chars @115200
-        ret = nrf_serial_write(&serial_uart,message,strlen(message),NULL,0);
+        ret = nrf_serial_write(&serial_uart,message,strlen(message),NULL,NRF_SERIAL_MAX_TIMEOUT);
     }while(ret == NRF_ERROR_BUSY);
     if(ret == NRF_ERROR_TIMEOUT)
     {

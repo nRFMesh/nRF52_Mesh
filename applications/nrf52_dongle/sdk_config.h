@@ -75,7 +75,7 @@
 // <268435456=> 1000000 baud 
 
 #ifndef APP_SERIAL_BAUDRATE
-#define APP_SERIAL_BAUDRATE 30801920
+#define APP_SERIAL_BAUDRATE 121634816
 #endif
 
 // <o> APP_SERIAL_INSTANCE  - Default Baudrate
@@ -1244,7 +1244,7 @@
 // <e> NRF_LOG_ENABLED - Logging module for nRF5 SDK
 //==========================================================
 #ifndef NRF_LOG_ENABLED
-#define NRF_LOG_ENABLED 1
+#define NRF_LOG_ENABLED 0
 #endif
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================

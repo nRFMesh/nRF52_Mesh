@@ -109,7 +109,6 @@ static nrf_esb_payload_t rx_payload;
 static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
-static volatile bool esb_rx_complete = true;//on startup no pending rx
 
 static app_mesh_rf_handler_t m_app_rf_handler;
 
@@ -271,9 +270,21 @@ void mesh_rx_handler(message_t* msg)
     }
 }
 
-void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
+void mesh_consume_rx_messages()
 {
     static uint32_t count = 0;
+    // Get the most recent element from the RX FIFO.
+    while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
+    {
+        mesh_esb_2_message_payload(&rx_payload,&rx_msg);
+        NRF_LOG_INFO("ESB Rx %d- pipe: (%d) -> pid:%d ; length:%d",count++,rx_payload.pipe,rx_payload.pid,rx_payload.length);
+        NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
+        mesh_rx_handler(&rx_msg);
+    }
+}
+
+void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
+{
     switch (p_event->evt_id)
     {
         case NRF_ESB_EVENT_TX_SUCCESS:
@@ -288,25 +299,9 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             esb_tx_complete = true;
             break;
         case NRF_ESB_EVENT_RX_RECEIVED:
-            //TODO unsafe mutex, should disable interrupts between get and set
-            if(esb_rx_complete)//otherwise re-entrant will be handled in the while loop
-            {
-                esb_rx_complete = false;
-                NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
-                // Get the most recent element from the RX FIFO.
-                while(nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS)
-                {
-                    mesh_esb_2_message_payload(&rx_payload,&rx_msg);
-                    NRF_LOG_INFO("ESB Rx %d- pipe: (%d) -> pid:%d ; length:%d",count++,rx_payload.pipe,rx_payload.pid,rx_payload.length);
-                    NRF_LOG_INFO("HSM - src: (%d) -> pid:0x%02X ; length:%d",rx_msg.source,rx_msg.pid, rx_msg.payload_length);
-                    mesh_rx_handler(&rx_msg);
-                }
-
-                // For each LED, set it as indicated in the rx_payload, but invert it for the button
-                // which is pressed. This is because the ack payload from the PRX is reflecting the
-                // state from before receiving the packet.
-                esb_rx_complete = true;
-            }
+            NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
+            //Do nothing, handled in while loop
+            //but return immidiatly so that more rx events are filled in the rx fifo
             break;
         default:
             esb_completed = true;
