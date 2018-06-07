@@ -12,8 +12,22 @@ def mqtt_on_message(client, userdata, msg):
     log.info("mqtt> %s : %s",msg.topic,msg.payload)
     return
 
+'''It's important to provide the msg dictionnary here as it might be used in a multitude of ways
+   by other modules
+'''
 def mesh_on_broadcast(msg):
-    log.info("id : %s",msg["id"])
+    log.info("rf  > %s %s : %s"%(msg["src"],mesh.node_name(msg["src"]),mesh.inv_pid[int(msg["id"])]))
+    publishing = mesh.publish(msg)
+    for sensor,payload in publishing.items():
+        topic = "Nodes/"+sensor
+        #clientMQTT.publish(topic,payload)
+    return
+
+def mesh_on_cmd_response(resp):
+    global node_id
+    if(resp["cmd"] == "get_node_id"):
+        node_id = int(resp["node_id"])
+        log.info("rf  > response node_id => : %d",node_id)
     return
 
 def loop_forever():
@@ -31,7 +45,7 @@ def loop(nb):
     return
 
 def set_channel(chan):
-    print("set_channel:",chan)
+    print("cmd > set_channel:",chan)
     mesh.command("set_channel",[chan])
     loop(2)
     return
@@ -40,12 +54,10 @@ def get_channel():
     loop(2)
     return
 def get_node_id():
+    print("cmd > get_node_id:",chan)
     mesh.command("get_node_id",[])
     loop(2)
     return
-
-
-
 
 # -------------------- main -------------------- 
 #python client.py -p COM4 -n 24 -c 10
@@ -65,10 +77,10 @@ parser.add_argument("-c","--channel",default=2)
 parser.add_argument("-f","--function",default="x")
 args = parser.parse_args()
 
-node_id = args.node
+node_id = 0
 chan = args.channel
 
-mesh.start(config,mesh_on_broadcast)
+mesh.start(config,mesh_on_broadcast,mesh_on_cmd_response)
 
 set_channel(chan)
 

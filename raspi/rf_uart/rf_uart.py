@@ -13,23 +13,6 @@ def run():
         on_line_function(line)
     return res
 
-def read_serial_line():
-    res = None
-    line_type = ser.read()
-    if(len(line_type)):
-        if(line_type == 'b'):
-            print("getting a binary line:")
-            line_size = ser.read()
-            line = ser.read(line_size)
-            print(binascii.hexlify(line))
-        else:
-            print("getting a text line:")
-            #line = ser.readline().decode("utf-8")[1:]
-            line = ser.readline()
-            print(binascii.hexlify(line))
-            #print(line)
-    return res
-
 def send(data):
     ser.write(data.encode())
     return
@@ -41,5 +24,5 @@ def serial_start(config,serial_on_line):
     ser = serial.Serial(config["serial"]["port"],
                         config["serial"]["baud"],
                         timeout=0.1)
-    print(ser.name)
+    print("uart> %s"%(ser.name))
     return ser

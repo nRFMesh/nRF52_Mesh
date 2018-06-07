@@ -1,13 +1,12 @@
 import os
 import datetime
 import time
-from collections import OrderedDict
-
 #Local imports
 import cfg
 import rf_uart as ser
 
 on_broadcast = None
+on_cmd_response = None
 
 nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
 
@@ -144,6 +143,15 @@ def node_name(byte):
         res = nodes[str(byte)]["name"]
     return res
 
+def publish(msg):
+    pub = {}
+    if(inv_pid[int(msg["id"])] == "bme280"):
+        pub["rssi"] = int(msg["rssi"])
+        pub["temperature"] = float(msg["temp"])
+        pub["humidity"] = float(msg["hum"])
+        pub["pressure"] = float(msg["press"])
+    return pub
+
 def parse_rf_data(data):
     rf_data_text = parse_pid(data[2])
     rf_data_text += " : "+parse_payload(data)+" "
@@ -158,20 +166,13 @@ def parse_rf_data(data):
     return rf_data_text
 
 def line2dict(line):
-    res = OrderedDict
+    res = {}
     entries = line.split(';')
     for entry in entries:
         kv = entry.split(':')
         if(len(kv)==2):
             res[kv[0]] = kv[1]
     return res
-
-def parse_rf_line(line):
-    ldict = line2dict(line)
-    if("ctrl" in ldict):
-        if(is_broadcast(ldict["ctrl"])):
-            on_broadcast(ldict)
-    return
 
 def command(cmd,params=[]):
     cmd_list = [exec_cmd[cmd]]+params
@@ -186,18 +187,22 @@ def send_msg(payload):
     return
 
 def serial_on_line(line):
-    line_print = "rf  > " + datetime.datetime.now().strftime("%M:%S:")
-    line_print+= str(int(round((time.time() * 1000)%1000))).zfill(3)+' '
-    line_print += line
-    print(line_print)
+    ldict = line2dict(line)
+    if("ctrl" in ldict):
+        if(is_broadcast(ldict["ctrl"])):
+            on_broadcast(ldict)
+    if("cmd" in ldict):
+        on_cmd_response(ldict)
     return
 
 def run():
     ser.run()
     return
 
-def start(config,mesh_on_broadcast):
+def start(config,mesh_on_broadcast,mesh_on_cmd_response):
     global on_broadcast
+    global on_cmd_response
     on_broadcast = mesh_on_broadcast
+    on_cmd_response = mesh_on_cmd_response
     ser.serial_start(config,serial_on_line)
     return

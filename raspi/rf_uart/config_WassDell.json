@@ -13,7 +13,7 @@
         ],
         "enable"    :true,
         "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "mqtt_2_rf" :false
     },
     "log":{
         "logfile":"./hci_client.log",

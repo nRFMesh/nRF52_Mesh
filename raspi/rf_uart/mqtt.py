@@ -11,13 +11,13 @@ conf = {}
 # -------------------- mqtt events -------------------- 
 def on_connect(lclient, userdata, flags, rc):
     global conf
-    log.info("mqtt connected with result code "+str(rc))
+    log.info("mqtt> connected with result code "+str(rc))
     if(conf["mqtt"]["mqtt_2_rf"]):
         for sub in userdata["mqtt"]["subscriptions"]:
-            log.info("Subscription to %s",sub)
+            log.info("mqtt> Subscription to %s",sub)
             lclient.subscribe(sub)
     else:
-        print("Subscriptions not enabled")
+        print("mqtt> Subscriptions not enabled")
 
 def ruler_loop_forever():
     while(True):
@@ -32,10 +32,10 @@ def mqtt_start(config,mqtt_on_message):
             try:
                 client.connect(config["mqtt"]["host"], config["mqtt"]["port"], config["mqtt"]["keepalive"])
                 connected = True
-                log.info(  "mqtt connected to "+config["mqtt"]["host"]+":"+str(config["mqtt"]["port"])+" with id: "+ cid )
+                log.info(  "mqtt> connected to "+config["mqtt"]["host"]+":"+str(config["mqtt"]["port"])+" with id: "+ cid )
             except socket.error:
                 log.error("socket.error will try a reconnection in 10 s")
-            sleep(10)
+                sleep(10)
         return
 
     global conf
