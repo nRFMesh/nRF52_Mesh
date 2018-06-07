@@ -67,14 +67,16 @@ NRF_LOG_MODULE_REGISTER();
 #define MESH_Broadcast_Header_Length 4
 #define MESH_P2P_Header_Length 5
 
-#define MESH_cmd_rf_chan_set        0x01
-#define MESH_cmd_rf_chan_get        0x02
-#define MESH_cmd_tx_power_set       0x03
-#define MESH_cmd_tx_power_get       0x04
-#define MESH_cmd_bitrate_set        0x05
-#define MESH_cmd_bitrate_get        0x06
-#define MESH_cmd_crc_set            0x07
-#define MESH_cmd_crc_get            0x08
+#define MESH_cmd_node_id_set        0x01
+#define MESH_cmd_node_id_get        0x02
+#define MESH_cmd_rf_chan_set        0x03
+#define MESH_cmd_rf_chan_get        0x04
+#define MESH_cmd_tx_power_set       0x05
+#define MESH_cmd_tx_power_get       0x06
+#define MESH_cmd_bitrate_set        0x07
+#define MESH_cmd_bitrate_get        0x08
+#define MESH_cmd_crc_set            0x09
+#define MESH_cmd_crc_get            0x0A
 
 
 const char * const pid_name[] = {  "",          //0x00
@@ -941,6 +943,17 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size)
     uint8_t resp_len;
     switch(data[0])
     {
+        case MESH_cmd_node_id_set:
+        {
+            //TODO persistance of parameters
+            resp_len = sprintf(resp,"cmd:set_node_id;set:%u;get:%u",data[1],mesh_node_id());
+        }
+        break;
+        case MESH_cmd_node_id_get:
+        {
+            resp_len = sprintf(resp,"cmd:get_node_id;node_id:%u",mesh_node_id());
+        }
+        break;
         case MESH_cmd_rf_chan_set:
         {
             mesh_wait_tx();//in case any action was ongoing

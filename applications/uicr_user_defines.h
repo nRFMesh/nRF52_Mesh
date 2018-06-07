@@ -8,7 +8,7 @@
 #define UICR_is_router()    (NRF_UICR->CUSTOMER[4] == 0xBABA)
 #define UICR_is_rf_cmd()    (NRF_UICR->CUSTOMER[5] == 0xBABA)
 #define UICR_is_rf2uart()   (NRF_UICR->CUSTOMER[6] == 0xBABA)
-#define UICR_is_testmode()  (NRF_UICR->CUSTOMER[7] == 0xBABA)
+#define UICR_is_uart_cmd()  (NRF_UICR->CUSTOMER[7] == 0xBABA)
 
 
 #endif /*__USER_UICR_DEFINES__*/

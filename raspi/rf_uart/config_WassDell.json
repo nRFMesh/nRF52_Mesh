@@ -1,0 +1,22 @@
+{
+    "serial":{
+        "port":"COM4",
+        "baud":460800
+    },
+    "mqtt":{
+        "host":"10.0.0.44",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"hci_client",
+        "subscriptions":[
+            "Nodes/#"
+        ],
+        "enable"    :true,
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
+    },
+    "log":{
+        "logfile":"./hci_client.log",
+        "level":"Debug"
+    }
+}

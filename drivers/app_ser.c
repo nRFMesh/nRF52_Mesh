@@ -11,6 +11,9 @@
 #include "app_util.h"
 
 #if(APP_SERIAL_ENABLED == 1)
+
+nrf_mtx_t rf_message_mtx;
+
 static void sleep_handler(void)
 {
     __WFE();
@@ -124,8 +127,8 @@ void ser_init(app_serial_handler_t handler)
     ret = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
     APP_ERROR_CHECK(ret);
 
-    //ret = nrf_serial_read(&serial_uart, &uart_cmd, 4, NULL, 0);
-    //APP_ERROR_CHECK(ret);
+    nrf_mtx_init(&rf_message_mtx);
+
 }
 
 /**
@@ -143,7 +146,9 @@ void ser_send(char* message)
     {
         //has a mutex protection over the TX queue, can be busy, thus retry
         //15 ms is max for 120 chars @115200
+        while(!nrf_mtx_trylock(&rf_message_mtx));
         ret = nrf_serial_write(&serial_uart,message,strlen(message),NULL,NRF_SERIAL_MAX_TIMEOUT);
+        nrf_mtx_unlock(&rf_message_mtx);
     }while(ret == NRF_ERROR_BUSY);
     if(ret == NRF_ERROR_TIMEOUT)
     {

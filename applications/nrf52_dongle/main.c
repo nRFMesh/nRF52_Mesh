@@ -45,8 +45,6 @@ uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
 
-nrf_mtx_t rf_message_mtx;
-
 void blink()
 {
     bsp_board_led_on(0);
@@ -93,7 +91,7 @@ void app_serial_handler(const char*msg,uint8_t size)
         ser_send(uart_message);
     #endif
 
-    if(UICR_is_rf_cmd())
+    if(UICR_is_uart_cmd())
     {
         mesh_text_request(msg,size);
     }
@@ -150,8 +148,6 @@ int main(void)
     bsp_board_init(BSP_INIT_LEDS);
 
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
-
-    nrf_mtx_init(&rf_message_mtx);
 
     ser_init(app_serial_handler);
 
