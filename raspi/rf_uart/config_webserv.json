@@ -1,6 +1,6 @@
 {
     "serial":{
-        "port":"COM4",
+        "port":"/dev/ttyUSB0",
         "baud":460800
     },
     "mqtt":{
@@ -12,11 +12,11 @@
             "Nodes/#"
         ],
         "enable"    :true,
-        "rf_2_mqtt" :false,
+        "rf_2_mqtt" :true,
         "mqtt_2_rf" :false
     },
     "log":{
-        "logfile":"./hci_client.log",
+        "logfile":"/home/pi/share/rf_uart.log",
         "level":"Debug"
     }
 }

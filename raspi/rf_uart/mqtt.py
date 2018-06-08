@@ -17,7 +17,13 @@ def on_connect(lclient, userdata, flags, rc):
             log.info("mqtt> Subscription to %s",sub)
             lclient.subscribe(sub)
     else:
-        print("mqtt> Subscriptions not enabled")
+        log.info("mqtt> Subscriptions not enabled")
+    if(conf["mqtt"]["rf_2_mqtt"]):
+        log.info("mqtt> Publishing enabled")
+    else:
+        log.info("mqtt> Publishing not enabled")
+            
+    
 
 def ruler_loop_forever():
     while(True):

@@ -4,6 +4,8 @@ import time
 #Local imports
 import cfg
 import rf_uart as ser
+import json
+import logging as log
 
 on_broadcast = None
 on_cmd_response = None
@@ -145,11 +147,25 @@ def node_name(byte):
 
 def publish(msg):
     pub = {}
-    if(inv_pid[int(msg["id"])] == "bme280"):
+    if("rssi" in msg):
         pub["rssi"] = int(msg["rssi"])
-        pub["temperature"] = float(msg["temp"])
-        pub["humidity"] = float(msg["hum"])
-        pub["pressure"] = float(msg["press"])
+    if(inv_pid[int(msg["id"])] == "bme280"):
+        topic_t = "Nodes/"+msg["src"]+"/temperature"
+        pub[topic_t] = float(msg["temp"])
+        topic_h = "Nodes/"+msg["src"]+"/humidity"
+        pub[topic_h] = float(msg["hum"])
+        topic_p = "Nodes/"+msg["src"]+"/pressure"
+        pub[topic_p] = float(msg["press"])
+    if(inv_pid[int(msg["id"])] == "light"):
+        topic = "Nodes/"+msg["src"]+"/light"
+        pub[topic] = float(msg["light"])
+    if(inv_pid[int(msg["id"])] == "acceleration"):
+        topic = "jNodes/"+msg["src"]+"/acceleration"
+        json_payload = {}
+        json_payload["x"] = float(msg["accx"])
+        json_payload["y"] = float(msg["accy"])
+        json_payload["z"] = float(msg["accz"])
+        pub[topic] = json.dumps(json_payload)
     return pub
 
 def parse_rf_data(data):
@@ -181,7 +197,7 @@ def command(cmd,params=[]):
     return
 
 def send_msg(payload):
-    print("tx>",parse_rf_data(payload))
+    log.debug("tx>%s",parse_rf_data(payload))
     text_msg = "msg:0x"+''.join('%02X' % b for b in payload)+"\r\n"
     ser.send(text_msg)
     return
@@ -192,7 +208,9 @@ def serial_on_line(line):
         if(is_broadcast(ldict["ctrl"])):
             on_broadcast(ldict)
     if("cmd" in ldict):
-        on_cmd_response(ldict)
+        handled = on_cmd_response(ldict)
+        if(not handled):
+            log.info("rf  > "+line)
     return
 
 def run():

@@ -17,18 +17,22 @@ def mqtt_on_message(client, userdata, msg):
 '''
 def mesh_on_broadcast(msg):
     log.info("rf  > %s %s : %s"%(msg["src"],mesh.node_name(msg["src"]),mesh.inv_pid[int(msg["id"])]))
-    publishing = mesh.publish(msg)
-    for sensor,payload in publishing.items():
-        topic = "Nodes/"+sensor
-        #clientMQTT.publish(topic,payload)
+    if(config["mqtt"]["rf_2_mqtt"]):
+        publishing = mesh.publish(msg)
+        for topic,payload in publishing.items():
+            clientMQTT.publish(topic,payload)
     return
 
+''' the return mesntions if the logto the user is handled or if not
+    the raw line will be logged
+'''
 def mesh_on_cmd_response(resp):
     global node_id
     if(resp["cmd"] == "get_node_id"):
         node_id = int(resp["node_id"])
         log.info("rf  > response node_id => : %d",node_id)
-    return
+        return True
+    return False
 
 def loop_forever():
     while(True):
@@ -78,7 +82,7 @@ parser.add_argument("-f","--function",default="x")
 args = parser.parse_args()
 
 node_id = 0
-chan = args.channel
+chan = int(args.channel)
 
 mesh.start(config,mesh_on_broadcast,mesh_on_cmd_response)
 
