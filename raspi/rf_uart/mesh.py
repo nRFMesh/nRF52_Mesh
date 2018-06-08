@@ -148,7 +148,8 @@ def node_name(byte):
 def publish(msg):
     pub = {}
     if("rssi" in msg):
-        pub["rssi"] = int(msg["rssi"])
+        topic = "Nodes/"+msg["src"]+"/rssi"
+        pub[topic] = int(msg["rssi"])
     if(inv_pid[int(msg["id"])] == "bme280"):
         topic_t = "Nodes/"+msg["src"]+"/temperature"
         pub[topic_t] = float(msg["temp"])
