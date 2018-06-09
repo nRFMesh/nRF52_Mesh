@@ -576,6 +576,14 @@ int rx_button(char * p_msg,uint8_t*data,uint8_t size)
     }
 }
 
+/**
+ * @brief Converts the light from 4 Big endien uint32_t mili-lux to printed float
+ * 
+ * @param p_msg output of the printed param:val
+ * @param data pointer on the payload of the light parameter bytes
+ * @param size size of the payload to assert the protocol coherency
+ * @return int length of the printed string
+ */
 int rx_light(char * p_msg,uint8_t*data,uint8_t size)
 {
     if(size == 2)
@@ -590,7 +598,9 @@ int rx_light(char * p_msg,uint8_t*data,uint8_t size)
                     light |= data[2] << 16;
                     light |= data[1] <<  8;
                     light |= data[0];
-        return sprintf(p_msg,"light:%lu",light);
+        float f_light = light;
+        f_light /= 1000;
+        return sprintf(p_msg,"light:%.03f",f_light);
     }
     else
     {

@@ -2,10 +2,11 @@
  *
  * @author Wassim FILALI
  *
- * @compiler IAR STM8
+ * @compiler arm gcc
  *
  *
  * $Date: 29.10.2016 - creation out of refactoring
+ * $Date: XX.08.2018 - takeover to nRf52
  * $Revision: 1 
  *
 */
@@ -96,6 +97,12 @@ void max44009_test()
     NRF_LOG_INFO("1110 1111 1110 => (? 187269 ) "NRF_LOG_FLOAT_MARKER,NRF_LOG_FLOAT(res));
 }
 
+/**
+ * @brief reads the light registers with safe overflow re-read
+ * 
+ * @param l_twi the Two Wire Interface driver instance
+ * @return uint32_t light in mili-lux
+ */
 uint32_t max44009_read_light(nrf_drv_twi_t *l_twi)
 {
     p_twi = l_twi;
