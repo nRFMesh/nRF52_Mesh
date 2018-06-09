@@ -157,10 +157,13 @@ def publish(msg):
         pub[topic_h] = float(msg["hum"])
         topic_p = "Nodes/"+msg["src"]+"/pressure"
         pub[topic_p] = float(msg["press"])
-    if(inv_pid[int(msg["id"])] == "light"):
+    elif(inv_pid[int(msg["id"])] == "light"):
         topic = "Nodes/"+msg["src"]+"/light"
         pub[topic] = float(msg["light"])
-    if(inv_pid[int(msg["id"])] == "acceleration"):
+    elif(inv_pid[int(msg["id"])] == "battery"):
+        topic = "Nodes/"+msg["src"]+"/battery"
+        pub[topic] = float(msg["battery"])
+    elif(inv_pid[int(msg["id"])] == "acceleration"):
         topic = "jNodes/"+msg["src"]+"/acceleration"
         json_payload = {}
         json_payload["x"] = float(msg["accx"])
