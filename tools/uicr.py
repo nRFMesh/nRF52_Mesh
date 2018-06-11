@@ -81,10 +81,14 @@ def read_id():
     uid = get_uid()
     print("device uid : %s" % uid )
     node_id = get_node_id_from_uid(uid)
-    print("node mesh id : %s" % node_id )
-    node = nodes[node_id]
-    print("name : %s" % node["name"] )
-    return
+    if(node_id):
+        print("node mesh id : %s" % node_id )
+        node = nodes[node_id]
+        print("name : %s" % node["name"] )
+        return True
+    else:
+        print("uid unknown")
+        return  False
 
 def read_config():
     global node_id
@@ -138,8 +142,10 @@ def write_config():
 
 if(mode == "-r"):
     start()
-    read_id()
-    read_config()
+    if(read_id()):
+        read_config()
+    else:
+        print("node id unavailable")
 elif(mode == "-w"):
     start()
     read_id()

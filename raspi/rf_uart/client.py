@@ -16,21 +16,28 @@ def mqtt_on_message(client, userdata, msg):
    by other modules
 '''
 def mesh_on_broadcast(msg):
-    log.info("rf  > %s %s : %s"%(msg["src"],mesh.node_name(msg["src"]),mesh.inv_pid[int(msg["id"])]))
+    log.info("rf  > %s %s : %s"%(msg["src"],mesh.node_name(msg["src"]),mesh.inv_pid[int(msg["pid"])]))
     if(config["mqtt"]["rf_2_mqtt"]):
         publishing = mesh.publish(msg)
         for topic,payload in publishing.items():
             clientMQTT.publish(topic,payload)
     return
 
+def mesh_on_message(msg):
+    if("ack" in msg):
+        log.info("Acknowledge for %s",mesh.inv_pid[int(msg["pid"])])
+    else:
+        log.info("Message %s",mesh.inv_pid[int(msg["pid"])])
+    return
+
 ''' the return mesntions if the logto the user is handled or if not
     the raw line will be logged
 '''
 def mesh_on_cmd_response(resp):
-    global node_id
+    global this_node_id
     if(resp["cmd"] == "get_node_id"):
-        node_id = int(resp["node_id"])
-        log.info("rf  > response node_id => : %d",node_id)
+        this_node_id = int(resp["node_id"])
+        log.info("rf  > response node_id => : %d",this_node_id)
         return True
     return False
 
@@ -62,7 +69,11 @@ def get_node_id():
     mesh.command("get_node_id",[])
     loop(2)
     return
-
+def ping(target_node):
+    control = 0x72
+    mesh.send([control,mesh.pid["ping"],this_node_id,target_node])
+    loop(2)
+    return
 # -------------------- main -------------------- 
 #python client.py -p COM4 -n 24 -c 10
 config = cfg.get_local_json()
@@ -80,15 +91,21 @@ parser.add_argument("-c","--channel",default=2)
 parser.add_argument("-f","--function",default="x")
 args = parser.parse_args()
 
-node_id = 0
+this_node_id = 0
 #TODO this have a default that comes from the config
 #so that the command line can only override the config if required
 chan = int(args.channel)
 
-mesh.start(config,mesh_on_broadcast,mesh_on_cmd_response)
+mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response)
 
-set_channel(chan)
+#set_channel(chan)
+get_channel()
 
 get_node_id()
+loop(10)
 
-loop_forever()
+if(args.function == 'l'):
+    loop_forever()
+
+ping(75)
+loop(10)

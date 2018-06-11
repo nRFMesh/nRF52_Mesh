@@ -61,8 +61,10 @@ NRF_LOG_MODULE_REGISTER();
 #define Mesh_Pid_Battery    0x15
 
 #define MESH_IS_BROADCAST(val) ((val & 0x80) == 0x80)
+#define MESH_IS_PEER2PEER(val) ((val & 0x80) == 0x00)
 //Ack if bits 1,2 == 1,0 => MASK 0x60, VAL 0x40
 #define MESH_IS_ACKNOWLEDGE(val) ((val & 0x60) == 0x40)
+#define MESH_WANT_ACKNOWLEDGE(val) ((val & 0xF0) == 0x70)
 
 #define MESH_Broadcast_Header_Length 4
 #define MESH_P2P_Header_Length 5
@@ -252,7 +254,23 @@ void mesh_rx_handler(message_t* msg)
 {
     uint8_t ctrl_backup = msg->control;
 
-    if(UICR_is_router())
+    if(MESH_WANT_ACKNOWLEDGE(msg->control))
+    {
+        if(msg->dest == UICR_NODE_ID)//current node id match
+        {
+            message_t ack;
+
+            ack.control = 0x40 | 2;         // ack | ttl = 2
+            ack.pid     = msg->pid;
+            ack.source  = msg->dest;        // == UICR_NODE_ID
+            ack.dest    = msg->source;
+            ack.payload_length = 0;
+
+            mesh_tx_message(&ack);
+        }
+    }
+    //only re-route messaegs directed to other than the current node itself
+    else if(UICR_is_router())
     {
         uint8_t ttl = msg->control & 0x0F;
         if(ttl>0)
@@ -264,6 +282,7 @@ void mesh_rx_handler(message_t* msg)
         }
     }
     
+    //The app gets everything
     if(m_app_rf_handler != NULL)
     {
         
@@ -394,6 +413,20 @@ void mesh_wait_tx()
 //------------------------- Messages Serialisation -------------------------
 //--------------------------------------------------------------------------
 
+
+void mesh_tx_raw(uint8_t* p_data,uint8_t size)
+{
+    mesh_pre_tx();
+
+    tx_payload.length   = size + 1;//as size itself is now added
+    tx_payload.data[0] = tx_payload.length;
+    memcpy( tx_payload.data+1,
+            p_data,
+            size);
+
+    esb_completed = false;//reset the check
+    nrf_esb_write_payload(&tx_payload);
+}
 
 
 /**
@@ -798,7 +831,7 @@ int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
 
 void mesh_parse(message_t* msg,char * p_msg)
 { 
-    p_msg += sprintf(  p_msg,"rssi:-%d;id:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->pid,msg->control,msg->source);
+    p_msg += sprintf(  p_msg,"rssi:-%d;pid:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->pid,msg->control,msg->source);
     if(!(MESH_IS_BROADCAST(msg->control)))
     {
         p_msg += sprintf(  p_msg,"dest:%d;",msg->dest);
@@ -1022,8 +1055,9 @@ void mesh_text_request(const char*text,uint8_t length)
         uint8_t size;
         if(text2bin(text+4,length-4,data,&size))
         {
+            mesh_tx_raw(data,size);
             char resp[32];
-            uint8_t resp_len = sprintf(resp,"msg_len:%d",size);
+            uint8_t resp_len = sprintf(resp,"sent_msg_len:%d",size);
             m_app_cmd_handler(resp,resp_len);
         }
     }

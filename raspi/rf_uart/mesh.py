@@ -8,6 +8,7 @@ import json
 import logging as log
 
 on_broadcast = None
+on_message = None
 on_cmd_response = None
 
 nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
@@ -150,20 +151,20 @@ def publish(msg):
     if("rssi" in msg):
         topic = "Nodes/"+msg["src"]+"/rssi"
         pub[topic] = int(msg["rssi"])
-    if(inv_pid[int(msg["id"])] == "bme280"):
+    if(inv_pid[int(msg["pid"])] == "bme280"):
         topic_t = "Nodes/"+msg["src"]+"/temperature"
         pub[topic_t] = float(msg["temp"])
         topic_h = "Nodes/"+msg["src"]+"/humidity"
         pub[topic_h] = float(msg["hum"])
         topic_p = "Nodes/"+msg["src"]+"/pressure"
         pub[topic_p] = float(msg["press"])
-    elif(inv_pid[int(msg["id"])] == "light"):
+    elif(inv_pid[int(msg["pid"])] == "light"):
         topic = "Nodes/"+msg["src"]+"/light"
         pub[topic] = float(msg["light"])
-    elif(inv_pid[int(msg["id"])] == "battery"):
+    elif(inv_pid[int(msg["pid"])] == "battery"):
         topic = "Nodes/"+msg["src"]+"/battery"
         pub[topic] = float(msg["battery"])
-    elif(inv_pid[int(msg["id"])] == "acceleration"):
+    elif(inv_pid[int(msg["pid"])] == "acceleration"):
         topic = "jNodes/"+msg["src"]+"/acceleration"
         json_payload = {}
         json_payload["x"] = float(msg["accx"])
@@ -200,17 +201,20 @@ def command(cmd,params=[]):
     ser.send(text_cmd)
     return
 
-def send_msg(payload):
-    log.debug("tx>%s",parse_rf_data(payload))
+def send(payload):
+    #log.debug("tx>%s",parse_rf_data(payload))
     text_msg = "msg:0x"+''.join('%02X' % b for b in payload)+"\r\n"
     ser.send(text_msg)
     return
 
 def serial_on_line(line):
+    print(line)
     ldict = line2dict(line)
     if("ctrl" in ldict):
         if(is_broadcast(ldict["ctrl"])):
             on_broadcast(ldict)
+        else:
+            on_message(ldict)
     if("cmd" in ldict):
         handled = on_cmd_response(ldict)
         if(not handled):
@@ -221,10 +225,12 @@ def run():
     ser.run()
     return
 
-def start(config,mesh_on_broadcast,mesh_on_cmd_response):
+def start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response):
     global on_broadcast
+    global on_message
     global on_cmd_response
     on_broadcast = mesh_on_broadcast
     on_cmd_response = mesh_on_cmd_response
+    on_message = mesh_on_message
     ser.serial_start(config,serial_on_line)
     return
