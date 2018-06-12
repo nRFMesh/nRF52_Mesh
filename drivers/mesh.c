@@ -12,11 +12,14 @@
 #include "mesh.h"
 
 #include "sdk_common.h"
+#include "sdk_config.h"
 
 #include "boards.h"
 
 #include "nrf_esb.h"
 #include "nrf_esb_error_codes.h"
+
+#include "nrf_drv_timer.h"
 
 #include "nrf_delay.h"
 #include <stdio.h>
@@ -59,6 +62,7 @@ NRF_LOG_MODULE_REGISTER();
 #define Mesh_Pid_accell     0x13
 #define Mesh_Pid_new_light  0x14
 #define Mesh_Pid_Battery    0x15
+#define Mesh_Pid_ExecuteCmd 0xEC
 
 #define MESH_IS_BROADCAST(val) ((val & 0x80) == 0x80)
 #define MESH_IS_PEER2PEER(val) ((val & 0x80) == 0x00)
@@ -107,9 +111,10 @@ const char * const pid_name[] = {  "",          //0x00
 
 #include "uicr_user_defines.h"
 
-static nrf_esb_config_t nrf_esb_config         = NRF_ESB_DEFAULT_CONFIG;
-static nrf_esb_payload_t tx_payload = NRF_ESB_CREATE_PAYLOAD(0, 0x01, 0x00);
-static nrf_esb_payload_t rx_payload;
+
+static nrf_esb_config_t     nrf_esb_config         = NRF_ESB_DEFAULT_CONFIG;
+static nrf_esb_payload_t    tx_payload = NRF_ESB_CREATE_PAYLOAD(0, 0x01, 0x00);
+static nrf_esb_payload_t    rx_payload;
 static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
@@ -118,16 +123,172 @@ static app_mesh_rf_handler_t m_app_rf_handler;
 
 static app_mesh_cmd_handler_t m_app_cmd_handler;
 
+//forward internal declarations
 void mesh_tx_message(message_t* msg);
+uint32_t mesh_tx_ack(message_t* msg, uint8_t ttl);
+uint32_t mesh_forward_message(message_t* msg);
+void mesh_execute_cmd(uint8_t*data,uint8_t size);
+bool window_check_retransmit();
+
+//-------------------------------------------------------------
+//----------------------- Payload Store -----------------------
+//-------------------------------------------------------------
+#if (TIMER_ENABLED == 1)
+const nrf_drv_timer_t TIMER_ACK = NRF_DRV_TIMER_INSTANCE(0);
+
+/**
+ * @brief Handler for timer events.
+ */
+void timer_ack_event_handler(nrf_timer_event_t event_type, void* p_context)
+{
+    switch (event_type)
+    {
+        case NRF_TIMER_EVENT_COMPARE0:
+            if(!window_check_retransmit())
+            {
+                nrf_drv_timer_disable(&TIMER_ACK);
+            }
+            break;
+        default:
+            //Do nothing.
+            break;
+    }
+}
+#endif /*TIMER_ENABLED*/
 
 
+
+typedef struct
+{
+    bool is_waiting_ack;
+    uint32_t timeout;
+    uint32_t count;
+    nrf_esb_payload_t payload;
+}esb_payload_store_t;
+
+#define PAYLOAD_STORE_SIZE 2
+
+static esb_payload_store_t  tx_payload_window[PAYLOAD_STORE_SIZE];
+
+/**
+ * @brief Get the tx payload object from the Store in case a retransmission might be required
+ * Otherwise the global tx_payload if no retransmission required or none available on which case
+ * re-transmission would not be performed
+ * 
+ * @param control 
+ * @return nrf_esb_payload_t* 
+ */
+nrf_esb_payload_t* window_get_payload(uint8_t control)
+{
+    nrf_esb_payload_t* res = NULL;
+    if((UICR_RTX_Timeout != 0xFFFFFFFF) && (UICR_RTX_Count != 0xFFFFFFFF))
+    {
+        if((UICR_RTX_Timeout != 0) && (UICR_RTX_Count != 0))
+        {
+            if(MESH_WANT_ACKNOWLEDGE(control))
+            {
+                //find one free and assign it
+                for(int i=0;(i<PAYLOAD_STORE_SIZE)&&(res==NULL);i++)
+                {
+                    if(!tx_payload_window[i].is_waiting_ack)
+                    {
+                        res = &tx_payload_window[i].payload;
+                        tx_payload_window[i].is_waiting_ack = true;
+                        tx_payload_window[i].timeout    = UICR_RTX_Timeout;
+                        tx_payload_window[i].count      = UICR_RTX_Count;
+                    }
+                }
+            }
+        }
+    }
+
+    if(res == NULL)//in both fails from control test or no store available test
+    {
+        res = &tx_payload;
+    }
+    else
+    {
+        #if(TIMER_ENABLED == 1)
+        nrf_drv_timer_enable(&TIMER_ACK);
+        #endif /*TIMER_ENABLED*/
+    }
+
+    return res;
+}
+
+bool is_matching_msg_ack(message_t* msg,nrf_esb_payload_t *p_payload)
+{
+    if(msg->pid != p_payload->data[2])//0:Length, 1:Ctrl, 2:pid
+    {
+        return false;
+    }
+    if(msg->source != p_payload->data[4])//compare source with dest (dest is @ 4)
+    {
+        return false;
+    }
+    if(msg->dest != p_payload->data[3])//compare dest with source (source is @ 3)
+    {
+        return false;
+    }
+    return true;    
+}
+
+void window_remove_payload(message_t* msg)
+{
+    bool found = false;
+    for(int i=0;(i<PAYLOAD_STORE_SIZE)&&(!found);i++)
+    {
+        if(tx_payload_window[i].is_waiting_ack)
+        {
+            if(is_matching_msg_ack(msg,&tx_payload_window[i].payload))
+            {
+                //TODO if serial cmd request, should report the rtx count
+                tx_payload_window[i].is_waiting_ack = false;
+                found = true;
+            }
+        }
+    }
+}
+
+/**
+ * @brief 
+ * 
+ * @return true the timer is still required
+ * @return false no timeout still required
+ */
+bool window_check_retransmit()
+{
+    bool timer_still_required = false;
+    for(int i=0;i<PAYLOAD_STORE_SIZE;i++)
+    {
+        if(tx_payload_window[i].is_waiting_ack)
+        {
+            bool this_timeout_is_still_required = true;
+            if(--tx_payload_window[i].timeout == 0)
+            {
+                //retransmit
+                nrf_esb_write_payload(&tx_payload_window[i].payload);
+                if(--tx_payload_window[i].count == 0)
+                {
+                    //retransmit count over !!!!! free the slot
+                    tx_payload_window[i].is_waiting_ack = false;
+                    this_timeout_is_still_required = false;
+                }
+                //restart a new timeout for the next count
+                tx_payload_window[i].timeout      = UICR_RTX_Timeout;
+            }
+            if(this_timeout_is_still_required)
+            {
+                timer_still_required = true;
+            }
+        }
+    }
+    return timer_still_required;
+}
 
 //-------------------------------------------------------------
 //------------------------- Mesh Core -------------------------
 //-------------------------------------------------------------
-
-
-
 
 uint16_t mesh_node_id()
 {
@@ -172,8 +333,6 @@ uint8_t mesh_get_crc()
 {
     return (uint8_t)NRF_RADIO->CRCCNF;
 }
-
-
 
 void mesh_pre_tx()
 {
@@ -252,41 +411,26 @@ void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
 
 void mesh_rx_handler(message_t* msg)
 {
-    uint8_t ctrl_backup = msg->control;
-
-    if(MESH_WANT_ACKNOWLEDGE(msg->control))
+    if(msg->dest == UICR_NODE_ID)//current node id match
     {
-        if(msg->dest == UICR_NODE_ID)//current node id match
+        if(MESH_WANT_ACKNOWLEDGE(msg->control))
         {
-            message_t ack;
-
-            ack.control = 0x40 | 2;         // ack | ttl = 2
-            ack.pid     = msg->pid;
-            ack.source  = msg->dest;        // == UICR_NODE_ID
-            ack.dest    = msg->source;
-            ack.payload_length = 0;
-
-            mesh_tx_message(&ack);
+            mesh_tx_ack(msg,2);
+        }
+        else if(MESH_IS_ACKNOWLEDGE(msg->control))
+        {
+            window_remove_payload(msg);//rx_payload is a global shared variable uniquely used during reception
         }
     }
     //only re-route messaegs directed to other than the current node itself
     else if(UICR_is_router())
     {
-        uint8_t ttl = msg->control & 0x0F;
-        if(ttl>0)
-        {
-            ttl--;
-            msg->control &= 0xF0;//clear ttl
-            msg->control |= ttl;
-            mesh_tx_message(msg);
-        }
+        mesh_forward_message(msg);
     }
     
     //The app gets everything
     if(m_app_rf_handler != NULL)
     {
-        
-        msg->control = ctrl_backup;
         m_app_rf_handler(msg);
     }
 }
@@ -383,6 +527,20 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
     NRF_LOG_INFO("nodeId %d",UICR_NODE_ID);
     NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
 
+
+    #if (TIMER_ENABLED == 1)
+        nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+        err_code = nrf_drv_timer_init(&TIMER_ACK, &timer_cfg, timer_ack_event_handler);
+        VERIFY_SUCCESS(err_code);
+
+        uint32_t time_ticks = nrf_drv_timer_ms_to_ticks(&TIMER_ACK, 1);//1 ms
+
+        nrf_drv_timer_extended_compare(
+            &TIMER_ACK, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+
+        nrf_drv_timer_enable(&TIMER_ACK);
+    #endif/*TIMER_ENABLED*/
+
     if(UICR_is_listening())
     {
         err_code = nrf_esb_start_rx();
@@ -407,28 +565,32 @@ void mesh_wait_tx()
     while(!esb_completed);
 }
 
-
-
 //--------------------------------------------------------------------------
 //------------------------- Messages Serialisation -------------------------
 //--------------------------------------------------------------------------
 
 
+/**
+ * @brief required TX raw as it prevents partial copies before using the same mesh_tx_message
+ * Note that the length is not expected to be the first byte here as it will be added
+ * 
+ * @param p_data 
+ * @param size 
+ */
 void mesh_tx_raw(uint8_t* p_data,uint8_t size)
 {
     mesh_pre_tx();
 
-    tx_payload.length   = size + 1;//as size itself is now added
-    tx_payload.data[0] = tx_payload.length;
-    memcpy( tx_payload.data+1,
+    nrf_esb_payload_t * p_tx_payload = window_get_payload(p_data[0]);//Starts with control as first byte
+    p_tx_payload->length   = size + 1;//as size itself is now added
+    p_tx_payload->data[0] = p_tx_payload->length;
+    memcpy( p_tx_payload->data+1,
             p_data,
             size);
 
     esb_completed = false;//reset the check
-    nrf_esb_write_payload(&tx_payload);
+    nrf_esb_write_payload(p_tx_payload);
 }
-
-
 /**
  * @brief Transmits a message structure
  * 
@@ -438,15 +600,16 @@ void mesh_tx_message(message_t* p_msg)
 {
     mesh_pre_tx();
 
-    mesh_message_2_esb_payload(p_msg,&tx_payload);
+    nrf_esb_payload_t * p_tx_payload = window_get_payload(p_msg->control);
+    mesh_message_2_esb_payload(p_msg,p_tx_payload);
 
     esb_completed = false;//reset the check
-    NRF_LOG_DEBUG("________________TX esb payload length = %d________________",tx_payload.data[0]);
+    NRF_LOG_DEBUG("________________TX esb payload length = %d________________",p_tx_payload->data[0]);
     //should not wait for esb_completed here as does not work from ISR context
 
     //NRF_ESB_TXMODE_AUTO is used no need to call nrf_esb_start_tx()
     //which could be used for a precise time transmission
-    nrf_esb_write_payload(&tx_payload);
+    nrf_esb_write_payload(p_tx_payload);
     
     //nrf_esb_start_tx();//as the previous mode does not start it due to .mode
 }
@@ -471,6 +634,39 @@ uint32_t mesh_tx_button(uint8_t state)
 
     return NRF_SUCCESS;
 }
+
+
+uint32_t mesh_tx_ack(message_t* msg, uint8_t ttl)
+{
+    message_t ack;
+
+    ack.control = 0x40 | ttl;         // ack | ttl = 2
+    ack.pid     = msg->pid;
+    ack.source  = msg->dest;        // == UICR_NODE_ID
+    ack.dest    = msg->source;
+    ack.payload_length = 0;
+
+    mesh_tx_message(&ack);
+
+    return NRF_SUCCESS;
+}
+
+uint32_t mesh_forward_message(message_t* msg)
+{
+    uint8_t ttl = msg->control & 0x0F;
+    if(ttl>0)
+    {
+        ttl--;
+        uint8_t ctrl_backup = msg->control;
+        msg->control &= 0xF0;//clear ttl
+        msg->control |= ttl;
+        mesh_tx_message(msg);
+        msg->control = ctrl_backup;//set it back as it was
+    }
+
+    return NRF_SUCCESS;
+}
+
 
 /**
  * @brief Sends a simple message that has no payload, by providing only the pid
@@ -907,6 +1103,17 @@ void mesh_parse(message_t* msg,char * p_msg)
                 p_msg += rx_new_light(p_msg,msg->payload,msg->payload_length);
             }
             break;
+            
+        case Mesh_Pid_ExecuteCmd:
+            {
+                if(UICR_is_rf_cmd())
+                {
+                    mesh_execute_cmd(msg->payload,msg->payload_length);
+                    //TODO define if the response is to be sent as RF message or back to UART
+                    //p_msg += rx_new_light(p_msg,msg->payload,msg->payload_length);
+                }
+            }
+            break;
         default:
         {
             if(msg->payload_length > 0)
@@ -1040,8 +1247,8 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size)
  * 
  * @param text contains a command line to execute a mesh rf function
  * supported commands :
- * * msg:0x00112233445566...
- * where 0:length, 1:control , 2:source , 3:dest/payload , 4:payload,...
+ * * msg:0x00112233445566... note length not included as will be generated
+ * where 0:control , 1:source , 2:dest/payload , 3:payload,...
  * * cmd:0x00112233445566
  * where 0x00 is the command id
  * the rest are the command parameters including : crc_cfg, header_cfg, bitrate,...

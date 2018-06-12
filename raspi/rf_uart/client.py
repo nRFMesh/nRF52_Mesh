@@ -25,7 +25,12 @@ def mesh_on_broadcast(msg):
 
 def mesh_on_message(msg):
     if("ack" in msg):
-        log.info("Acknowledge for %s",mesh.inv_pid[int(msg["pid"])])
+        log.info(   "ack > %s %s -> %s (rssi:%s)",
+                    mesh.inv_pid[int(msg["pid"])],
+                    msg["src"],
+                    msg["dest"],
+                    msg["rssi"]
+                    )
     else:
         log.info("Message %s",mesh.inv_pid[int(msg["pid"])])
     return
@@ -56,21 +61,23 @@ def loop(nb):
     return
 
 def set_channel(chan):
-    print("cmd > set_channel:",chan)
+    log.debug("cmd > set_channel: %d",chan)
     mesh.command("set_channel",[chan])
     loop(2)
     return
 def get_channel():
+    log.debug("cmd > get_channel()")
     mesh.command("get_channel",[])
     loop(2)
     return
 def get_node_id():
-    print("cmd > get_node_id:",chan)
+    log.debug("cmd > get_node_id()")
     mesh.command("get_node_id",[])
     loop(2)
     return
 def ping(target_node):
-    control = 0x72
+    log.debug("msg > ping %d -> %d ",this_node_id,target_node)
+    control = 0x70
     mesh.send([control,mesh.pid["ping"],this_node_id,target_node])
     loop(2)
     return

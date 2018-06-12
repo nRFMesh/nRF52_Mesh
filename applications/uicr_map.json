@@ -6,5 +6,8 @@
     "is_router"     : "CUSTOMER_4",
     "is_rf_cmd"     : "CUSTOMER_5",
     "is_rf2uart"    : "CUSTOMER_6",
-    "is_uart_cmd"   : "CUSTOMER_7"
+    "is_uart_cmd"   : "CUSTOMER_7",
+    "rtx_timeout"   : "CUSTOMER_8",
+    "rtx_max_timeout": "CUSTOMER_9",
+    "rtx_count"     : "CUSTOMER_10"
 }

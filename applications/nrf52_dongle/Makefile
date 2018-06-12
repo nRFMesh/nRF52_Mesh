@@ -3,8 +3,8 @@ TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
 #BOARD selection : BOARD_NRF52_DONGLE, BOARD_NRF52_SENSOR_TAG
-USED_BOARD := BOARD_NRF52_DONGLE
-#USED_BOARD := BOARD_NRF52_SENSOR_TAG
+#USED_BOARD := BOARD_NRF52_DONGLE
+USED_BOARD := BOARD_NRF52_SENSOR_TAG
 
 SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
@@ -52,6 +52,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_timer.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_saadc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
 

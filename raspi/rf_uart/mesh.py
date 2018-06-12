@@ -208,7 +208,7 @@ def send(payload):
     return
 
 def serial_on_line(line):
-    print(line)
+    #print(line)
     ldict = line2dict(line)
     if("ctrl" in ldict):
         if(is_broadcast(ldict["ctrl"])):

@@ -11,7 +11,7 @@
         "subscriptions":[
             "Nodes/#"
         ],
-        "enable"    :true,
+        "enable"    :false,
         "rf_2_mqtt" :false,
         "mqtt_2_rf" :false
     },
