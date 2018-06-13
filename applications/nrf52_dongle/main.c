@@ -171,6 +171,8 @@ int main(void)
     while(true)
     {
         mesh_consume_rx_messages();
+        //TODO required delay as the serial_write does not execute with two close consecutive calls
+        nrf_delay_ms(1);
     }
 }
 /*lint -restore */

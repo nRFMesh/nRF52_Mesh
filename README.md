@@ -149,6 +149,11 @@ Send message to execute on the RF target node 75/0x4B the command Set channel to
 
     msg:0x72EC494B030A
 
+Send request to execute on the RF target node 75/0x4B the command Set channel to 0x0A
+The only difference to the previous example is that an intermediate ack for the request is not required before getting the response
+
+    msg:0x22EC494B030A
+
 ### Switch between serial SERIAL and LOG over UART
 run
 

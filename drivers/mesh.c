@@ -1219,10 +1219,6 @@ uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size)
         break;
         case MESH_cmd_rf_chan_set:
         {
-            mesh_wait_tx();//in case any action was ongoing
-            nrf_esb_stop_rx();
-            nrf_esb_set_rf_channel(data[1]);
-            nrf_esb_start_rx();
             length = sprintf(text,"cmd:set_channel;set:%u;get:%u",data[1],data[2]);
         }
         break;
@@ -1233,10 +1229,6 @@ uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size)
         break;
         case MESH_cmd_crc_set:
         {
-            mesh_wait_tx();//in case any action was ongoing
-            nrf_esb_stop_rx();
-            mesh_set_crc(data[1]);
-            nrf_esb_start_rx();
             length = sprintf(text,"cmd:set_crc;set:%u;get:%u",data[1],data[2]);
         }
         break;
