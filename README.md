@@ -124,8 +124,30 @@ It is possible to reconfigure the Node on runtime and manage manage a mesh netwo
 | 0x09 | Set CRC | 0 : No CRC - 1 : 8bit - 2 : 16 bit|
 | 0x0A | Get CRC |  |
 
+### Command examples
+Set channel 10/0x0A
 
+    cmd:0x030A
 
+get channel
+
+    cmd:0x04
+
+Set Tx Power to  -4dBm/0xFC
+
+    cmd:0x05FC
+
+Send message, directed (not broadcast) with ttl = 2, ping(75/0x4B) from 73/0x49
+
+    msg:0x7201494B
+
+Send message to execute on the RF target node 75/0x4B the command Set Tx Power to -4 dBm
+
+    msg:0x72EC494B05FC
+
+Send message to execute on the RF target node 75/0x4B the command Set channel to 0x0A
+
+    msg:0x72EC494B030A
 
 ### Switch between serial SERIAL and LOG over UART
 run

@@ -69,6 +69,7 @@ NRF_LOG_MODULE_REGISTER();
 //Ack if bits 1,2 == 1,0 => MASK 0x60, VAL 0x40
 #define MESH_IS_ACKNOWLEDGE(val) ((val & 0x60) == 0x40)
 #define MESH_WANT_ACKNOWLEDGE(val) ((val & 0xF0) == 0x70)
+#define MESH_IS_RESPONSE(val) ((val & 0xF0) == 0x00)
 
 #define MESH_Broadcast_Header_Length 4
 #define MESH_P2P_Header_Length 5
@@ -127,8 +128,9 @@ static app_mesh_cmd_handler_t m_app_cmd_handler;
 void mesh_tx_message(message_t* msg);
 uint32_t mesh_tx_ack(message_t* msg, uint8_t ttl);
 uint32_t mesh_forward_message(message_t* msg);
-void mesh_execute_cmd(uint8_t*data,uint8_t size);
+void mesh_execute_cmd(uint8_t*data,uint8_t size,bool is_rf_request,uint8_t rf_nodeid);
 bool window_check_retransmit();
+uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size);
 
 //-------------------------------------------------------------
 //----------------------- Payload Store -----------------------
@@ -699,7 +701,21 @@ void mesh_tx_reset()
     mesh_tx_pid(Mesh_Pid_Reset);
 }
 
-void mesh_tx_data(uint8_t pid,uint8_t * data,uint8_t size)
+void mesh_response_data(uint8_t pid,uint8_t dest,uint8_t * data,uint8_t size)
+{
+    message_t msg;
+
+    msg.control = 0x00 | 2;         // response | ttl = 2
+    msg.pid     = pid;
+    msg.source  = UICR_NODE_ID;
+    msg.dest    = dest;
+    msg.payload = data;
+    msg.payload_length = size;
+
+    mesh_tx_message(&msg);
+}
+
+void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size)
 {
     message_t msg;
 
@@ -728,7 +744,7 @@ uint32_t mesh_tx_alive()
     data[3] = 0xFF & (uint8_t)(live_count );
     data[4] = NRF_RADIO->TXPOWER;
 
-    mesh_tx_data(Mesh_Pid_Alive,data,5);
+    mesh_bcast_data(Mesh_Pid_Alive,data,5);
     
     return live_count++;//returns the first used value before the increment
 }
@@ -737,7 +753,7 @@ uint32_t mesh_tx_alive()
 
 void mesh_tx_light(uint32_t light)
 {
-    mesh_tx_data(Mesh_Pid_Light,(uint8_t*)&light,4);
+    mesh_bcast_data(Mesh_Pid_Light,(uint8_t*)&light,4);
 }
 
 void mesh_tx_battery(uint16_t voltage)
@@ -745,7 +761,7 @@ void mesh_tx_battery(uint16_t voltage)
     uint8_t data[2];
     data[0] = 0xFF & (uint8_t)(voltage >> 8);
     data[1] = 0xFF & (uint8_t)(voltage);
-    mesh_tx_data(Mesh_Pid_Battery,data,2);
+    mesh_bcast_data(Mesh_Pid_Battery,data,2);
 }
 
 void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
@@ -763,7 +779,7 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
     data[9] = 0xFF & (uint8_t)(press >> 16);
     data[10]= 0xFF & (uint8_t)(press >> 8);
     data[11]= 0xFF & (uint8_t)(press );
-    mesh_tx_data(Mesh_Pid_bme,data,12);
+    mesh_bcast_data(Mesh_Pid_bme,data,12);
 }
 
 //----------------------------------------------------------------------------
@@ -1106,11 +1122,16 @@ void mesh_parse(message_t* msg,char * p_msg)
             
         case Mesh_Pid_ExecuteCmd:
             {
-                if(UICR_is_rf_cmd())
+                if(MESH_IS_RESPONSE(msg->control))
                 {
-                    mesh_execute_cmd(msg->payload,msg->payload_length);
-                    //TODO define if the response is to be sent as RF message or back to UART
-                    //p_msg += rx_new_light(p_msg,msg->payload,msg->payload_length);
+                    p_msg += cmd_parse_response(p_msg,msg->payload,msg->payload_length);
+                }
+                else//request
+                {
+                    if(UICR_is_rf_cmd())
+                    {
+                        mesh_execute_cmd(msg->payload,msg->payload_length,true,msg->source);
+                    }
                 }
             }
             break;
@@ -1180,28 +1201,20 @@ void mesh_parse_bytes(message_t* msg,char * p_msg)
 //------------------------- Mesh Commander -------------------------
 //------------------------------------------------------------------
 
-
-/**
- * @brief Executes a command received in a binary format
- * 
- * @param data the array starting with <cmd_id> followed by <param0><param1>,...
- * @param size the total size including the first byte of cmd_id
- */
-void mesh_execute_cmd(uint8_t*data,uint8_t size)
+uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size)
 {
-    char resp[32];
-    uint8_t resp_len;
+    uint8_t length;
     switch(data[0])
     {
         case MESH_cmd_node_id_set:
         {
             //TODO persistance of parameters
-            resp_len = sprintf(resp,"cmd:set_node_id;set:%u;get:%u",data[1],mesh_node_id());
+            length = sprintf(text,"cmd:set_node_id;set:%u;get:%u",data[1],data[2]);
         }
         break;
         case MESH_cmd_node_id_get:
         {
-            resp_len = sprintf(resp,"cmd:get_node_id;node_id:%u",mesh_node_id());
+            length = sprintf(text,"cmd:get_node_id;node_id:%u",data[1]);
         }
         break;
         case MESH_cmd_rf_chan_set:
@@ -1210,12 +1223,12 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size)
             nrf_esb_stop_rx();
             nrf_esb_set_rf_channel(data[1]);
             nrf_esb_start_rx();
-            resp_len = sprintf(resp,"cmd:set_channel;set:%u;get:%u",data[1],mesh_get_channel());
+            length = sprintf(text,"cmd:set_channel;set:%u;get:%u",data[1],data[2]);
         }
         break;
         case MESH_cmd_rf_chan_get:
         {
-            resp_len = sprintf(resp,"cmd:get_channel;channel:%u",mesh_get_channel());
+            length = sprintf(text,"cmd:get_channel;channel:%u",data[1]);
         }
         break;
         case MESH_cmd_crc_set:
@@ -1224,21 +1237,100 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size)
             nrf_esb_stop_rx();
             mesh_set_crc(data[1]);
             nrf_esb_start_rx();
-            resp_len = sprintf(resp,"cmd:set_crc;set:%u;get:%u",data[1],mesh_get_crc());
+            length = sprintf(text,"cmd:set_crc;set:%u;get:%u",data[1],data[2]);
         }
         break;
         case MESH_cmd_crc_get:
         {
-            resp_len = sprintf(resp,"cmd:get_crc;crc:%u",mesh_get_crc());
+            length = sprintf(text,"cmd:get_crc;crc:%u",data[1]);
         }
         break;
         default:
         {
-            resp_len = sprintf(resp,"cmd:0x%02X;len:%d",data[0],size);
+            length = sprintf(text,"cmd:0x%02X;resp:unknown",data[0]);
         }
         break;
     }
-    m_app_cmd_handler(resp,resp_len);
+    return length;
+}
+
+/**
+ * @brief Executes a command received in a binary format
+ * 
+ * @param data the array starting with <cmd_id> followed by <param0><param1>,...
+ * @param size the total size including the first byte of cmd_id
+ */
+void mesh_execute_cmd(uint8_t*data,uint8_t size,bool is_rf_request,uint8_t rf_nodeid)
+{
+    uint8_t resp[32];
+    uint8_t resp_len;
+    resp[0] = data[0];          //First byte response is always the command id requested
+    switch(data[0])
+    {
+        case MESH_cmd_node_id_set:
+        {
+            //TODO persistance of parameters
+            resp[1] = data[1];          //set request confirmation
+            resp[2] = mesh_node_id();   //new set value as read from source after set
+            resp_len = 3;
+        }
+        break;
+        case MESH_cmd_node_id_get:
+        {
+            resp[1] = mesh_node_id();   //Value as read from source after set
+            resp_len = 2;
+        }
+        break;
+        case MESH_cmd_rf_chan_set:
+        {
+            mesh_wait_tx();//in case any action was ongoing
+            nrf_esb_stop_rx();
+            nrf_esb_set_rf_channel(data[1]);
+            nrf_esb_start_rx();
+            resp[1] = data[1];          //set channel request confirmation
+            resp[2] = mesh_get_channel();   //new set value as read from source after set
+            resp_len = 3;
+        }
+        break;
+        case MESH_cmd_rf_chan_get:
+        {
+            resp[1] = mesh_get_channel();   //new set value as read from source after set
+            resp_len = 2;
+        }
+        break;
+        case MESH_cmd_crc_set:
+        {
+            mesh_wait_tx();//in case any action was ongoing
+            nrf_esb_stop_rx();
+            mesh_set_crc(data[1]);
+            nrf_esb_start_rx();
+            resp[1] = data[1];              //set crc request confirmation
+            resp[2] = mesh_get_crc();       //new set value as read from source after set
+            resp_len = 3;
+        }
+        break;
+        case MESH_cmd_crc_get:
+        {
+            resp[1] = mesh_get_crc();       //new set value as read from source after set
+            resp_len = 2;
+        }
+        break;
+        default:
+        {
+            resp_len = 1;
+        }
+        break;
+    }
+    if(is_rf_request)
+    {
+        mesh_response_data(Mesh_Pid_ExecuteCmd,rf_nodeid,resp,resp_len);
+    }
+    else
+    {
+        char text[128];
+        uint8_t length = cmd_parse_response(text,resp,resp_len);
+        m_app_cmd_handler(text,length);
+    }
 }
 
 /**
@@ -1274,7 +1366,7 @@ void mesh_text_request(const char*text,uint8_t length)
         uint8_t size;
         if(text2bin(text+4,length-4,data,&size))
         {
-            mesh_execute_cmd(data,size);
+            mesh_execute_cmd(data,size,false,0);//rf_nodeid unused in this case, set as 0
         }
     }
 }
