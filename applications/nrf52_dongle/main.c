@@ -122,9 +122,9 @@ void app_rtc_handler()
 {
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
     
-    NRF_LOG_INFO("id:%d:alive:%lu",mesh_node_id(),alive_count);
+    NRF_LOG_INFO("id:%d:alive:%lu",get_this_node_id(),alive_count);
     #ifdef UART_SELF_ALIVE
-        sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",mesh_node_id(),alive_count,uart_rx_size);
+        sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",get_this_node_id(),alive_count,uart_rx_size);
         ser_send(rtc_message);
     #endif
     UNUSED_VARIABLE(alive_count);
@@ -153,7 +153,7 @@ int main(void)
 
     //Cannot use non-blocking with buffers from const code memory
     //reset is a status which single event is reset, that status takes the event name
-    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",mesh_node_id(),mesh_channel());
+    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
     ser_send(rtc_message);
 
     blink();

@@ -292,7 +292,7 @@ bool window_check_retransmit()
 //------------------------- Mesh Core -------------------------
 //-------------------------------------------------------------
 
-uint16_t mesh_node_id()
+uint16_t get_this_node_id()
 {
     return UICR_NODE_ID;
 }
@@ -653,6 +653,15 @@ uint32_t mesh_tx_ack(message_t* msg, uint8_t ttl)
     return NRF_SUCCESS;
 }
 
+void alive_add_rtx_info(message_t* msg)
+{
+    uint8_t add_index = msg->payload_length;
+    msg->payload[add_index++] = msg->rssi;
+    msg->payload[add_index++] = get_this_node_id();
+    msg->payload[add_index++] = NRF_RADIO->TXPOWER;
+    msg->payload_length+=3;
+}
+
 uint32_t mesh_forward_message(message_t* msg)
 {
     uint8_t ttl = msg->control & 0x0F;
@@ -662,7 +671,15 @@ uint32_t mesh_forward_message(message_t* msg)
         uint8_t ctrl_backup = msg->control;
         msg->control &= 0xF0;//clear ttl
         msg->control |= ttl;
-        mesh_tx_message(msg);
+        if(msg->pid == Mesh_Pid_Alive)//rework to add the new (rssi,nid,tx)
+        {
+            alive_add_rtx_info(msg);
+            mesh_tx_message(msg);
+        }
+        else
+        {
+            mesh_tx_message(msg);
+        }
         msg->control = ctrl_backup;//set it back as it was
     }
 
@@ -786,22 +803,60 @@ void mesh_tx_bme(int32_t temp,uint32_t hum,uint32_t press)
 //------------------------- Messages Deserialisation -------------------------
 //----------------------------------------------------------------------------
 
-
-int rx_alive(char * p_msg,uint8_t*data,uint8_t size)
+/**
+ * @brief parses a binary alive message that contains optionally a complete
+ * trace route information of every jump it went through in the mesh
+ * The first transmission give the info of the Tx_power, and each receiver complete
+ * the triple info with rss and node id, then sends the triple (tx_power,rssi,nodeid)
+ * to the next node
+ * @param p_msg pointer where to generate the text message
+ * @param data pointer to the payload of the alive message to parse
+ * @param size size of the data
+ * @param rssi detection from the current node, required as specific to the captured packet
+ * @return int the number of characters printed in the first text pointer
+ */
+int rx_alive(char * p_msg,uint8_t*data,uint8_t size,int8_t rssi)
 {
     if(size == 0)
     {
         return sprintf(p_msg,"alive:1");
     }
-    else if(size == 5)
+    else if((size >= 5) && ((size - 5) % 3 == 0))//size pattern of alive messages
     {
+        //-------------------------- 3 sections --------------------------
         uint32_t live_count;
-        live_count  = data[0] << 24;
-        live_count |= data[1] << 16;
-        live_count |= data[2] << 8;
-        live_count |= data[3];
-        uint8_t tx_power = data[4];
-        return sprintf(p_msg,"alive:%lu;tx_power:%d",live_count,tx_power);
+        int data_index = 0;
+        live_count  = data[data_index++] << 24;
+        live_count |= data[data_index++] << 16;
+        live_count |= data[data_index++] << 8;
+        live_count |= data[data_index++];
+        //-------------------------- section one permanent --------------------------
+        int add = sprintf(p_msg,"alive:%lu;size:%u",live_count,size);
+        p_msg += add;
+        int total_print = add;
+        //----------------------- section two depends on nb rtx -----------------------
+        int nb_rtx = (size-5) / 3;//must be rounded here as % test passed
+        for(int i=0;i<nb_rtx;i++)
+        {
+            add = sprintf(p_msg,";rx%d:%d,-%d,%d",
+                                                i+1,
+                                                data[data_index],
+                                                data[data_index+1],
+                                                data[data_index+2]
+                                                );
+            data_index+=3;//to avoid the error of operation may be undefined with muliple increments in sprintf
+            p_msg += add;
+            total_print += add;
+        }
+        //----------------------- section three permanent, the last rtx is special -----------------------
+        add = sprintf(p_msg,";rx%d:%d,-%d,%d",
+                                            nb_rtx+1,
+                                            data[data_index++],
+                                            rssi,
+                                            get_this_node_id()
+                                            );
+        total_print += add;
+        return total_print;
     }
     else
     {
@@ -1043,7 +1098,7 @@ int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
 
 void mesh_parse(message_t* msg,char * p_msg)
 { 
-    p_msg += sprintf(  p_msg,"rssi:-%d;pid:%d;ctrl:0x%02X;src:%d;",msg->rssi,msg->pid,msg->control,msg->source);
+    p_msg += sprintf(  p_msg,"pid:%d;ctrl:0x%02X;src:%d;",msg->pid,msg->control,msg->source);
     if(!(MESH_IS_BROADCAST(msg->control)))
     {
         p_msg += sprintf(  p_msg,"dest:%d;",msg->dest);
@@ -1056,7 +1111,7 @@ void mesh_parse(message_t* msg,char * p_msg)
     {
         case Mesh_Pid_Alive:
             {
-                p_msg += rx_alive(p_msg,msg->payload,msg->payload_length);
+                p_msg += rx_alive(p_msg,msg->payload,msg->payload_length,msg->rssi);
             }
             break;
         case Mesh_Pid_Reset:
@@ -1263,13 +1318,13 @@ void mesh_execute_cmd(uint8_t*data,uint8_t size,bool is_rf_request,uint8_t rf_no
         {
             //TODO persistance of parameters
             resp[1] = data[1];          //set request confirmation
-            resp[2] = mesh_node_id();   //new set value as read from source after set
+            resp[2] = get_this_node_id();   //new set value as read from source after set
             resp_len = 3;
         }
         break;
         case MESH_cmd_node_id_get:
         {
-            resp[1] = mesh_node_id();   //Value as read from source after set
+            resp[1] = get_this_node_id();   //Value as read from source after set
             resp_len = 2;
         }
         break;

@@ -26,7 +26,7 @@ typedef void (*app_mesh_rf_handler_t)(message_t*);
 
 typedef void (*app_mesh_cmd_handler_t)(const char*,uint8_t);
 
-uint16_t mesh_node_id();
+uint16_t get_this_node_id();
 uint8_t mesh_channel();
 
 uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler);
