@@ -25,11 +25,10 @@ def mesh_on_broadcast(msg):
 
 def mesh_on_message(msg):
     if("ack" in msg):
-        log.info(   "ack > %s %s -> %s (rssi:%s)",
+        log.info(   "ack > %s %s -> %s",
                     mesh.inv_pid[int(msg["pid"])],
                     msg["src"],
-                    msg["dest"],
-                    msg["rssi"]
+                    msg["dest"]
                     )
     else:
         log.info("Message %s",mesh.inv_pid[int(msg["pid"])])
@@ -60,6 +59,13 @@ def loop(nb):
         nb = nb - 1
     return
 
+def remote_set_channel(remote,chan):
+    log.debug("remote_set_channel(nodeid %d @ chan %d)",remote,chan)
+    control = 0x21
+    mesh.send([control,mesh.pid["exec_cmd"],this_node_id,remote,mesh.exec_cmd["set_channel"],remote,chan])
+    loop(2)
+    return
+
 def set_channel(chan):
     log.debug("cmd > set_channel: %d",chan)
     mesh.command("set_channel",[chan])
@@ -80,6 +86,13 @@ def ping(target_node):
     control = 0x70
     mesh.send([control,mesh.pid["ping"],this_node_id,target_node])
     loop(2)
+    return
+
+def test1():
+    remote_set_channel(74,10)
+    set_channel(10)
+    ping(74)
+    loop_forever()
     return
 # -------------------- main -------------------- 
 #python client.py -p COM4 -n 24 -c 10
@@ -114,5 +127,5 @@ loop(10)
 if(args.function == 'l'):
     loop_forever()
 
-ping(75)
-loop(10)
+#ping(75)
+#test1()

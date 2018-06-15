@@ -4,7 +4,7 @@
         "baud":460800
     },
     "mqtt":{
-        "host":"10.0.0.44",
+        "host":"localhost",
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",

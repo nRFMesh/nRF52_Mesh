@@ -831,11 +831,11 @@ int rx_alive(char * p_msg,uint8_t*data,uint8_t size,int8_t rssi)
         live_count |= data[data_index++] << 8;
         live_count |= data[data_index++];
         //-------------------------- section one permanent --------------------------
-        int add = sprintf(p_msg,"alive:%lu;size:%u",live_count,size);
+        int nb_rtx = (size-5) / 3;//must be rounded here as % test passed
+        int add = sprintf(p_msg,"alive:%lu;nb:%u",live_count,nb_rtx+1);
         p_msg += add;
         int total_print = add;
         //----------------------- section two depends on nb rtx -----------------------
-        int nb_rtx = (size-5) / 3;//must be rounded here as % test passed
         for(int i=0;i<nb_rtx;i++)
         {
             add = sprintf(p_msg,";rx%d:%d,-%d,%d",

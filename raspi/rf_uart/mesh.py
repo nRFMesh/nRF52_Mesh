@@ -171,6 +171,19 @@ def publish(msg):
         json_payload["y"] = float(msg["accy"])
         json_payload["z"] = float(msg["accz"])
         pub[topic] = json.dumps(json_payload)
+    elif(inv_pid[int(msg["pid"])] == "alive"):
+        topic = "jNodes/"+msg["src"]+"/alive"
+        json_payload = {}
+        json_payload["count"] = int(msg["alive"])
+        nb_rx = int(msg["nb"])
+        for i in range(nb_rx):
+            rx_i = "rx"+str(i+1)
+            json_payload[rx_i] = {}
+            txpow_rssi_nid = msg[rx_i].split(',')
+            json_payload[rx_i]["tx_power"]  = txpow_rssi_nid[0]
+            json_payload[rx_i]["rssi"]      = txpow_rssi_nid[1]
+            json_payload[rx_i]["nodeid"]    = txpow_rssi_nid[2]
+        pub[topic] = json.dumps(json_payload)
     return pub
 
 def parse_rf_data(data):
