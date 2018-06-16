@@ -118,11 +118,9 @@ chan = int(args.channel)
 
 mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response)
 
-#set_channel(chan)
-get_channel()
+set_channel(chan)
 
 get_node_id()
-loop(10)
 
 if(args.function == 'l'):
     loop_forever()
