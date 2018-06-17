@@ -63,12 +63,33 @@ void blink()
  */
 void rf_mesh_handler(message_t* msg)
 {
+    bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
-    if(UICR_is_rf2uart())
+    if(MESH_IS_BROADCAST(msg->control))
     {
-        char rf_message[128];
-        mesh_parse(msg,rf_message);
-        ser_send(rf_message);
+        is_relevant_host = true;
+    }
+    else if((msg->dest == get_this_node_id()))
+    {
+        if(MESH_IS_RESPONSE(msg->control))
+        {
+            is_relevant_host = true;
+        }
+        //else it's a request or a message
+        else if( (msg->pid == Mesh_Pid_ExecuteCmd) && (UICR_is_rf_cmd()) )
+        {
+            mesh_execute_cmd(msg->payload,msg->payload_length,true,msg->source);
+        }
+    }
+    if(is_relevant_host)
+    {
+        //Pure routers should not waste time sending messages over uart
+        if(UICR_is_rf2uart())
+        {
+            char rf_message[128];
+            mesh_parse(msg,rf_message);
+            ser_send(rf_message);
+        }
     }
 }
 

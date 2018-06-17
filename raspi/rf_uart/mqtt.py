@@ -47,7 +47,8 @@ def mqtt_start(config,mqtt_on_message):
     global conf
     conf = config
     clientMQTT = None
-    if(config["mqtt"]["enable"]):
+    if(config["mqtt"]["rf_2_mqtt"] or config["mqtt"]["mqtt_2_rf"]):
+        config["mqtt"]["enable"] = True
         cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
         clientMQTT = mqtt.Client(client_id=cid,userdata=config)
         clientMQTT.on_connect = on_connect
@@ -55,4 +56,6 @@ def mqtt_start(config,mqtt_on_message):
         mqtt_connect_retries(clientMQTT)
         #the loop will be called in the run main loop()
         #clientMQTT.loop_start()
+    else:
+       config["mqtt"]["enable"] = False
     return clientMQTT

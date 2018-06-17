@@ -46,9 +46,10 @@ exec_cmd = {
     "get_node_id"   : 0x02,
     "set_channel"   : 0x03,
     "get_channel"   : 0x04,
-    "set_power"     : 0x05,
-    "get_power"     : 0x06,
-    "config"        : 0x32
+    "set_tx_power"  : 0x05,
+    "get_tx_power"  : 0x06,
+    "set_param"     : 0x07,
+    "get_param"     : 0x08,
 }
 
 set_rx = {
@@ -114,32 +115,6 @@ def parse_payload(data):
 def parse_is_broadcast(byte):
     return (byte & 0x80)
 
-def parse_control(byte):
-    res = ""
-    if(byte & 0x80):
-        res = res + "Broadcast "
-    else:
-        res = res + "Directed "
-        if(byte & 0x40):
-            res = res + "Msg_Ack "
-            if(byte & 0x20):
-                res = res + "Message "
-                if(byte & 0x10):
-                    res = res + "To_Send_Ack "
-                else:
-                    res = res + "Do_Not_Send_Ack "
-            else:
-                res = res + "Acknowledge "
-        else:
-            res = res + "Req_Res "
-            if(byte & 0x20):
-                res = res + "Request "
-            else:
-                res = res + "Response "
-    ttl = byte & 0x0F
-    res = res + "ttl "+str(ttl)
-    return res
-
 def node_name(byte):
     res ="Unknown"
     if(str(byte) in nodes):
@@ -186,19 +161,6 @@ def publish(msg):
         pub[topic] = json.dumps(json_payload)
     return pub
 
-def parse_rf_data(data):
-    rf_data_text = parse_pid(data[2])
-    rf_data_text += " : "+parse_payload(data)+" "
-    if(data[2] == pid["test_rf_resp"]):
-        rf_data_text += " res="+str(data[5])+" "
-    rf_data_text += "(" + node_name(data[3]) + " -> "
-    if(not parse_is_broadcast(data[1])):
-        rf_data_text += node_name(data[4]) + ") ; "
-    else:
-        rf_data_text += " X) ; "
-    rf_data_text +=  parse_control(data[1])
-    return rf_data_text
-
 def line2dict(line):
     res = {}
     entries = line.split(';')
@@ -215,7 +177,7 @@ def command(cmd,params=[]):
     return
 
 def send(payload):
-    #log.debug("tx>%s",parse_rf_data(payload))
+    #print("payload:",payload)
     text_msg = "msg:0x"+''.join('%02X' % b for b in payload)+"\r\n"
     ser.send(text_msg)
     return
@@ -227,11 +189,15 @@ def serial_on_line(line):
         if(is_broadcast(ldict["ctrl"])):
             on_broadcast(ldict)
         else:
-            on_message(ldict)
-    if("cmd" in ldict):
-        handled = on_cmd_response(ldict)
-        if(not handled):
-            log.info("rf  > "+line)
+            if("cmd" in ldict):
+                on_cmd_response(ldict,True)
+                log.info("remote cmd resp > "+line)
+            else:
+                on_message(ldict)
+            #log.info("msg > "+line)
+    elif("cmd" in ldict):
+        on_cmd_response(ldict,False)
+        log.info("cmd resp > "+line)
     return
 
 def run():

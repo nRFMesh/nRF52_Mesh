@@ -203,3 +203,42 @@ The adapter model still in preparation can be found [here](https://a360.co/2IcKZ
 <img src="boards/nrf52_dongle/images/adapter.png" width="300" title="Adapter">
 <br/>
 <img src="boards/nrf52_dongle/images/pogo-pin adapter.jpg" width="300" title="Adapter">
+
+# Raspi Host Controller Interface
+
+## HCI MQTT Test vector
+
+### Commands
+get mesh node id of attached dongle
+
+    mosquitto_pub -t 'cmd/request/get_node_id' -m ''
+
+Response
+
+    cmd/response/get_node_id {"cmd": "get_node_id", "node_id": "73"}
+
+get channel of attached dongle
+
+    mosquitto_pub -t 'cmd/request/get_channel' -m ''
+
+Response
+
+    cmd/response/get_channel {"cmd": "get_channel", "channel": "2"}
+
+### Remote Commands
+Request to set remote node 74 on RF channel 2
+
+    mosquitto_pub -t 'remote_cmd/request/set_channel' -m '{"channel":2,"remote":74}'
+
+Response
+
+    remote_cmd/response/set_channel {"pid": "236", "ctrl": "0x02", "src": "74", "dest": "73", "cmd": "set_channel", "set": "2", "get": "2"}
+
+### Actions
+Ping node 74
+
+    mosquitto_pub -t 'Nodes/79/ping' -m '{"remote":"74"}'
+
+aAknowledge
+
+    Nodes/79/ack 1

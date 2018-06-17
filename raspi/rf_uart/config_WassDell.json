@@ -4,16 +4,18 @@
         "baud":460800
     },
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.44",
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",
         "subscriptions":[
-            "Nodes/#"
+            "Nodes/#",
+            "cmd/request/#",
+            "remote_cmd/request/#"
         ],
-        "enable"    :false,
-        "rf_2_mqtt" :false,
-        "mqtt_2_rf" :false
+        "actions"   :["dimmer","heat","ping"],
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
     },
     "log":{
         "logfile":"./hci_client.log",

@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
 
 //should match NRF_ESB_MAX_PAYLOAD_LENGTH
 #define MAX_MESH_MESSAGE_SIZE 32
@@ -20,6 +21,51 @@ typedef struct
 
 extern const char * const pid_name[];
 
+//------------------------- Mesh Functions Identifiers -------------------------
+
+#define Mesh_Pid_Alive 0x05
+#define Mesh_Pid_Reset 0x04
+#define Mesh_Pid_Button 0x06
+
+//light was 16bit redefined u32 bit
+#define Mesh_Pid_Light 0x07
+#define Mesh_Pid_Temperature 0x08
+//bme280 no more with uncalibrated params
+#define Mesh_Pid_bme        0x0A
+//following rgb is led color control
+#define Mesh_Pid_led_rgb    0x0B
+#define Mesh_Pid_light_rgb  0x0E
+#define Mesh_Pid_Humidity   0x11
+#define Mesh_Pid_Pressure   0x12
+#define Mesh_Pid_accell     0x13
+#define Mesh_Pid_new_light  0x14
+#define Mesh_Pid_Battery    0x15
+#define Mesh_Pid_ExecuteCmd 0xEC
+
+#define MESH_Broadcast_Header_Length 4
+#define MESH_P2P_Header_Length 5
+
+#define MESH_cmd_node_id_set        0x01
+#define MESH_cmd_node_id_get        0x02
+#define MESH_cmd_rf_chan_set        0x03
+#define MESH_cmd_rf_chan_get        0x04
+#define MESH_cmd_tx_power_set       0x05
+#define MESH_cmd_tx_power_get       0x06
+#define MESH_cmd_bitrate_set        0x07
+#define MESH_cmd_bitrate_get        0x08
+#define MESH_cmd_crc_set            0x09
+#define MESH_cmd_crc_get            0x0A
+
+//------------------------- Mesh Macros -------------------------
+
+#define MESH_IS_BROADCAST(val) ((val & 0x80) == 0x80)
+#define MESH_IS_PEER2PEER(val) ((val & 0x80) == 0x00)
+//Ack if bits 1,2 == 1,0 => MASK 0x60, VAL 0x40
+#define MESH_IS_ACKNOWLEDGE(val) ((val & 0x60) == 0x40)
+#define MESH_WANT_ACKNOWLEDGE(val) ((val & 0xF0) == 0x70)
+#define MESH_IS_RESPONSE(val) ((val & 0xF0) == 0x00)
+
+
 //------------------------- Mesh Core -------------------------
 
 typedef void (*app_mesh_rf_handler_t)(message_t*);
@@ -30,6 +76,8 @@ uint16_t get_this_node_id();
 uint8_t mesh_channel();
 
 uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler);
+
+void mesh_execute_cmd(uint8_t*data,uint8_t size,bool is_rf_request,uint8_t rf_nodeid);
 
 //------------------------- Mesh protocol -------------------------
 
