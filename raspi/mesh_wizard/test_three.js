@@ -1,6 +1,8 @@
 var camera, scene, renderer;
 var geometry, material, mesh,wiremesh;
 
+var container;
+
 init();
 animate();
 
@@ -77,7 +79,12 @@ function plane2(){
 
 function init() {
 
-	camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
+	container = document.getElementById('viewer');
+	var w = container.clientWidth;
+	var h = container.clientHeight;
+	console.log("w:",w);
+	console.log("h:",h);
+	camera = new THREE.PerspectiveCamera( 70, w / h, 0.01, 10 );
 	camera.position.z = 2;
 	camera.position.y = 0.6;
 	scene = new THREE.Scene();
@@ -90,9 +97,10 @@ function init() {
 
 
 	renderer = new THREE.WebGLRenderer( { antialias: true } );
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setSize( w, h );
 	renderer.setClearColor( 0x000000, 1 );
-	document.body.appendChild( renderer.domElement );
+	//document.body.appendChild( renderer.domElement );
+	container.appendChild(renderer.domElement);
 
 }
 
