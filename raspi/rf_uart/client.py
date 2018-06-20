@@ -18,6 +18,8 @@ def mesh_do_action(cmd,remote,params):
             mesh.send([ control,mesh.pid["ping"],this_node_id,int(remote)])
     except KeyError:
         log.error("mqtt_remote_req > KeyError Exception for %s",cmd)
+    except ValueError:
+        log.error("mqtt_remote_req > ValueError Exception for %s , '%s'",cmd, remote)
     return
 
 def remote_execute_command(cmd,params):
@@ -180,12 +182,8 @@ cfg.configure_log(config["log"])
 
 log.info("hci client started")
 
-#will start a separate thread for looping
-clientMQTT = mqtt_start(config,mqtt_on_message)
-
 parser = argparse.ArgumentParser()
-parser.add_argument("-p","--port",default="COM4")
-parser.add_argument("-c","--channel",default=2)
+parser.add_argument("-c","--channel",default=10)
 parser.add_argument("-f","--function",default="x")
 args = parser.parse_args()
 
@@ -193,6 +191,9 @@ this_node_id = 0
 #TODO this have a default that comes from the config
 #so that the command line can only override the config if required
 chan = int(args.channel)
+
+#will start a separate thread for looping
+clientMQTT = mqtt_start(config,mqtt_on_message)
 
 mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response)
 
