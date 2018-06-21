@@ -35,8 +35,8 @@ def remote_execute_command(cmd,params):
             )
         else:
             return False
-    except KeyError:
-        log.error("mqtt_remote_req > KeyError Exception for %s",cmd)
+    except (KeyError,TypeError):
+        log.error("mqtt_remote_req > Error Exception for %s",cmd)
     return True
 
 def execute_command(cmd,params):
@@ -62,9 +62,8 @@ def execute_command(cmd,params):
 def mqtt_on_message(client, userdata, msg):
     topics = msg.topic.split('/')
     cmd = topics[2]
-    if(len(msg.payload) == 0):
-        params = []
-    else:
+    params = []
+    if(len(msg.payload) != 0):
         try:
             params = json.loads(msg.payload)
         except json.decoder.JSONDecodeError:

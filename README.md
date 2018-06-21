@@ -123,6 +123,9 @@ It is possible to reconfigure the Node on runtime and manage manage a mesh netwo
 | 0x08 | Get Bitrate |
 | 0x09 | Set CRC | 0 : No CRC - 1 : 8bit - 2 : 16 bit|
 | 0x0A | Get CRC |  |
+| 0x0B | Set UICR | used uicr registers |
+| 0x0C | Get UICR |  |
+
 
 ### Command examples
 Set channel 10/0x0A
@@ -136,6 +139,10 @@ get channel
 Set Tx Power to  -4dBm/0xFC
 
     cmd:0x05FC
+
+Set UICR e.g. RF Channel @ CUSTOMER[1] to channel 10
+
+    cmd:0x0B010A
 
 Send message, directed (not broadcast) with ttl = 2, ping(75/0x4B) from 73/0x49
 
