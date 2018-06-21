@@ -7,6 +7,8 @@ function onConnect() {
   console.log("onConnect");
   client.subscribe("Nodes/#");
   client.subscribe("jNodes/#");
+  client.subscribe("cmd/#");
+  client.subscribe("remote_cmd/#");
   /*message = new Paho.MQTT.Message("Hello");
   message.destinationName = "World";
   client.send(message);*/

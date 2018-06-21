@@ -1,37 +1,47 @@
 var camera, scene, renderer;
-var geometry, material, mesh,wiremesh;
+var mesh,wiremesh;
+var node1;
 
-var container;
+var container,controls;
 
-init();
-animate();
+class Mesh {
+	constructor(height, width) {
+	  this.height = height;
+	  this.width = width;
+	}
+  }
 
+class Node{
+	constructor(pos){
+		var size = 0.05;
+		var nb_sections = 64;
+		var geometry = new THREE.SphereGeometry( size, nb_sections,nb_sections );
+		//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+		var material = new THREE.MeshPhongMaterial( {
+			color: 0x156289,
+			emissive: 0x072534,
+			side: THREE.DoubleSide,
+			flatShading: true
+		});
 
-function geometries(){
+		this.mesh = new THREE.Mesh( geometry, material );
 
-	geometry = new THREE.SphereGeometry( 0.2, 6, 5 );
-	//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	material = new THREE.MeshPhongMaterial( {
-		color: 0x156289,
-		emissive: 0x072534,
-		side: THREE.DoubleSide,
-		flatShading: true
-	});
+		var wiregeom = new THREE.SphereBufferGeometry( size, 6, 5 );
+		//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+		var wirematerial = new THREE.MeshBasicMaterial( {wireframe:true, color:0x000000} );
 
-	mesh = new THREE.Mesh( geometry, material );
+		this.wiremesh = new THREE.Mesh( wiregeom, wirematerial );
 
-	var wiregeom = new THREE.SphereBufferGeometry( 0.2, 6, 5 );
-	//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	var wirematerial = new THREE.MeshBasicMaterial( {wireframe:true, color:0x000000} );
+		this.mesh.position.set(pos.x,pos.y,pos.z);
+		this.wiremesh.position.set(pos.x,pos.y,pos.z);
 
-	wiremesh = new THREE.Mesh( wiregeom, wirematerial );
-
-	mesh.position.set(0,0.3,0);
-	wiremesh.position.set(0,0.3,0);
-
-	scene.add( wiremesh );
-	scene.add( mesh );
-
+		//scene.add( this.wiremesh );
+		scene.add( this.mesh );
+	}
+	rotate(angle){
+		this.mesh.rotation.y 		+= angle;
+		this.wiremesh.rotation.y 	+= angle;
+	}
 }
 
 function lights(){
@@ -49,58 +59,96 @@ function lights(){
 	scene.add( lights[ 2 ] );
 }
 
-function plane1(){
-	var plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 0 );
-	var helper = new THREE.PlaneHelper( plane, 1, 0xffff00 );
-	scene.add( helper );	
+class Plane{
+	static init(w,h) {
+		var plane = new THREE.PlaneGeometry( w,h,4,4 );
+		//var pmat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+		var pmat = new THREE.MeshPhongMaterial( {
+			color: 0xABABAB,
+			emissive: 0xABABAB,
+			side: THREE.DoubleSide,
+			flatShading: true
+		});
+		
+		var planemesh = new THREE.Mesh( plane, pmat );
+		planemesh.rotation.x = Math.PI / 2;
+		scene.add( planemesh );
+
+		plane = new THREE.PlaneBufferGeometry( w,h,4,4 );
+		pmat = new THREE.MeshBasicMaterial( {wireframe:true, color:0x000000} );
+		
+		planemesh = new THREE.Mesh( plane, pmat );
+		planemesh.rotation.x = Math.PI / 2;
+		scene.add( planemesh );
+	}
 }
 
-function plane2(){
-	var plane = new THREE.PlaneGeometry( 2,2,4,4 );
-	//var pmat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-	var pmat = new THREE.MeshPhongMaterial( {
-		color: 0xABABAB,
-		emissive: 0xABABAB,
-		side: THREE.DoubleSide,
-		flatShading: true
-	});
-	
-	var planemesh = new THREE.Mesh( plane, pmat );
-	planemesh.rotation.x = Math.PI / 2;
-	scene.add( planemesh );
+function controls(){
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-	plane = new THREE.PlaneBufferGeometry( 2,2,4,4 );
-	pmat = new THREE.MeshBasicMaterial( {wireframe:true, color:0x000000} );
-	
-	planemesh = new THREE.Mesh( plane, pmat );
-	planemesh.rotation.x = Math.PI / 2;
-	scene.add( planemesh );
+	//controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+
+	controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+	controls.dampingFactor = 1.5;//0.1:too rolly, 1: smooth, 2 unstable
+
+	controls.screenSpacePanning = false;
+
+	controls.minDistance = 1;
+	controls.maxDistance = 10;
+
+	controls.minPolarAngle =  10 * Math.PI / 180;
+	controls.maxPolarAngle =  80 * Math.PI / 180;
+
+	controls.rotateSpeed = 0.7;
+
 }
+
+function onWindowResize() {
+
+	w = container.clientWidth;
+	h = container.clientHeight;
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
+
+	renderer.setSize( w, h );
+
+}
+
 
 function init() {
+
+	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 	container = document.getElementById('viewer');
 	var w = container.clientWidth;
 	var h = container.clientHeight;
-	console.log("w:",w);
-	console.log("h:",h);
-	camera = new THREE.PerspectiveCamera( 70, w / h, 0.01, 10 );
+	
+	camera = new THREE.PerspectiveCamera( 45, w / h, 0.01, 20 );
 	camera.position.z = 2;
 	camera.position.y = 0.6;
+
 	scene = new THREE.Scene();
 
-	geometries();
+	//geometries();
+	node1 = new Node(new THREE.Vector3(0,0.2,0));
 
-	plane2();
+	node2 = new Node(new THREE.Vector3(0.5,0.2,0));
+
+	//as only one place is needed, no need to create a variable
+	Plane.init(2,2);
 
 	lights();
 
 
-	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer = new THREE.WebGLRenderer( { antialias: true,alpha:true } );
 	renderer.setSize( w, h );
-	renderer.setClearColor( 0x000000, 1 );
-	//document.body.appendChild( renderer.domElement );
+	renderer.setClearColor( 0x000000, 0.0 );
+
 	container.appendChild(renderer.domElement);
+
+	controls();
+
+	window.addEventListener( 'resize', onWindowResize, false );
 
 }
 
@@ -108,10 +156,15 @@ function animate() {
 
 	requestAnimationFrame( animate );
 
-	//mesh.rotation.x += 0.01;
-	mesh.rotation.y += 0.02;
-	wiremesh.rotation.y += 0.02;
+	controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+
+	node1.rotate(0.02);
 
 	renderer.render( scene, camera );
 
 }
+
+
+init();
+animate();
+
