@@ -372,6 +372,7 @@ void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
 
 void mesh_rx_handler(message_t* msg)
 {
+    bool is_to_be_forwarded = false;
     if(msg->dest == UICR_NODE_ID)//current node id match
     {
         if(MESH_WANT_ACKNOWLEDGE(msg->control))
@@ -386,13 +387,19 @@ void mesh_rx_handler(message_t* msg)
     //only re-route messaegs directed to other than the current node itself
     else if(UICR_is_router())
     {
-        mesh_forward_message(msg);
+        is_to_be_forwarded = true;
     }
     
     //The app gets everything
     if(m_app_rf_handler != NULL)
     {
         m_app_rf_handler(msg);
+    }
+
+    //as the message forward is destructive it is to be done at the last step
+    if(is_to_be_forwarded)
+    {
+        mesh_forward_message(msg);
     }
 }
 
@@ -626,20 +633,17 @@ uint32_t mesh_forward_message(message_t* msg)
     uint8_t ttl = msg->control & 0x0F;
     if(ttl>0)
     {
+        //Add TTL
         ttl--;
-        uint8_t ctrl_backup = msg->control;
         msg->control &= 0xF0;//clear ttl
-        msg->control |= ttl;
+        msg->control |= ttl;//set new ttl
+        //Update Alive
         if(msg->pid == Mesh_Pid_Alive)//rework to add the new (rssi,nid,tx)
         {
             alive_add_rtx_info(msg);
-            mesh_tx_message(msg);
         }
-        else
-        {
-            mesh_tx_message(msg);
-        }
-        msg->control = ctrl_backup;//set it back as it was
+        //send it
+        mesh_tx_message(msg);
     }
 
     return NRF_SUCCESS;
