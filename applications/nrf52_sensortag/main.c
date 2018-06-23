@@ -90,8 +90,10 @@ void app_rtc_handler()
     static const uint32_t offset_bme    = 1;
     static const uint32_t period_light  = 3;
     static const uint32_t offset_light  = 2;
-    static const uint32_t period_bat    = 30;
+    static const uint32_t period_bat    = 60;
     static const uint32_t offset_bat    = 0;
+    static const uint32_t period_alive  = 60;
+    static const uint32_t offset_alive  = 30;
 
     clocks_restart();
     twi_restart();
@@ -107,6 +109,10 @@ void app_rtc_handler()
     if( ((cycle_count+offset_bat) % period_bat)==0)
     {
         read_send_battery();
+    }
+    if( ((cycle_count+offset_alive) % period_alive)==0)
+    {
+        mesh_tx_alive();
     }
     mesh_wait_tx();
 

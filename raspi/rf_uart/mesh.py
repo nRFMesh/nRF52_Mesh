@@ -126,7 +126,10 @@ def publish(msg):
     if("rssi" in msg):
         topic = "Nodes/"+msg["src"]+"/rssi"
         pub[topic] = int(msg["rssi"])
-    if(inv_pid[int(msg["pid"])] == "bme280"):
+    if(inv_pid[int(msg["pid"])] == "reset"):
+        topic = "Nodes/"+msg["src"]+"/reset"
+        pub[topic] = float(msg["reset"])
+    elif(inv_pid[int(msg["pid"])] == "bme280"):
         topic_t = "Nodes/"+msg["src"]+"/temperature"
         pub[topic_t] = float(msg["temp"])
         topic_h = "Nodes/"+msg["src"]+"/humidity"
