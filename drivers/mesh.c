@@ -488,6 +488,11 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
     err_code = nrf_esb_set_rf_channel(UICR_RF_CHANNEL);
     VERIFY_SUCCESS(err_code);
 
+#if defined(BOARD_NRF52_DONGLE)
+    err_code = nrf_esb_set_tx_power(RADIO_TXPOWER_TXPOWER_Pos4dBm);
+    VERIFY_SUCCESS(err_code);
+#endif
+
     tx_payload.length  = 8;
     tx_payload.pipe    = 0;
     tx_payload.data[0] = 0x00;
