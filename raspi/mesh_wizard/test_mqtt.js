@@ -34,9 +34,11 @@ function setup_buttons(){
   var inNodeId = document.getElementById("inNodeId");
   var btnPing = document.getElementById("btnPing");
   var btnGetChannel = document.getElementById("btnGetChannel");
+  var btnGetNodeId = document.getElementById("btnGetNodeId");
   var btnRemGetChannel = document.getElementById("btnRemGetChannel");
   btnPing.onclick = function()          { client.send("Nodes/"+inNodeId.value+"/ping","");  }
   btnGetChannel.onclick = function()    { client.send("cmd/request/get_channel","");  }
+  btnGetNodeId.onclick = function()    { client.send("cmd/request/get_node_id","");  }
   btnRemGetChannel.onclick = function() { client.send("remote_cmd/request/get_channel",'{"remote":'+inNodeId.value+'}');  }
 }
 

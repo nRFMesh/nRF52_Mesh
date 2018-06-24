@@ -11,7 +11,9 @@ on_broadcast = None
 on_message = None
 on_cmd_response = None
 
-nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
+nodes_config = os.getenv('NODES_CONFIG','/home/pi/IoT_Frameworks/config/nodes.json')
+log.info("using NODES_CONFIG : %s",nodes_config)
+nodes = cfg.get_local_nodes(nodes_config)
 
 pid = {
     "exec_cmd"      : 0xEC,
@@ -126,9 +128,23 @@ def publish(msg):
     if("rssi" in msg):
         topic = "Nodes/"+msg["src"]+"/rssi"
         pub[topic] = int(msg["rssi"])
-    if(inv_pid[int(msg["pid"])] == "reset"):
-        topic = "Nodes/"+msg["src"]+"/reset"
-        pub[topic] = float(msg["reset"])
+    if(inv_pid[int(msg["pid"])] == "alive"):
+        #Publish both : database count
+        topic = "Nodes/"+msg["src"]+"/alive"
+        pub[topic] = int(msg["alive"])
+        #and then publish json structure with more info
+        topic = "jNodes/"+msg["src"]+"/alive"
+        json_payload = {}
+        json_payload["count"] = int(msg["alive"])
+        nb_rx = int(msg["nb"])
+        for i in range(nb_rx):
+            rx_i = "rx"+str(i+1)
+            json_payload[rx_i] = {}
+            txpow_rssi_nid = msg[rx_i].split(',')
+            json_payload[rx_i]["tx_power"]  = txpow_rssi_nid[0]
+            json_payload[rx_i]["rssi"]      = txpow_rssi_nid[1]
+            json_payload[rx_i]["nodeid"]    = txpow_rssi_nid[2]
+        pub[topic] = json.dumps(json_payload)
     elif(inv_pid[int(msg["pid"])] == "bme280"):
         topic_t = "Nodes/"+msg["src"]+"/temperature"
         pub[topic_t] = float(msg["temp"])
@@ -149,19 +165,12 @@ def publish(msg):
         json_payload["y"] = float(msg["accy"])
         json_payload["z"] = float(msg["accz"])
         pub[topic] = json.dumps(json_payload)
-    elif(inv_pid[int(msg["pid"])] == "alive"):
-        topic = "jNodes/"+msg["src"]+"/alive"
-        json_payload = {}
-        json_payload["count"] = int(msg["alive"])
-        nb_rx = int(msg["nb"])
-        for i in range(nb_rx):
-            rx_i = "rx"+str(i+1)
-            json_payload[rx_i] = {}
-            txpow_rssi_nid = msg[rx_i].split(',')
-            json_payload[rx_i]["tx_power"]  = txpow_rssi_nid[0]
-            json_payload[rx_i]["rssi"]      = txpow_rssi_nid[1]
-            json_payload[rx_i]["nodeid"]    = txpow_rssi_nid[2]
-        pub[topic] = json.dumps(json_payload)
+    elif(inv_pid[int(msg["pid"])] == "button"):
+        topic = "Nodes/"+msg["src"]+"/button"
+        pub[topic] = int(msg["button"])
+    elif(inv_pid[int(msg["pid"])] == "reset"):
+        topic = "Nodes/"+msg["src"]+"/reset"
+        pub[topic] = float(msg["reset"])
     return pub
 
 def line2dict(line):

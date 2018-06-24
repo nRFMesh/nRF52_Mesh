@@ -246,6 +246,6 @@ Ping node 74
 
     mosquitto_pub -t 'Nodes/79/ping' -m '{"remote":"74"}'
 
-aAknowledge
+Aknowledge
 
     Nodes/79/ack 1
