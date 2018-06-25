@@ -146,15 +146,17 @@ def publish(msg):
             json_payload[rx_i]["nodeid"]    = txpow_rssi_nid[2]
         pub[topic] = json.dumps(json_payload)
     elif(inv_pid[int(msg["pid"])] == "bme280"):
-        topic_t = "Nodes/"+msg["src"]+"/temperature"
-        pub[topic_t] = float(msg["temp"])
-        topic_h = "Nodes/"+msg["src"]+"/humidity"
-        pub[topic_h] = float(msg["hum"])
-        topic_p = "Nodes/"+msg["src"]+"/pressure"
-        pub[topic_p] = float(msg["press"])
+        if("temp" in msg):
+            topic_t = "Nodes/"+msg["src"]+"/temperature"
+            pub[topic_t] = float(msg["temp"])
+            topic_h = "Nodes/"+msg["src"]+"/humidity"
+            pub[topic_h] = float(msg["hum"])
+            topic_p = "Nodes/"+msg["src"]+"/pressure"
+            pub[topic_p] = float(msg["press"])
     elif(inv_pid[int(msg["pid"])] == "light"):
-        topic = "Nodes/"+msg["src"]+"/light"
-        pub[topic] = float(msg["light"])
+        if("light" in msg):
+            topic = "Nodes/"+msg["src"]+"/light"
+            pub[topic] = float(msg["light"])
     elif(inv_pid[int(msg["pid"])] == "battery"):
         topic = "Nodes/"+msg["src"]+"/battery"
         pub[topic] = float(msg["battery"])
