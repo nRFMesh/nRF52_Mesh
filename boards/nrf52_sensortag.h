@@ -74,7 +74,7 @@ extern "C" {
 #define I2C_SCL 29
 #define I2C_SDA 30
 
-#define APDS9960_INT 31
+#define SENSOR_INT 31
 
 #define RX_PIN_NUMBER  7
 #define TX_PIN_NUMBER  6
