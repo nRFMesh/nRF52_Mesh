@@ -160,11 +160,12 @@ def publish(msg):
         pub[topic] = float(msg["battery"])
     elif(inv_pid[int(msg["pid"])] == "acceleration"):
         topic = "jNodes/"+msg["src"]+"/acceleration"
-        json_payload = {}
-        json_payload["x"] = float(msg["accx"])
-        json_payload["y"] = float(msg["accy"])
-        json_payload["z"] = float(msg["accz"])
-        pub[topic] = json.dumps(json_payload)
+        if("accx" in msg):  #check accx is enough as some have size error logs
+            json_payload = {}
+            json_payload["x"] = float(msg["accx"])
+            json_payload["y"] = float(msg["accy"])
+            json_payload["z"] = float(msg["accz"])
+            pub[topic] = json.dumps(json_payload)
     elif(inv_pid[int(msg["pid"])] == "button"):
         topic = "Nodes/"+msg["src"]+"/button"
         pub[topic] = int(msg["button"])
