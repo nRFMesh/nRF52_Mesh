@@ -3,6 +3,8 @@
 #include "mpu6050.h"
 #include "mpu60x0_register_map.h"
 
+#include "nrf52_sensortag.h"
+#include "nrf_gpio.h"
 
 #define ADDRESS_WHO_AM_I          (0x75U) // !< WHO_AM_I register identifies the device. Expected value is 0x68.
 #define ADDRESS_SIGNAL_PATH_RESET (0x68U) // !<
@@ -61,6 +63,8 @@ bool mpu6050_verify_product_id(void)
 
 bool mpu6050_init(uint8_t device_address)
 {
+    nrf_gpio_cfg_input(SENSOR_INT,NRF_GPIO_PIN_NOPULL);
+
     bool transfer_succeeded = true;
 
     m_device_address = device_address;
@@ -109,19 +113,6 @@ void mpu_wakeup()
 void mpu_sleep()
 {
     mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x48);//0x48 => sleep
-}
-
-void mpu_get_accell_xyz(int8_t *x,int8_t *y,int8_t *z)
-{
-    uint8_t accell[5];
-    //XH,XL ; YH,YL ; ZH,ZL
-    mpu6050_read_burst(MPU_REG_ACCEL_XOUT_H,5,accell);//need only high
-    //DEBUG_PRINTF("0x%02X 0x%02X ; 0x%02X 0x%02X ; 0x%02X 0x%02X\r\n",
-    //                accell[0],accell[1],accell[2],
-    //                accell[3],accell[4],accell[5]);
-    *x = accell[0];
-    *y = accell[2];
-    *z = accell[4];
 }
 
 void mpu_get_accell_data(uint8_t *data)
