@@ -1,6 +1,10 @@
 
 var client,textBox;
 
+var mqtt_port = 3000;
+
+import {MyHome} from './three_app.js';
+
 // called when the client connects
 function onConnect() {
   // Once a connection has been made, make a subscription and send a message.
@@ -9,9 +13,6 @@ function onConnect() {
   client.subscribe("jNodes/#");
   client.subscribe("cmd/#");
   client.subscribe("remote_cmd/#");
-  /*message = new Paho.MQTT.Message("Hello");
-  message.destinationName = "World";
-  client.send(message);*/
 }
 
 // called when the client loses its connection
@@ -24,6 +25,7 @@ function onConnectionLost(responseObject) {
 // called when a message arrives
 function onMessageArrived(message) {
   console.log(message.destinationName	+ " : "+message.payloadString);
+  MyHome.on_message(message.destinationName);
   textBox.value = message.destinationName	+ " : "+message.payloadString+"\r\n"
                   +textBox.value;
   //document.getElementById("meshlog").value += message.destinationName	+ " : "+message.payloadString;
@@ -42,9 +44,9 @@ function setup_buttons(){
   btnRemGetChannel.onclick = function() { client.send("remote_cmd/request/get_channel",'{"remote":'+inNodeId.value+'}');  }
 }
 
-function main(){
+function init(){
   // Create a client instance
-  client = new Paho.MQTT.Client(location.hostname, Number(3000), "clientId");
+  client = new Paho.MQTT.Client(location.hostname, Number(mqtt_port), "clientId");
   // set callback handlers
   client.onConnectionLost = onConnectionLost;
   client.onMessageArrived = onMessageArrived;
@@ -56,7 +58,8 @@ function main(){
 
 //----------------------------------------------------------------------------------
 
-main();
+//main();
 
-setup_buttons();
+//setup_buttons();
 
+export{init,setup_buttons}

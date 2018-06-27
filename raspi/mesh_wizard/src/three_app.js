@@ -4,16 +4,26 @@ var node1;
 
 var container,controls;
 
-class Mesh {
-	constructor(height, width) {
-	  this.height = height;
-	  this.width = width;
-	}
-  }
+var MyHome;
+
+var nodes_config;
+
+$.getJSON("nodes.json", function(json) {
+	nodes_config = json;
+    console.log("loaded json file");
+	init();
+	animate();
+
+});
+
+function swap_yz(pos){
+	return new THREE.Vector3(pos.x,pos.z,-pos.y);
+}
 
 class Node{
-	constructor(pos){
-		var size = 0.05;
+	constructor(id){
+		this.id = id;
+		var size = 0.2;
 		var nb_sections = 64;
 		var geometry = new THREE.SphereGeometry( size, nb_sections,nb_sections );
 		//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
@@ -32,17 +42,52 @@ class Node{
 
 		this.wiremesh = new THREE.Mesh( wiregeom, wirematerial );
 
+		
+		var pos;
+		if("position" in nodes_config[id])
+		{
+			pos = nodes_config[id].position;
+			pos = swap_yz(pos);
+			console.log("nodeid "+id+" has position : "+pos.x,pos.y,pos.z);
+		}
+		else
+		{
+			pos = {"x":0,"y":0,"z":0}
+			console.log("nodeid "+id+" has no position");
+		}
+
 		this.mesh.position.set(pos.x,pos.y,pos.z);
 		this.wiremesh.position.set(pos.x,pos.y,pos.z);
 
 		//scene.add( this.wiremesh );
 		scene.add( this.mesh );
 	}
-	rotate(angle){
-		this.mesh.rotation.y 		+= angle;
-		this.wiremesh.rotation.y 	+= angle;
-	}
 }
+
+class Home {
+	constructor(nodes_array) {
+	  this.nodes = nodes_array;
+	}
+
+	add_node(id){
+		if(! this.nodes.includes(id))
+		{
+			this.nodes.push(new Node(id))
+		}
+	}
+
+	on_message(mqtt_post){
+		var vals = mqtt_post.split("/");
+		if(vals.length == 3)
+		{
+			var nodeid = vals[1];
+			this.add_node(nodeid);
+		}
+		console.log("On Home Added Node id > "+nodeid);
+	}
+
+}
+
 
 function lights(){
 	var lights = [];
@@ -83,7 +128,7 @@ class Plane{
 	}
 }
 
-function controls(){
+function add_controls(){
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 	//controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
@@ -94,7 +139,7 @@ function controls(){
 	controls.screenSpacePanning = false;
 
 	controls.minDistance = 1;
-	controls.maxDistance = 10;
+	controls.maxDistance = 30;
 
 	controls.minPolarAngle =  10 * Math.PI / 180;
 	controls.maxPolarAngle =  80 * Math.PI / 180;
@@ -105,8 +150,8 @@ function controls(){
 
 function onWindowResize() {
 
-	w = container.clientWidth;
-	h = container.clientHeight;
+	var w = container.clientWidth;
+	var h = container.clientHeight;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
 
@@ -123,19 +168,19 @@ function init() {
 	var w = container.clientWidth;
 	var h = container.clientHeight;
 	
-	camera = new THREE.PerspectiveCamera( 45, w / h, 0.01, 20 );
-	camera.position.z = 2;
-	camera.position.y = 0.6;
+	camera = new THREE.PerspectiveCamera( 45, w / h, 0.1, 50 );
+	camera.position.z = 10;
+	camera.position.y = 3;
 
 	scene = new THREE.Scene();
 
 	//geometries();
-	node1 = new Node(new THREE.Vector3(0,0.2,0));
-
-	node2 = new Node(new THREE.Vector3(0.5,0.2,0));
-
 	//as only one place is needed, no need to create a variable
-	Plane.init(2,2);
+	Plane.init(6,6);
+
+	MyHome = new Home([]);
+	//MyHome.add_node(78);
+	MyHome.add_node(80);
 
 	lights();
 
@@ -146,7 +191,7 @@ function init() {
 
 	container.appendChild(renderer.domElement);
 
-	controls();
+	add_controls();
 
 	window.addEventListener( 'resize', onWindowResize, false );
 
@@ -158,13 +203,9 @@ function animate() {
 
 	controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
 
-	node1.rotate(0.02);
-
 	renderer.render( scene, camera );
 
 }
 
 
-init();
-animate();
-
+export {MyHome};
