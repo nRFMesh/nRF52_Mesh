@@ -186,7 +186,10 @@
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0x34 93 E8 D8 4D 1E 5C 92",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "position"   :{ "x":"-1","y":"-0.8","z":"3.7"},
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
             },
     "46":   {   "name"          :"Button_6",
         "board"         :"nRF51_Beacon",
@@ -272,25 +275,34 @@
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0x5A 22 98 07 82 4C 10 79",
-        "wrong_uid"           :"0x3A 2E 20 D6 4B B0 70 DE"
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
         },
     "62":   {   "name"          :"nRF_SensorTag_3",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0xA9 07 67 2F 9E C5 D6 FF",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
         },
     "63":   {   "name"          :"nRF_SensorTag_4",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0xCD 78 62 B0 92 DD EA 77",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
         },
     "64":   {   "name"          :"nRF_SensorTag_5",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0xAB 60 9E 89 29 F4 8F 10",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "position"   :{ "x":"-1","y":"-0.7","z":"3.6"},
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
         },
     "65":   {   "name"          :"bedroom repeater",
         "sensors"       :["light","colorLight","temperature","humidity","pressure"],
@@ -320,25 +332,33 @@
             "board"         :"nRF51_Sensors",
             "program"       :"nRF51_Sensors",
             "uid"           :"0xC4 76 76 3E 31 59 0D D9",
-            "data"          : ["acceleration","temperature","pressure","light"]
-            },
+            "data"          : ["acceleration"],
+            "channel"       : "2",
+            "sleep"         : "10"
+                },
     "70":   {   "name"          :"nRF_SensorTag_7",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0x57 17 B7 11 B7 14 CE C6",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
             },
     "71":   {   "name"          :"nRF_SensorTag_8",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0XF2 B4 78 A7 11 00 EE 6A",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
             },
     "72":   {   "name"          :"nRF_SensorTag_9",
         "board"         :"nRF51_Sensors",
         "program"       :"nRF51_Sensors",
         "uid"           :"0xD0 E1 5F 7E DB ED B4 E6",
-        "data"          : ["acceleration","temperature","pressure","light"]
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "10"
             },
     "73":   {   "name"          :"nRF52_SensorTag_Test1",
         "board"         :"nRF52_Sensors",
@@ -395,6 +415,7 @@
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x0E AD B5 5F 07 C1 9D 85",
+        "position"      :{ "x":"-2","y":"2.1","z":"0.7"},
         "add"           :"",
         "data"          : ["temperature","hunidity","pressure","light"],
         "channel"       : "2",
@@ -404,6 +425,7 @@
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x80 38 D1 86 F8 C9 EB 23",
+        "position"      :{ "x":"0.5","y":"1","z":"0.7"},
         "add"           :"",
         "data"          : ["temperature","hunidity","pressure","light"],
         "channel"       : "2",
@@ -421,6 +443,7 @@
     "79":   {   "name"          :"Bedroom Repeater2",
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
+        "position"      :{ "x":"-2.0","y":"4","z":"0.7"},
         "uid"           :"0x2E 43 2E 3C 2C 3D DB 2B",
         "add"           :"",
         "data"          : [],
@@ -439,6 +462,7 @@
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
         "uid"           :"0x92 F4 EA 61 46 CB 31 11",
+        "position"      :{ "x":"2.0","y":"3","z":"0.3"},
         "data"          : [],
         "channel"       : "2",
         "sleep"         : "60",
@@ -507,7 +531,7 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
-    },
+            },
     "85":   {   "name"          :"Dongle7",
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
@@ -523,6 +547,27 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "86":   {   "name"          :"Dongle8",
+        "board"         :"nRF52_Dongle"
+    },
+    "87":   {   "name"          :"Dongle9",
+        "board"         :"nRF52_Dongle"
+    },
+    "88":   {   "name"          :"Dongle10",
+        "board"         :"nRF52_Dongle"
+    },
+    "89":   {   "name"          :"Dongle11",
+        "board"         :"nRF52_Dongle"
+    },
+    "90":   {   "name"          :"Accell Tag6",
+        "board"         :"nRF52_Sensors",
+        "program"       :"nRF52_Accell",
+        "uid"           :"0xB2 73 F8 37 5C F8 39 DA",
+        "position"   :{ "x":"1","y":"-2","z":"0.1"},
+        "data"          : ["acceleration"],
+        "channel"       : "2",
+        "sleep"         : "20"
             }
             
 }

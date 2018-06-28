@@ -24,7 +24,7 @@ function onConnectionLost(responseObject) {
 
 // called when a message arrives
 function onMessageArrived(message) {
-  console.log(message.destinationName	+ " : "+message.payloadString);
+  //console.log(message.destinationName	+ " : "+message.payloadString);
   MyHome.on_message(message.destinationName);
   textBox.value = message.destinationName	+ " : "+message.payloadString+"\r\n"
                   +textBox.value;

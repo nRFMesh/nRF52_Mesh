@@ -5,14 +5,18 @@ var node1;
 var container,controls;
 
 var MyHome;
-
 var nodes_config;
+
+
+import {NodesTable} from './nodes_table.js';
+
 
 $.getJSON("nodes.json", function(json) {
 	nodes_config = json;
     console.log("loaded json file");
 	init();
 	animate();
+
 
 });
 
@@ -70,9 +74,17 @@ class Home {
 	}
 
 	add_node(id){
-		if(! this.nodes.includes(id))
+		if(this.nodes.includes(id))
 		{
-			this.nodes.push(new Node(id))
+			console.log("Node already available")
+		}
+		else
+		{
+			var node = new Node(id);
+			this.nodes.push(id);
+			console.log(this.nodes);
+			NodesTable.addNodeToTable(nodes_config[id].name,id);
+			console.log("On Home Added Node id > "+id);
 		}
 	}
 
@@ -81,9 +93,8 @@ class Home {
 		if(vals.length == 3)
 		{
 			var nodeid = vals[1];
-			this.add_node(nodeid);
+			this.add_node(parseInt(nodeid));
 		}
-		console.log("On Home Added Node id > "+nodeid);
 	}
 
 }
@@ -180,7 +191,6 @@ function init() {
 
 	MyHome = new Home([]);
 	//MyHome.add_node(78);
-	MyHome.add_node(80);
 
 	lights();
 
