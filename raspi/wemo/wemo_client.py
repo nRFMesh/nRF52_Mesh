@@ -37,10 +37,13 @@ def on_message(client, userdata, msg):
 # -------------------- wemo events -------------------- 
 def on_switch(switch):
     log.info("Switch found! %s", switch.name)
+    config["devices"][switch.name]["found"] = True
 def on_motion(motion):
     log.info("Motion found! %s", motion.name)
 
 def wemo_start():
+    for device_name in config["devices"]:
+        config["devices"][device_name]["found"] = False
     env = Environment(on_switch,on_motion)
     env.start()
     env.discover(seconds=3)
@@ -48,9 +51,10 @@ def wemo_start():
     #env.list_switches()
     devices = {}
     for device_name in config["devices"]:
-        switch = env.get_switch(device_name)
-        #switch["node"] = config["devices"][device_name]["node"] # no support for assignment
-        devices[device_name] = switch
+        if(config["devices"][device_name]["found"]):
+            switch = env.get_switch(device_name)
+            #switch["node"] = config["devices"][device_name]["node"] # no support for assignment
+            devices[device_name] = switch
     #print("explain()")
     #switch.explain()
     return devices
