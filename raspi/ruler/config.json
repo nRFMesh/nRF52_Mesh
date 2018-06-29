@@ -1,0 +1,26 @@
+{
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"py_ruler"
+    },
+    "log":{
+        "logfile":"/home/pi/share/ruler.log",
+        "level":"Debug"
+    },
+    "rules":{
+        "Bathroom_Hum_Status":{
+            "input":"Nodes/7/humidity",
+            "output":"jNodes/56/RGB",
+            "description":"indicate when the bathroom is humid",
+            "enable" : false
+        },
+        "Bedroom_Light_Up":{
+            "input":"Nodes/41/button",
+            "output":"Nodes/34/dimmer",
+            "description":"Increeses the light of the sleeping room on button press",
+            "enable" : true
+        }
+    }
+}

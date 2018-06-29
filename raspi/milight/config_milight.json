@@ -1,0 +1,51 @@
+{  
+    "devices":{
+        "LivingRoom":{
+            "host":"10.0.0.8",
+            "port":8899
+        },
+        "Upstairs":{
+            "host":"10.0.0.6",
+            "port":8899
+        }
+    },
+    "mapping":{
+        "31":{
+            "device"    :"LivingRoom",
+            "channel"   :1
+        },
+        "32":{
+            "device"    :"LivingRoom",
+            "channel"   :2
+        },
+        "33":{
+            "device"    :"LivingRoom",
+            "channel"   :3
+        },
+        "34":{
+            "device"    :"LivingRoom",
+            "channel"   :4
+        },
+        "35":{
+            "device"    :"Upstairs",
+            "channel"   :1
+        },
+        "36":{
+            "device"    :"Upstairs",
+            "channel"   :2
+        }
+    },
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"python_milight",
+        "subscribe":{
+            "Nodes"     :["dimmer"]
+        }
+    },
+    "log":{
+        "logfile":"/home/pi/share/milight_gateway.log",
+        "level":"Info"
+    }
+}
