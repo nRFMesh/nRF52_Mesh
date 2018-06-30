@@ -1,18 +1,24 @@
 {
     "serial":{
-        "port":"/dev/ttyUSB0"
+        "port":"/dev/ttyUSB0",
+        "baud":460800
     },
     "mqtt":{
-        "host":"10.0.0.44",
+        "host":"localhost",
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",
         "subscriptions":[
-            "Nodes/#"
-        ]
+            "Nodes/#",
+            "cmd/request/#",
+            "remote_cmd/request/#"
+        ],
+        "actions"   :["dimmer","heat","ping"],
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
     },
     "log":{
-        "logfile":"/home/pi/share/hci_client.log",
+        "logfile":"/home/pi/share/rf_uart.log",
         "level":"Debug"
     }
 }

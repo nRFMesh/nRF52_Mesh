@@ -1,0 +1,3 @@
+influxdb
+paho-mqtt
+git+https://github.com/iancmcc/ouimeaux.git
