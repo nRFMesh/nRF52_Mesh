@@ -1,0 +1,14 @@
+{
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60
+    },
+    "influxdb":{
+        "host":"localhost",
+        "port":8086,
+        "db":"meshNodes",
+        "logfile":"/home/pi/share/influx_client.log",
+        "mqtt_client_id":"py_influx"
+    }
+}

@@ -568,6 +568,24 @@
         "data"          : ["acceleration"],
         "channel"       : "2",
         "sleep"         : "20"
+    },
+    "91":   {   "name"          :"Workplace Tag7",
+        "board"         :"nRF52_Sensors",
+        "program"       :"nRF52_Sensors",
+        "uid"           :"0x40 2D FD 9A 41 D2 D1 72",
+        "position"      :{ "x":"-2","y":"0.3","z":"3.3"},
+        "data"          : ["temperature","hunidity","pressure","light"],
+        "channel"       : "2",
+        "sleep"         : "20"
+    },
+    "92":   {   "name"          :"Up on stairs Tag8",
+        "board"         :"nRF52_Sensors",
+        "program"       :"nRF52_Sensors",
+        "uid"           :"0x54 AA 4F 3A C2 94 5A B9",
+        "position"      :{ "x":"-2","y":"3.3","z":"3.3"},
+        "data"          : ["temperature","hunidity","pressure","light"],
+        "channel"       : "2",
+        "sleep"         : "20"
             }
             
 }
