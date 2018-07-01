@@ -1,18 +1,52 @@
-# What you'll find [here](https://github.com/nRFMesh/nRF52_Mesh)
-* nRF52 boards schematics and applications using the nRF SDK 15
-    * Low power Custom Sensor Tag with BME280 and MAX44009 (currently @22 uA)
-    * Reprogrammed USB dongle from the market with 3d printed pogo-pins adapter (status alive)
-* A light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
-    * Sleepy nodes (low power) and router nodes (always listening)
-    * single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
-    * An alternative to the Bluetooth Mesh and Zigbee Thread IPV6 world
-* Tools and environemt
-    * devices database management and automated parameters flashing
-    * [HomeSmartMesh](https://github.com/HomeSmartMesh/IoT_Frameworks) compatible environment where a raspberry pi collects the data into a time series [influx](https://www.influxdata.com/time-series-database/) Data base and serve a [Graphana](https://grafana.com/grafana) web interface
+# Presentation and Documentation on [Home Smart Mesh](https://www.homesmartmesh.com/)
+This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/) with focus on software configuration and protocol implementation details
 
-# Installation
-* GNU Tools ARM Embedded version 6 2017-q2-update, referenced from the SDK Makefile.windows
-* Python [jlink wrapper](https://github.com/square/pylink). Used in Makefile and tools of this repo, more on [pylink.readthedocs](http://pylink.readthedocs.io/en/latest/pylink.html). Note that it has to be used with a 32 bit python version referenced in the tools scripts as **C:\Python27\python.exe**. wrapper scripts already availabe in the tools directory
+# The content of [this repository](https://github.com/nRFMesh/nRF52_Mesh)
+## ./raspi/
+The server's python scripts running also on a raspberry pi
+* ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
+* ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
+* ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
+* ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
+* ./raspi/grafana : [Grafana](https://grafana.com/grafana) is used as a dashboard, it is a webserver interface that is installed on the raspberry pi (or on the docker image). Some dashboards examples are provided in this directory, where the queries are matching the way how the influx client has recorded the sensors data. 
+* ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
+* ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
+* Data collection into a time series database 
+
+
+## ./boards/
+Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware
+
+## ./applications/
+The nRF52 firmware grouped in project directories each containing the "main.c", "Makefile" and other project configuration files
+* ./applications/nrf52_sensortag/ : Low power Custom Sensor application with BME280 and MAX44009 (currently @22 uA)
+* ./applications/nrf52_dongle/ : Reprogrammed USB dongle from the market
+* ./applications/nrf52_accel/ : Motion detection Tag
+
+## ./drivers/
+Contains the specific drivers for this project from which the "mesh.c" a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
+* Sleepy nodes (low power) and router nodes (always listening)
+* single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
+* An alternative to the Bluetooth Mesh and Zigbee Thread IPV6 world
+
+## ./tools/
+Contains the fancy Makefile extensions that allow :
+* switch power on and off using a Segger jlink
+* read and write parameters matching the device's unique identifier read from the HW registers
+
+## ./nRF5_SDK_15.0.0_prf/
+This is a submodule that minifies the nRF15 SDK for the content required by this repository.
+When compiling the nRF applications firmware don't forget :
+
+    git submodule update --init
+
+# Dependencies
+* For the Raspberry pi tools and scripts see full installation steps in the [Installation](https://www.homesmartmesh.com/install/) website page
+* For the nRF52 firmare :
+    * GNU Tools ARM Embedded version 6 2017-q2-update, referenced from the SDK Makefile.windows
+    * Python [jlink wrapper](https://github.com/square/pylink). Used in Makefile and tools of this repo, more on [pylink.readthedocs](http://pylink.readthedocs.io/en/latest/pylink.html). Note that it has to be used with a 32 bit python version referenced in the tools scripts as **C:\Python27\python.exe**. wrapper scripts already availabe in the tools directory
+
+## Details about the nRF52 Frimware environment
 
 <img src="images/pylink.png" width="360">
 
