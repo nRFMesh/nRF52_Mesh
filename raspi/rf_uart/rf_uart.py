@@ -6,11 +6,14 @@ on_line_function = None
 
 def run():
     res = None
-    line = ser.readline().decode("utf-8")
-    if(len(line)):
-        line = line.replace('\r','')
-        line = line.replace('\n','')
-        on_line_function(line)
+    try:
+        line = ser.readline().decode("utf-8")
+        if(len(line)):
+            line = line.replace('\r','')
+            line = line.replace('\n','')
+            on_line_function(line)
+    except OSError,e:
+        print("Handled exception: %s",str(e))
     return res
 
 def send(data):

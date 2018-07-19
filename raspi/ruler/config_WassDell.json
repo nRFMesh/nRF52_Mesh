@@ -1,12 +1,12 @@
 {
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
         "client_id":"py_ruler"
     },
     "log":{
-        "logfile":"/home/pi/share/ruler.log",
+        "logfile":"./ruler.log",
         "level":"Debug"
     },
     "rules":{

@@ -6,22 +6,23 @@ from time import sleep,time
 import json
 import rules
 import socket
+from vectors import Vector
 
 # -------------------- mqtt events -------------------- 
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
-    for rule_name,rule in config["rules"].iteritems():
+    for rule_name,rule in config["rules"].items():
         log.info("Subscription for rule:%s %s -> %s",rule_name,rule["input"],rule["output"])
         lclient.subscribe(rule["input"])
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
-    for rule_name,rule in config["rules"].iteritems():
+    for rule_name,rule in config["rules"].items():
         if msg.topic == rule["input"]:
             if(rule["enable"]):
                 #call the Fuction with the same name as the Rule 
                 payload = getattr(rules,rule_name)(msg.payload)
-                if(payload):
+                if(payload != None):
                     clientMQTT.publish(rule["output"],payload)
 
 
@@ -52,8 +53,11 @@ def mqtt_start():
     clientMQTT.loop_start()
     return clientMQTT
 
+
+
+
 # -------------------- main -------------------- 
-config = cfg.get_local_json("config.json")
+config = cfg.get_local_json()
 
 cfg.configure_log(config["log"])
 
@@ -64,3 +68,5 @@ clientMQTT = mqtt_start()
 
 #loop forever
 ruler_loop_forever()
+
+

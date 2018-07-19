@@ -1,6 +1,8 @@
 import logging as log
 from time import time
 import json
+from functools import reduce
+from vectors import Vector
 
 def static_vars(**kwargs):
     def decorate(func):
@@ -69,3 +71,19 @@ def Button_To_Heat_Down(input):
     else:
         result = None # ignored, do nothing
     return result
+
+def Bathroom_Window(input):
+    a = json.loads(input)
+    v_acc   = Vector(a["x"],a["y"],a["z"])
+    v_earth = Vector(0,0,-1)
+    angle = v_acc.angle(v_earth)
+    log.debug(f"Bathroom Window>input({input}) =>output({angle})")
+    return angle
+
+def Bathroom_Heating(input):
+    a = json.loads(input)
+    v_acc   = Vector(a["x"],a["y"],a["z"])
+    v_closed = Vector(0.213,-0.998,-0.166)#zero reference
+    angle = v_acc.angle(v_closed)
+    log.debug(f"Bathroom Heating>input({input}) =>output({angle})")
+    return angle
