@@ -77,7 +77,7 @@ def Bathroom_Window(input):
     v_acc   = Vector(a["x"],a["y"],a["z"])
     v_earth = Vector(0,0,-1)
     angle = v_acc.angle(v_earth)
-    log.debug(f"Bathroom Window>input({input}) =>output({angle})")
+    log.debug(f"Bathroom Window>input(%s) =>output(%f)"%(input,angle))
     return angle
 
 def Bathroom_Heating(input):
@@ -85,5 +85,5 @@ def Bathroom_Heating(input):
     v_acc   = Vector(a["x"],a["y"],a["z"])
     v_closed = Vector(0.213,-0.998,-0.166)#zero reference
     angle = v_acc.angle(v_closed)
-    log.debug(f"Bathroom Heating>input({input}) =>output({angle})")
+    log.debug("Bathroom Heating>input(%s) =>output(%f)"%(input,angle))
     return angle
