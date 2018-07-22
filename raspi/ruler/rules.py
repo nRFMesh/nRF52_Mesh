@@ -72,6 +72,15 @@ def Button_To_Heat_Down(input):
         result = None # ignored, do nothing
     return result
 
+def safe_angle(vect,ref):
+    try:
+        return vect.angle(ref)
+    except ValueError:
+        log.debug("Handled Exception for ValueError measuring: ",vect)
+        #print(vect)
+    return None
+    
+
 def Bathroom_Window(input):
     a = json.loads(input)
     v_acc   = Vector(a["x"],a["y"],a["z"])
@@ -84,6 +93,7 @@ def Bathroom_Heating(input):
     a = json.loads(input)
     v_acc   = Vector(a["x"],a["y"],a["z"])
     v_closed = Vector(0.213,-0.998,-0.166)#zero reference
-    angle = v_acc.angle(v_closed)
+    angle = safe_angle(v_acc,v_closed)
+    #angle = v_acc.angle(v_closed)
     log.debug("Bathroom Heating>input(%s) =>output(%f)"%(input,angle))
     return angle
