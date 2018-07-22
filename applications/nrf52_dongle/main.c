@@ -45,15 +45,36 @@ uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
 
-void blink()
+void blink_red(int time,int afteroff)
+{
+    bsp_board_led_on(1);
+    bsp_board_led_off(0);
+    nrf_delay_ms(time);
+    bsp_board_leds_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
+
+void blink_blue(int time,int afteroff)
 {
     bsp_board_led_on(0);
-    nrf_delay_ms(200);
+    bsp_board_led_off(1);
+    nrf_delay_ms(time);
     bsp_board_leds_off();
-    nrf_delay_ms(200);
-    bsp_board_led_on(0);
-    nrf_delay_ms(200);
-    bsp_board_leds_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
+
+void blink()
+{
+    nrf_delay_ms(500);
+    blink_red(200,500);
+    blink_blue(500,500);
+    bsp_board_leds_on();
 }
 
 /**
