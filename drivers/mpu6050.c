@@ -5,14 +5,16 @@
 
 #include "nrf52_sensortag.h"
 #include "nrf_gpio.h"
-
-#define ADDRESS_WHO_AM_I          (0x75U) // !< WHO_AM_I register identifies the device. Expected value is 0x68.
-#define ADDRESS_SIGNAL_PATH_RESET (0x68U) // !<
+#include "nrf_drv_gpiote.h"
+#include "nrf_delay.h"
 
 static const uint8_t expected_who_am_i = 0x68U; // !< Expected value to get from WHO_AM_I register.
 static uint8_t       m_device_address;          // !< Device address in bits [7:1]
 
 static const nrf_drv_twi_t *p_twi = NULL;
+static app_mpu_handler_t g_app_mpu_handler;
+
+
 
 uint8_t mpu6050_register_write(uint8_t register_address, uint8_t value)
 {
@@ -51,7 +53,7 @@ uint8_t mpu6050_read_burst(uint8_t start, uint8_t length, uint8_t* buffer)
 
 bool mpu6050_verify_product_id(void)
 {
-    if (mpu6050_register_read(ADDRESS_WHO_AM_I) == expected_who_am_i)
+    if (mpu6050_register_read(MPU_REG_WHO_AM_I) == expected_who_am_i)
     {
         return true;
     }
@@ -61,48 +63,7 @@ bool mpu6050_verify_product_id(void)
     }
 }
 
-bool mpu6050_init(uint8_t device_address)
-{
-    nrf_gpio_cfg_input(SENSOR_INT,NRF_GPIO_PIN_NOPULL);
-
-    bool transfer_succeeded = true;
-
-    m_device_address = device_address;
-
-    // Do a reset on signal paths
-    uint8_t reset_value = 0x04U | 0x02U | 0x01U; // Resets gyro, accelerometer and temperature sensor signal paths.
-    transfer_succeeded &= mpu6050_register_write(ADDRESS_SIGNAL_PATH_RESET, reset_value);
-
-    // Read and verify product ID
-    transfer_succeeded &= mpu6050_verify_product_id();
-
-    return transfer_succeeded;
-}
-
-void mpu_init(const nrf_drv_twi_t *l_twi)
-{
-    p_twi = l_twi;
-
-    mpu6050_init(0x68);
-
-    //config = 6 ; Bandwidth : Accel 5 Hz, Gyro 5 Hz
-    mpu6050_register_write(MPU_REG_CONFIG,6);
-    //FS_SEL = 0 => 250°/s (lowest)
-    mpu6050_register_write(MPU_REG_GYRO_CONFIG,0); // same as reset value
-    //AFS_SEL = 0 => +- 2g (lowest)
-    mpu6050_register_write(MPU_REG_ACCEL_CONFIG,0); // same as reset value
-    
-    //wakeup
-    //0x08 : TEMP_DIS => disable temperature
-    //0x20 : CYCLE wake up every period
-    //0x00 : Internal 8 MHz oscillator
-    mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x28);//8 : TEMP_DIS - awake
-    //channels standby modes 0x38 Accel  ; 0x07 Gyro
-    //LP_WAKE_CTRL 0 = 1.25 Hz
-    mpu6050_register_write(MPU_REG_PWR_MGMT_2,0x07);//0x07 Gyro in standby
-
-}
-
+//should be used when a single measure is required, but have to wait the measure
 void mpu_wakeup()
 {
     //wakeup
@@ -117,6 +78,119 @@ void mpu_sleep()
 
 void mpu_get_accell_data(uint8_t *data)
 {
+    //clear any pending interrupt, used when awaken from interrupt after the user sets back the twi clocks
+    mpu6050_register_read(MPU_REG_INT_STATUS);//read is enough to clear
     //XH,XL ; YH,YL ; ZH,ZL
     mpu6050_read_burst(MPU_REG_ACCEL_XOUT_H,6,data);
 }
+
+void mpu6050_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+{
+    g_app_mpu_handler(0);
+}
+
+bool mpu6050_init(uint8_t device_address)
+{
+    bool transfer_succeeded = true;
+    m_device_address = device_address;
+
+    // Read and verify product ID
+    transfer_succeeded &= mpu6050_verify_product_id();
+
+    mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x80);//DEVICE_RESET
+    nrf_delay_ms(100);
+    // Do a reset on signal paths
+    uint8_t reset_value = 0x04U | 0x02U | 0x01U; // Resets gyro, accelerometer and temperature sensor signal paths.
+    transfer_succeeded &= mpu6050_register_write(MPU_REG_SIGNAL_PATH_RESET, reset_value);
+    nrf_delay_ms(100);
+
+    return transfer_succeeded;
+}
+
+void mpu_cycle()
+{
+    // 1KHz / (1,256) => 1KHz,3.9 Hz
+    //TODO to test is it has an impact on power or sampling rate ?
+    //mpu6050_register_write(MPU_REG_SMPLRT_DIV,200);//=> matches the 5 Hz
+
+    //config = 6 ; Bandwidth : Accel 5 Hz delay 19 ms, Gyro 5 Hz delay 18.6 ms, FS 1 KHz
+    //EXT_SYNC_SET input disabled for FSYNC pin
+    mpu6050_register_write(MPU_REG_CONFIG,6);
+    //FS_SEL = 0 => 250°/s (lowest)
+    mpu6050_register_write(MPU_REG_GYRO_CONFIG,0); // same as reset value
+    //AFS_SEL = 0 => +- 2g (lowest)
+    mpu6050_register_write(MPU_REG_ACCEL_CONFIG,0); // same as reset value
+
+    // DEVICE_RESET,SLEEP,CYCLE, - ; ; TEMP_DIS, CLKSEL[2:0]
+    //wakeup
+    //0x08 : TEMP_DIS => disable temperature
+    //0x20 : CYCLE wake up every period
+    //0x00 : Internal 8 MHz oscillator
+    mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x28);//8 : TEMP_DIS - awake
+    //channels standby modes 0x38 Accel  ; 0x07 Gyro
+    //LP_WAKE_CTRL 0 = 1.25 Hz
+    mpu6050_register_write(MPU_REG_PWR_MGMT_2,0x07);//0x07 Gyro in standby
+
+    //disable interrupts
+    mpu6050_register_write(MPU_REG_INT_PIN_CFG, 0);
+    mpu6050_register_write(MPU_REG_INT_ENABLE, 0);
+}
+
+void mpu_motion(app_mpu_handler_t handler)
+{
+    g_app_mpu_handler = handler;
+    // DEVICE_RESET,SLEEP,CYCLE, - ; ; TEMP_DIS, CLKSEL[2:0]
+    mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x08);
+    
+    //LP_WAKE_CTRL[1:0] STBY_XA,STBY_YA ; ; STBY_ZA,STBY_XG ,STBY_YG ,STBY_ZG
+    mpu6050_register_write(MPU_REG_PWR_MGMT_2,0x00);
+
+
+    //EXT_SYNC_SET[2:0],DLP_CFG[2:0]
+    mpu6050_register_write(MPU_REG_CONFIG,0);
+    //FS_SEL = 0 => 250°/s (lowest)
+    mpu6050_register_write(MPU_REG_GYRO_CONFIG,0);
+    //AFS_SEL = 0 => +- 2g (lowest)
+    mpu6050_register_write(MPU_REG_ACCEL_CONFIG,0);
+
+    //  --------  Configure the MPU for correct interrupt  --------  
+    //INT_LEVEL=0 (activelow), INT_OPEN=0 (pushpull), INT_LATCH_EN=0 (50us pulse), INT_RD_CLEAR=0 (clear on read status)
+    //NT_RD_CLEAR=0 (FSYNC do not care), FSYNC_INT_LEVEL=0 (do not care), FSYNC_INT_EN=0 (do not care), I2C_BYPASS_EN=0 (do not care)
+    //actually the interrupt INT pin of the MPU_6050 is always enabled
+    mpu6050_register_write(MPU_REG_INT_PIN_CFG, 0);
+    
+    mpu6050_register_write(MPU_REG_INT_ENABLE, 0x40);           //0x40 Magic number defined by datasheet Spec page 33 8.1 Motion Interrupt
+    
+    mpu6050_register_write(MPU_REG_MOT_DUR, 0x01);              //defined by datasheet Spec page 33 8.1 Motion Interrupt
+
+    uint8_t threshold = 20;//1-255
+    mpu6050_register_write(MPU_REG_MOT_THR, threshold);       //defined by datasheet Spec page 33 8.1 Motion Interrupt
+
+    nrf_delay_ms(1);                                            //defined by datasheet Spec page 33 8.1 Motion Interrupt
+
+    //Note : 7 is reserved and 0x1A is CONFIG not ACCEL_CONFIG,
+    mpu6050_register_write(MPU_REG_CONFIG,7);                   //defined by datasheet Spec page 33 8.1 Motion Interrupt
+
+    //LP_WAKE_CTRL[1:0] STBY_XA,STBY_YA ; ; STBY_ZA,STBY_XG ,STBY_YG ,STBY_ZG
+    mpu6050_register_write(MPU_REG_PWR_MGMT_2,0x07);//0 lowest freq 1.25 Hz, Gyro standby
+    // DEVICE_RESET,SLEEP,CYCLE, - ; ; TEMP_DIS, CLKSEL[2:0]
+    mpu6050_register_write(MPU_REG_PWR_MGMT_1,0x28);
+
+    //  --------  Configure the PIO interrupt accordingly  --------  
+    nrf_drv_gpiote_init();
+    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_HITOLO(true);
+    config.pull = NRF_GPIO_PIN_NOPULL;
+    nrf_drv_gpiote_in_init(SENSOR_INT, &config, mpu6050_interrupt);
+    nrf_drv_gpiote_in_event_enable(SENSOR_INT, true);//true = enable
+
+    //clear any pending interrupt to enable newer ones
+    mpu6050_register_read(MPU_REG_INT_STATUS);//read is enough to clear
+}
+
+void mpu_init(const nrf_drv_twi_t *l_twi)
+{
+    p_twi = l_twi;
+
+    mpu6050_init(0x68);//verify id and reset
+}
+

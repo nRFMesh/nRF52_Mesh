@@ -58,6 +58,18 @@ void read_send_accell()
     mesh_bcast_data(0x13,accell_data,6);
 }
 
+void app_mpu_handler(uint8_t event)
+{
+    clocks_restart();
+    twi_restart();
+
+    read_send_accell();
+    
+    twi_stop();
+    clocks_stop();//release the hf clock
+}
+
+
 void app_rtc_handler()
 {
     static uint32_t cycle_count = 0;
@@ -65,15 +77,15 @@ void app_rtc_handler()
     static const uint32_t offset_accell = 1;
     static const uint32_t period_bat    = 60;
     static const uint32_t offset_bat    = 0;
-    static const uint32_t period_alive  = 60;
-    static const uint32_t offset_alive  = 30;
+    static const uint32_t period_alive  = 6;
+    static const uint32_t offset_alive  = 3;
 
     clocks_restart();
     twi_restart();
 
     if( ((cycle_count+offset_accell) % period_accell)==0)
     {
-        read_send_accell();
+        //read_send_accell();
     }
     if( ((cycle_count+offset_bat) % period_bat)==0)
     {
@@ -90,6 +102,16 @@ void app_rtc_handler()
     twi_stop();
     clocks_stop();
 
+}
+
+void test_ping()
+{
+    while(1)
+    {
+        nrf_delay_ms(100);
+        mesh_tx_alive();
+        mesh_wait_tx();
+    }
 }
 
 int main(void)
@@ -114,6 +136,8 @@ int main(void)
     twi_init(&m_twi);
 
     mpu_init(&m_twi);
+    //mpu_cycle();
+    mpu_motion(app_mpu_handler);
 
     //only allow interrupts to start after init is done
     rtc_config(app_rtc_handler);
@@ -126,11 +150,14 @@ int main(void)
 
     mesh_tx_reset();
     mesh_wait_tx();
+
+    //test_ping();
     //read_send_battery();//could not be sent after rest with and without wait_tx
 
     // ------------------------- Start Events ------------------------- 
     twi_stop();
     clocks_stop();//release the hf clock
+
 
     while(true)
     {
