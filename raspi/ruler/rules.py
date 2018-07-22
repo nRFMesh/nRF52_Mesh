@@ -77,7 +77,7 @@ def Bathroom_Window(input):
     v_acc   = Vector(a["x"],a["y"],a["z"])
     v_earth = Vector(0,0,-1)
     angle = v_acc.angle(v_earth)
-    log.debug(f"Bathroom Window>input(%s) =>output(%f)"%(input,angle))
+    log.debug("Bathroom Window>input(%s) =>output(%f)"%(input,angle))
     return angle
 
 def Bathroom_Heating(input):

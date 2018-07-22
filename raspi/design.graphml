@@ -17,10 +17,10 @@
     <node id="n0">
       <data key="d6">
         <y:GenericNode configuration="ShinyPlateNode3">
-          <y:Geometry height="43.0" width="179.0" x="585.0" y="221.0"/>
-          <y:Fill color="#CCFFCC" color2="#CCFFCC" transparent="false"/>
+          <y:Geometry height="82.46666666666664" width="179.0" x="585.0" y="203.93333333333334"/>
+          <y:Fill color="#FFFFFF" color2="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="23.6015625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="49.3203125" x="64.83984375" xml:space="preserve" y="9.69921875">MQTT<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="32" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="43.203125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="94.640625" x="42.1796875" xml:space="preserve" y="19.63177083333329">MQTT<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
         </y:GenericNode>
       </data>
     </node>
@@ -214,7 +214,7 @@
     <edge id="e8" source="n0" target="n9">
       <data key="d10">
         <y:BezierEdge>
-          <y:Path sx="-60.5" sy="2.25" tx="0.0" ty="0.0"/>
+          <y:Path sx="-60.5" sy="4.315116279069765" tx="0.0" ty="0.0"/>
           <y:LineStyle color="#00FF00" type="line" width="2.0"/>
           <y:Arrows source="standard" target="standard"/>
         </y:BezierEdge>
@@ -230,7 +230,6 @@
       </data>
     </edge>
     <edge id="e10" source="n11" target="n9">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
