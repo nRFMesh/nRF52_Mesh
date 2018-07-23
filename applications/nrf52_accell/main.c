@@ -64,6 +64,7 @@ void app_mpu_handler(uint8_t event)
     twi_restart();
 
     read_send_accell();
+    mesh_wait_tx();
     
     twi_stop();
     clocks_stop();//release the hf clock
@@ -77,8 +78,8 @@ void app_rtc_handler()
     static const uint32_t offset_accell = 1;
     static const uint32_t period_bat    = 60;
     static const uint32_t offset_bat    = 0;
-    static const uint32_t period_alive  = 6;
-    static const uint32_t offset_alive  = 3;
+    static const uint32_t period_alive  = 3;
+    static const uint32_t offset_alive  = 2;
 
     clocks_restart();
     twi_restart();

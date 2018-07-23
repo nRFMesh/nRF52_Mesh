@@ -163,8 +163,12 @@ void mpu_motion(app_mpu_handler_t handler)
     
     mpu6050_register_write(MPU_REG_MOT_DUR, 0x01);              //defined by datasheet Spec page 33 8.1 Motion Interrupt
 
-    uint8_t threshold = 20;//1-255
+    uint8_t threshold = 2;//1-255
     mpu6050_register_write(MPU_REG_MOT_THR, threshold);       //defined by datasheet Spec page 33 8.1 Motion Interrupt
+
+    //to register 0x69, write the motion detection decrement and a few other settings (for example write 0x15 to set 
+    //both free-fall and motion decrements to 1 and accelerometer start-up delay to 5ms total by adding 1ms. ) 
+    //mpu6050_register_write(MPU_REG_MOT_DETECT_CTRL, 0x15);//TODO define more details about this undocumented register
 
     nrf_delay_ms(1);                                            //defined by datasheet Spec page 33 8.1 Motion Interrupt
 
@@ -178,7 +182,7 @@ void mpu_motion(app_mpu_handler_t handler)
 
     //  --------  Configure the PIO interrupt accordingly  --------  
     nrf_drv_gpiote_init();
-    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_HITOLO(true);
+    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
     config.pull = NRF_GPIO_PIN_NOPULL;
     nrf_drv_gpiote_in_init(SENSOR_INT, &config, mpu6050_interrupt);
     nrf_drv_gpiote_in_event_enable(SENSOR_INT, true);//true = enable
