@@ -76,8 +76,8 @@ def safe_angle(vect,ref):
     try:
         return vect.angle(ref)
     except ValueError:
-        log.debug("Handled Exception for ValueError measuring: ",vect)
-        #print(vect)
+        log.debug("Handled Exception for ValueError")
+        print(vect)
     return None
     
 
@@ -94,6 +94,7 @@ def Bathroom_Heating(input):
     v_acc   = Vector(a["x"],a["y"],a["z"])
     v_closed = Vector(0.213,-0.998,-0.166)#zero reference
     angle = safe_angle(v_acc,v_closed)
-    #angle = v_acc.angle(v_closed)
-    log.debug("Bathroom Heating>input(%s) =>output(%f)"%(input,angle))
+    if(type(angle) == float):
+        #angle = v_acc.angle(v_closed)
+        log.debug("Bathroom Heating>input(%s) =>output(%f)"%(input,angle))
     return angle
