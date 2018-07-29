@@ -1,7 +1,7 @@
 
 var client,textBox;
 
-var mqtt_port = 3000;
+var mqtt_port = 1884;
 
 import {MyHome} from './three_app.js';
 
