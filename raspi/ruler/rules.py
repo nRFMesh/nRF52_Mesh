@@ -33,7 +33,6 @@ def RGB_Tester_Burst(input):
     log.info("RGB_Tester_Burst() post")
     return "100"
 
-@static_vars(event_time=time())
 def Bedroom_Light_Up(input):
     log.debug("Sleeproom_Light_Up>input(%s)",input)
     if(float(input) == 1.0):
@@ -98,3 +97,23 @@ def Bathroom_Heating(input):
         #angle = v_acc.angle(v_closed)
         log.debug("Bathroom Heating>input(%s) =>output(%f)"%(input,angle))
     return angle
+
+def Bedroom_Direction_Remote(input):
+    a = json.loads(input)
+    list_dirs = [abs(a["x"]),abs(a["y"]),abs(a["z"])]
+    max_dir = list_dirs.index(max(list_dirs))
+    log.debug("Motion Event>direction(%d) [%0.3f , %0.3f , %0.3f]",max_dir,a["x"],a["y"],a["z"])
+    if(max_dir == 0):
+        result = 2
+        log.debug("Dimmer>On")
+    elif(max_dir == 1):
+        result = 1
+        log.debug("Dimmer>Night")
+    elif(max_dir == 2):
+        result = 0
+        log.debug("Dimmer>Off")
+    else:
+        result = None
+    return result
+
+

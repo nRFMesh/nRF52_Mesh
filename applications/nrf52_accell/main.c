@@ -52,22 +52,47 @@ void read_send_battery()
 
 void read_send_accell()
 {
-    //mpu_wakeup();
     uint8_t accell_data[6];
     mpu_get_accell_data(accell_data);
-    NRF_LOG_DEBUG("xh(%d)\r\n",accell_data[0]);
     mesh_bcast_data(Mesh_Pid_accell,accell_data,6);
+}
+
+//always 0
+void read_send_gyro()
+{
+    uint8_t gyro_data[6];
+    mpu_get_gyro_data(gyro_data);
+    char text[40];
+    rx_gyro(text,gyro_data,6);
+    mesh_bcast_text(text);
 }
 
 void read_send_motion()
 {
     char text[20];
-    sprintf(text,"Motion");
+
+    float x,y,z;
+    mpu_get_accell(&x,&y,&z);
+    x = x*x;
+    y = y*y;
+    z = z*z;
+    if(x > y)
+    {
+        if(x > z)
+        {
+            sprintf(text,"Motion X:%0.3f;%0.3f;%0.3f",x,y,z);
+        }
+    }
+    else if(y > z)
+    {
+        sprintf(text,"Motion Y:%0.3f;%0.3f;%0.3f",x,y,z);
+    }
+    else
+    {
+        sprintf(text,"Motion Z:%0.3f;%0.3f;%0.3f",x,y,z);
+    }
+
     mesh_bcast_text(text);
-    mesh_wait_tx();
-    uint8_t accell_data[6];
-    mpu_get_accell_data(accell_data);
-    mesh_bcast_data(Mesh_Pid_accell,accell_data,6);
     mesh_wait_tx();
 }
 
@@ -81,7 +106,11 @@ void app_mpu_handler(uint8_t event)
         do_manage_twi_clocks = true;
     }
 
-    read_send_motion();
+    read_send_accell();
+    //read_send_motion();
+    nrf_delay_ms(500);
+    read_send_accell();
+    mesh_wait_tx();
     
     if(do_manage_twi_clocks)
     {
@@ -96,8 +125,6 @@ void app_rtc_handler()
 {
     bool do_manage_twi_clocks = false;
     static uint32_t cycle_count = 0;
-    static const uint32_t period_accell = 3;
-    static const uint32_t offset_accell = 1;
     static const uint32_t period_bat    = 60;
     static const uint32_t offset_bat    = 0;
     static const uint32_t period_alive  = 3;
@@ -110,10 +137,6 @@ void app_rtc_handler()
         do_manage_twi_clocks = true;
     }
 
-    if( ((cycle_count+offset_accell) % period_accell)==0)
-    {
-        read_send_accell();
-    }
     if( ((cycle_count+offset_bat) % period_bat)==0)
     {
         read_send_battery();

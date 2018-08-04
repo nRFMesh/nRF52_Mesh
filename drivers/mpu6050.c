@@ -84,6 +84,31 @@ void mpu_get_accell_data(uint8_t *data)
     mpu6050_read_burst(MPU_REG_ACCEL_XOUT_H,6,data);
 }
 
+void mpu_get_accell(float *x,float *y,float *z)
+{
+    uint8_t data[6];
+    //XH,XL ; YH,YL ; ZH,ZL
+    mpu6050_read_burst(MPU_REG_ACCEL_XOUT_H,6,data);
+    int16_t 	accell_x =  data[0] << 8;
+                accell_x |= data[1];
+    int16_t 	accell_y =  data[2] << 8;
+                accell_y |= data[3];
+    int16_t 	accell_z =  data[4] << 8;
+                accell_z |= data[5];
+    *x =  accell_x;
+    *x /= 16384;
+    *y =  accell_y;
+    *y /= 16384;
+    *z =  accell_z;
+    *z /= 16384;
+}
+
+void mpu_get_gyro_data(uint8_t *data)
+{
+    //XH,XL ; YH,YL ; ZH,ZL
+    mpu6050_read_burst(MPU_REG_GYRO_XOUT_H,6,data);
+}
+
 void mpu6050_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     g_app_mpu_handler(0);

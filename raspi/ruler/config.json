@@ -33,6 +33,12 @@
             "output":"Nodes/34/dimmer",
             "description":"Increeses the light of the sleeping room on button press",
             "enable" : true
+        },
+        "Bedroom_Direction_Remote":{
+            "input":"jNodes/93/acceleration",
+            "output":"Nodes/34/dimmer",
+            "description":"Set the light depending on the Tag orientation",
+            "enable" : true
         }
     }
 }

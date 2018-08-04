@@ -108,6 +108,7 @@ void mesh_text_request(const char*text,uint8_t length);
 
 //-------------------------- Parsers -------------------------------
 int rx_accell(char * p_msg,uint8_t*data,uint8_t size);
+int rx_gyro(char * p_msg,uint8_t*data,uint8_t size);
 
 
 #endif /*__MESH_H__*/

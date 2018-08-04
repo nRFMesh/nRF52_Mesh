@@ -1076,6 +1076,32 @@ int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
     }
 }
 
+int rx_gyro(char * p_msg,uint8_t*data,uint8_t size)
+{
+    if(size != 6)
+    {
+        return sprintf(p_msg,"size not 6 but:%d",size);
+    }
+    else
+    {
+        int16_t 	gyro_x =  data[0] << 8;
+                    gyro_x |= data[1];
+        int16_t 	gyro_y =  data[2] << 8;
+                    gyro_y |= data[3];
+        int16_t 	gyro_z =  data[4] << 8;
+                    gyro_z |= data[5];
+        float   x =  gyro_x;
+                x /= 131;
+        float   y =  gyro_y;
+                y /= 131;
+        float   z =  gyro_z;
+                z /= 131;
+        //note only +-250 °/s is used
+        int sres = sprintf(p_msg,"gyrx:%0.3f;gyry:%0.3f;gyrz:%0.3f",x,y,z);
+        return sres;
+    }
+}
+
 int rx_text(char * p_msg,uint8_t*data,uint8_t size)
 {
     memcpy(p_msg,data,size);
