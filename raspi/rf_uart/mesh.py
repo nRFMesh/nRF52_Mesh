@@ -38,6 +38,7 @@ pid = {
     "acceleration"  : 0x13,
     "light_n"       : 0x14,
     "battery"       : 0x15,
+    "text"          : 0x16,
     "test_rf_resp"  : 0x30
 }
 

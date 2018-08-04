@@ -30,6 +30,7 @@
 #include "twi.h"
 #include "mesh.h"
 
+bool is_twi_clocks = false;
 
 /* TWI instance. */
 static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
@@ -55,24 +56,45 @@ void read_send_accell()
     uint8_t accell_data[6];
     mpu_get_accell_data(accell_data);
     NRF_LOG_DEBUG("xh(%d)\r\n",accell_data[0]);
-    mesh_bcast_data(0x13,accell_data,6);
+    mesh_bcast_data(Mesh_Pid_accell,accell_data,6);
+}
+
+void read_send_motion()
+{
+    char text[20];
+    sprintf(text,"Motion");
+    mesh_bcast_text(text);
+    mesh_wait_tx();
+    uint8_t accell_data[6];
+    mpu_get_accell_data(accell_data);
+    mesh_bcast_data(Mesh_Pid_accell,accell_data,6);
+    mesh_wait_tx();
 }
 
 void app_mpu_handler(uint8_t event)
 {
-    clocks_restart();
-    twi_restart();
+    bool do_manage_twi_clocks = false;
+    if(!is_twi_clocks)
+    {
+        clocks_restart();
+        twi_restart();
+        do_manage_twi_clocks = true;
+    }
 
-    read_send_accell();
-    mesh_wait_tx();
+    read_send_motion();
     
-    twi_stop();
-    clocks_stop();//release the hf clock
+    if(do_manage_twi_clocks)
+    {
+        twi_stop();
+        clocks_stop();
+        is_twi_clocks = false;
+    }
 }
 
 
 void app_rtc_handler()
 {
+    bool do_manage_twi_clocks = false;
     static uint32_t cycle_count = 0;
     static const uint32_t period_accell = 3;
     static const uint32_t offset_accell = 1;
@@ -81,12 +103,16 @@ void app_rtc_handler()
     static const uint32_t period_alive  = 3;
     static const uint32_t offset_alive  = 2;
 
-    clocks_restart();
-    twi_restart();
+    if(!is_twi_clocks)
+    {
+        clocks_restart();
+        twi_restart();
+        do_manage_twi_clocks = true;
+    }
 
     if( ((cycle_count+offset_accell) % period_accell)==0)
     {
-        //read_send_accell();
+        read_send_accell();
     }
     if( ((cycle_count+offset_bat) % period_bat)==0)
     {
@@ -100,8 +126,12 @@ void app_rtc_handler()
 
     cycle_count++;
 
-    twi_stop();
-    clocks_stop();
+    if(do_manage_twi_clocks)
+    {
+        twi_stop();
+        clocks_stop();
+        is_twi_clocks = false;
+    }
 
 }
 
@@ -135,10 +165,12 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     twi_init(&m_twi);
+    is_twi_clocks = true;
 
+    //this init needs teh twi to be enabled
     mpu_init(&m_twi);
+    mpu_motion_init(app_mpu_handler);
     //mpu_cycle();
-    mpu_motion(app_mpu_handler);
 
     //only allow interrupts to start after init is done
     rtc_config(app_rtc_handler);
@@ -149,6 +181,8 @@ int main(void)
     NRF_LOG_INFO("Hello from nRF52 Sensors");
     NRF_LOG_INFO("____________________________");
 
+    //transmission is not re-entrant
+    //nrf_delay_ms(100);
     mesh_tx_reset();
     mesh_wait_tx();
 
@@ -156,9 +190,15 @@ int main(void)
     //read_send_battery();//could not be sent after rest with and without wait_tx
 
     // ------------------------- Start Events ------------------------- 
-    twi_stop();
-    clocks_stop();//release the hf clock
+    //an interrupt might have happened after which the twi clocks sent off
+    if(is_twi_clocks)
+    {
+        twi_stop();
+        clocks_stop();//release the hf clock
+        is_twi_clocks = false;
+    }
 
+    //enable mpu interrupt only after stopping the twi as the interrupt restart it
 
     while(true)
     {

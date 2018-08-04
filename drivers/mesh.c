@@ -713,6 +713,18 @@ void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size)
     mesh_tx_message(&msg);
 }
 
+//limited to 255
+void mesh_bcast_text(char *text)
+{
+    uint8_t size = strlen(text);
+    if(size>MAX_MESH_MESSAGE_SIZE)//truncate in case of long message
+    {
+        text[size-1] = '>';
+        size = MAX_MESH_MESSAGE_SIZE;
+    }
+    mesh_bcast_data(Mesh_Pid_Text,(uint8_t*)text,size);
+}
+
 /**
  * @brief Broadcast an alive packet with associated payload information
  * The payload contains a livecounter (uint32_t) and the RF transmission power (int8_t)
@@ -1064,6 +1076,12 @@ int rx_accell(char * p_msg,uint8_t*data,uint8_t size)
     }
 }
 
+int rx_text(char * p_msg,uint8_t*data,uint8_t size)
+{
+    memcpy(p_msg,data,size);
+    return size;
+}
+
 void mesh_parse(message_t* msg,char * p_msg)
 { 
     p_msg += sprintf(  p_msg,"pid:%d;ctrl:0x%02X;src:%d;",msg->pid,msg->control,msg->source);
@@ -1142,7 +1160,11 @@ void mesh_parse(message_t* msg,char * p_msg)
                 p_msg += rx_new_light(p_msg,msg->payload,msg->payload_length);
             }
             break;
-            
+        case Mesh_Pid_Text:
+            {
+                p_msg += rx_text(p_msg,msg->payload,msg->payload_length);
+            }
+            break;
         case Mesh_Pid_ExecuteCmd:
             {
                 //only responses directed to us are parsed

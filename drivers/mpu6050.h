@@ -12,7 +12,7 @@ void mpu_dump_regs();
 void mpu_init(const nrf_drv_twi_t *l_twi);//also wakes up
 
 void mpu_cycle();//cyclically wakeup from interrupt and update reagisters left ready to be read
-void mpu_motion(app_mpu_handler_t handler);//react on motion and triggers an interrupt on INT pio
+void mpu_motion_init(app_mpu_handler_t handler);
 
 void mpu_get_accell_data(uint8_t *data);
 

@@ -136,7 +136,7 @@ void mpu_cycle()
     mpu6050_register_write(MPU_REG_INT_ENABLE, 0);
 }
 
-void mpu_motion(app_mpu_handler_t handler)
+void mpu_motion_init(app_mpu_handler_t handler)
 {
     g_app_mpu_handler = handler;
     // DEVICE_RESET,SLEEP,CYCLE, - ; ; TEMP_DIS, CLKSEL[2:0]

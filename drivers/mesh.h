@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 //should match NRF_ESB_MAX_PAYLOAD_LENGTH
-#define MAX_MESH_MESSAGE_SIZE 32
+#define MAX_MESH_MESSAGE_SIZE 40
 
 typedef struct 
 {
@@ -40,6 +40,8 @@ extern const char * const pid_name[];
 #define Mesh_Pid_accell     0x13
 #define Mesh_Pid_new_light  0x14
 #define Mesh_Pid_Battery    0x15
+#define Mesh_Pid_Text       0x16
+#define Mesh_Pid_MQTT       0x17
 #define Mesh_Pid_ExecuteCmd 0xEC
 
 #define MESH_Broadcast_Header_Length 4
@@ -89,6 +91,7 @@ void mesh_tx_reset();
 uint32_t mesh_tx_alive();
 
 void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size);
+void mesh_bcast_text(char *text);
 
 uint32_t mesh_tx_button(uint8_t state);
 void mesh_tx_light(uint32_t light);
@@ -102,5 +105,9 @@ void mesh_parse_bytes(message_t* msg,char * p_msg);
 //------------------------- Mesh Commander -------------------------
 
 void mesh_text_request(const char*text,uint8_t length);
+
+//-------------------------- Parsers -------------------------------
+int rx_accell(char * p_msg,uint8_t*data,uint8_t size);
+
 
 #endif /*__MESH_H__*/
