@@ -11,7 +11,7 @@ on_broadcast = None
 on_message = None
 on_cmd_response = None
 
-nodes_config = os.getenv('NODES_CONFIG','/home/pi/IoT_Frameworks/config/nodes.json')
+nodes_config = os.getenv('NODES_CONFIG','/home/pi/nRF52_Mesh/raspi/mesh_wizard/nodes.json')
 log.info("using NODES_CONFIG : %s",nodes_config)
 nodes = cfg.get_local_nodes(nodes_config)
 
