@@ -60,11 +60,7 @@ def mqtt_connect_retries(client):
     return
 
 # -------------------- main -------------------- 
-config = cfg.get_local_json("config_milight.json")
-
-cfg.configure_log(config["log"])
-
-log.info("milight client started")
+config = cfg.configure_log(__file__)
 
 # -------------------- Milight Client -------------------- 
 milight_controllers = {}

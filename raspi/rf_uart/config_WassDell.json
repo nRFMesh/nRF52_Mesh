@@ -1,10 +1,10 @@
 {
     "serial":{
-        "port":"COM13",
+        "port":"COM12",
         "baud":460800
     },
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",
@@ -18,7 +18,7 @@
         "mqtt_2_rf" :true
     },
     "log":{
-        "logfile":"./hci_client.log",
+        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\rf_uart\\hci_client.log",
         "level":"Debug"
     }
 }

@@ -3,6 +3,7 @@ import json
 import logging as log
 import socket
 from collections import OrderedDict
+import datetime
 
 # -------------------- config -------------------- 
 def get_local_json():
@@ -31,7 +32,9 @@ def get_local_nodes(nodes_file):
     nodes = json.load(open(nodes_file),object_pairs_hook=OrderedDict)
     return nodes
 
-def configure_log(config):
+def configure_log(logger_name):
+    global_config = get_local_json()
+    config = global_config["log"]
     log_level_map = {
         "Debug"     :10,
         "Info"      :20,
@@ -39,11 +42,16 @@ def configure_log(config):
         "Error"     :40,
         "Critical"  :50
     }
+    #if(os.path.isfile(config["logfile"])):
+    for handler in log.root.handlers[:]:
+        log.root.removeHandler(handler)
     log.basicConfig(    filename=config["logfile"],
                         level=log_level_map[config["level"]],
                         format='%(asctime)s %(name)s %(levelname)-8s %(message)s',
                         datefmt='%d %H:%M:%S'
                         )
     log.getLogger('').addHandler(log.StreamHandler())
-    log.info("log started @ level:%s",config["level"])
-    return
+    log.info("====> '%s' started logging with level '%s' @ '%s'"%(logger_name,config["level"],str(datetime.datetime.utcnow())))
+    #else:
+    #    print("Log file not available : %s"%(config["logfile"]))
+    return global_config

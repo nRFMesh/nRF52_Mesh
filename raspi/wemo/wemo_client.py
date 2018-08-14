@@ -91,11 +91,7 @@ def mqtt_start():
     return clientMQTT
 
 # -------------------- main -------------------- 
-config = cfg.get_local_json("config_wemo.json")
-
-cfg.configure_log(config["log"])
-
-log.info("wemo client started")
+config = cfg.configure_log(__file__)
 
 #will start a separate thread for looping
 clientMQTT = mqtt_start()

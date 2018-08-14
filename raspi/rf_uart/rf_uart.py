@@ -12,7 +12,7 @@ def run():
             line = line.replace('\r','')
             line = line.replace('\n','')
             on_line_function(line)
-    except OSError,e:
+    except OSError as e:
         print("Handled exception: %s",str(e))
     return res
 

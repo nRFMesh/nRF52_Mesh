@@ -57,11 +57,7 @@ def mqtt_start():
 
 
 # -------------------- main -------------------- 
-config = cfg.get_local_json()
-
-cfg.configure_log(config["log"])
-
-log.info("ruler started @ :"+str(datetime.datetime.utcnow()))
+config = cfg.configure_log(__file__)
 
 #will start a separate thread for looping
 clientMQTT = mqtt_start()

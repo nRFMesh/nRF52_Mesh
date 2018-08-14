@@ -1,12 +1,13 @@
 import sys
 import logging as log
 import argparse
-import cfg
 from time import sleep,time
 import json
 from mqtt import mqtt_start
 import socket
 import mesh as mesh
+import cfg
+
 
 def mesh_do_action(cmd,remote,params):
     control = 0x71
@@ -175,11 +176,7 @@ def test1():
     return
 # -------------------- main -------------------- 
 #python client.py -p COM4 -n 24 -c 10
-config = cfg.get_local_json()
-
-cfg.configure_log(config["log"])
-
-log.info("hci client started")
+config = cfg.configure_log(__file__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c","--channel",default=10)

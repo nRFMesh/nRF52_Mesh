@@ -51,18 +51,8 @@ def mqtt_connect_retries():
         sleep(10)
     return
 
-config = cfg.get_local_json("config.json")
-
-# -------------------- logging -------------------- 
-log.basicConfig(    filename=config["influxdb"]["logfile"],
-                    level=log.INFO,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%d %H:%M:%S'
-                    )
-log.getLogger('').addHandler(log.StreamHandler())
-
-log.info("influx client started")
-
+# -------------------- main -------------------- 
+config = cfg.configure_log(__file__)
 
 # -------------------- influxDB client -------------------- 
 clientDB = InfluxDBClient(    config["influxdb"]["host"], 
