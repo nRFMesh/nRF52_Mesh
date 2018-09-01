@@ -1,0 +1,25 @@
+{  
+    "bridges":{
+        "LivingRoom":"10.0.0.38"
+    },
+    "devices":{
+        "95":{
+            "topic"     :"Nodes/",
+            "type"      :"dimmer",
+            "name"      :"Test Small Stand"
+        }
+    },
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"python_hue",
+        "subscribe":{
+            "Nodes"     :["dimmer"]
+        }
+    },
+    "log":{
+        "logfile":"/home/pi/share/hue.log",
+        "level":"Info"
+    }
+}

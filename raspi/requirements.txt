@@ -2,4 +2,5 @@ vectors
 influxdb
 paho-mqtt
 milight
+phue
 git+https://github.com/iancmcc/ouimeaux.git
