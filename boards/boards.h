@@ -49,6 +49,8 @@
   #include "nrf52_sensortag.h"
 #elif defined(BOARD_NRF52_DONGLE)
   #include "nrf52_dongle.h"
+#elif defined(BOARD_NRF52_BUTTONS)
+  #include "nrf52_buttons.h"
 #else
 #error "Board is not defined"
 
