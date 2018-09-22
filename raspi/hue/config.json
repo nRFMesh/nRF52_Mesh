@@ -1,6 +1,6 @@
 {  
-    "bridges":{
-        "LivingRoom":"10.0.0.38"
+    "gateway":{
+        "url":"http://localhost/api/853212563154"
     },
     "devices":{
         "95":{
@@ -17,6 +17,9 @@
         "subscribe":{
             "Nodes"     :["dimmer"]
         }
+    },
+    "websocket":{
+        "url":"ws://localhost:443"
     },
     "log":{
         "logfile":"/home/pi/share/hue.log",

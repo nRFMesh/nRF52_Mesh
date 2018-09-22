@@ -680,5 +680,13 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "95":   {   "name"          :"Xio Env 1",
+        "board"         :"Xiaomi_Aquara_Env_Sensor",
+        "uid"           :"",
+        "mac"           :"00:15:8d:00:02:47:6b",
+        "position"   :{ "x":"1","y":"-1","z":"0.6"},
+        "data"          : ["temperature","humidity","pressure"],
+        "channel"       : "25"
     }
 }

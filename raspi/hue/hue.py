@@ -12,7 +12,7 @@ import sys,os
 import cfg
 
 def on_connect(lclient, userdata, flags, rc):
-    for node_id,device in config["devices"]:
+    for node_id,device in config["devices"].items():
         topic_sub = device["topic"]+node_id+'/'+device["type"]
         lclient.subscribe(topic_sub)
         log.info("Subscribed to: "+topic_sub)
@@ -73,18 +73,19 @@ if(cfg.ping(config["bridges"]["LivingRoom"])):
     lights = b.get_light_objects('name')
 
     log.info("Hue Lights available :")
-    for name, light in lights.iteritems():
+    for name, light in lights.items():
         log.info(name)
+    
+    lights["Test Small Stand"].brightness = 2
 else:
     log.info("Bridge ip not responding")
 
+
 # -------------------- Mqtt Client -------------------- 
-cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
-client = mqtt.Client(client_id=cid)
-client.on_connect = on_connect
-client.on_message = on_message
-
-mqtt_connect_retries(client)
-
-client.loop_forever()
+#cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
+#client = mqtt.Client(client_id=cid)
+#client.on_connect = on_connect
+#client.on_message = on_message
+#mqtt_connect_retries(client)
+#client.loop_forever()
 

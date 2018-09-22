@@ -1,6 +1,6 @@
 {  
-    "bridges":{
-        "LivingRoom":"10.0.0.38"
+    "gateway":{
+        "url":"http://10.0.0.17/api/853212563154"
     },
     "devices":{
         "95":{
@@ -10,13 +10,17 @@
         }
     },
     "mqtt":{
-        "host":"10.0.0.44",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
-        "client_id":"python_hue",
-        "subscribe":{
-            "Nodes"     :["dimmer"]
-        }
+        "client_id":"hci_client",
+        "subscriptions":[],
+        "actions"   :["dimmer","heat","ping"],
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
+    },
+    "websocket":{
+        "url":"ws://10.0.0.17:443"
     },
     "log":{
         "logfile":"./hue.log",
