@@ -1,0 +1,29 @@
+{  
+    "gateway":{
+        "url":"http://localhost/api/853212563154"
+    },
+    "devices":{
+        "95":{
+            "topic"     :"Nodes/",
+            "type"      :"dimmer",
+            "name"      :"Test Small Stand"
+        }
+    },
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"hci_client",
+        "subscriptions":[],
+        "actions"   :["dimmer","heat","ping"],
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
+    },
+    "websocket":{
+        "url":"ws://localhost:443"
+    },
+    "log":{
+        "logfile":"/home/pi/share/conbee.log",
+        "level":"Info"
+    }
+}
