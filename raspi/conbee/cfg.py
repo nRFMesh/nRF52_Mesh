@@ -82,3 +82,12 @@ def get_node_id_from_name(name,nodes):
             if val["name"] == name:
                 res = key
     return res
+
+def get_first_key_from_param(param,match,mapdict):
+    res =""
+    for key,entry in mapdict.items():
+        if param in entry:
+            if entry[param] == match:
+                res = key
+                return res
+    return res

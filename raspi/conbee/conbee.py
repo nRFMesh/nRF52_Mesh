@@ -30,11 +30,33 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
     res = None
     modelid = sensors_map[sid]["modelid"]
     if(modelid == "lumi.sensor_cube.aqgl01"):
-        #TODO find if the sid is the first in sensors_map then it's events, or if second then it's gyro rotation analog value
-        json_payload = {}
-        json_payload["event"] = buttonevent
+        first_id = cfg.get_first_key_from_param("modelid","lumi.sensor_cube.aqgl01",sensors_map)
+        if(sid == first_id):
+            json_payload = {}
+            if(buttonevent == 7000):
+                json_payload["event"] = "wakeup"
+            elif(buttonevent == 7007):
+                json_payload["event"] = "shake"
+            else:
+                event_to   = int(buttonevent / 1000)
+                event_from = int(buttonevent %   10)
+                if(event_from == event_to):
+                    json_payload["event"] = "double_tap"
+                    json_payload["face"] = event_to
+                elif(event_from == 0):
+                    json_payload["event"] = "push"
+                    json_payload["face"] = event_to
+                else:
+                    json_payload["event"] = "flip"
+                    json_payload["from"] = event_from
+                    json_payload["to"] = event_to
+                #print(f"from {event_from} to {event_to} : ")
+            #print("button => cube button event")
+        else:
+            json_payload = {}
+            json_payload["rotation"] = buttonevent
+            #print("button => cube analog rotation")
         res = json.dumps(json_payload)
-        print("button => cube")
     elif(modelid == "lumi.vibration.aq1"):
         json_payload = {"motion":"high"}
         res = json.dumps(json_payload)
