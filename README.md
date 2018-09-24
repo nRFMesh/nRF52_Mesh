@@ -4,6 +4,7 @@ This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/)
 # The content of [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 ## ./raspi/
 The server's python scripts running also on a raspberry pi
+* ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
 * ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
 * ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
 * ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
@@ -12,6 +13,31 @@ The server's python scripts running also on a raspberry pi
 * ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
 * ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
 * Data collection into a time series database 
+
+## ConBee Zigbee to MQTT example
+
+    jNodes/96/button {"event": "flip", "from": 4, "to": 2}
+    jNodes/96/button {"event": "flip", "from": 2, "to": 4}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 6}
+    jNodes/96/button {"event": "push", "face": 6}
+    jNodes/96/button {"event": "flip", "from": 6, "to": 3}
+    jNodes/96/button {"event": "shake"}
+    jNodes/96/button {"event": "double_tap", "face": 3}
+    jNodes/96/button {"rotation": -1377}
+    jNodes/96/button {"rotation": 8140}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 2}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 6}
+    jNodes/96/button {"event": "flip", "from": 2, "to": 6}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 4}
+    jNodes/96/button {"event": "wakeup"}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
+    jNodes/96/button {"event": "shake"}
+    jNodes/96/button {"event": "double_tap", "face": 1}
+    jNodes/96/button {"event": "flip", "from": 5, "to": 1}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 5}
+    jNodes/96/button {"rotation": 6288}
+    jNodes/96/button {"rotation": -4747}
 
 
 ## ./boards/
