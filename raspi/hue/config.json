@@ -1,6 +1,6 @@
 {  
-    "gateway":{
-        "url":"http://localhost/api/853212563154"
+    "bridges":{
+        "LivingRoom":"10.0.0.38"
     },
     "devices":{
         "95":{

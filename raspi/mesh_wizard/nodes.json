@@ -694,7 +694,7 @@
         "uid"           :"",
         "mac"           :"00:15:8d:00:028f:85:31",
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
-        "data"          : ["wake","flip","push","shake","double_tap"],
+        "events"          : ["wake","flip","push","shake","double_tap"],
         "channel"       : "25"
     },
     "97":   {   "name"          :"lumi.vibration.aq1 7",
@@ -702,7 +702,7 @@
         "uid"           :"",
         "mac"           :"00:15:8d:00:02:a4:f6",
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
-        "data"          : ["move"],
+        "events"          : ["move"],
         "channel"       : "25"
     }
 }

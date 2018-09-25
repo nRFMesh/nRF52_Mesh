@@ -94,7 +94,7 @@ async def websocket_sensor_events():
                     topic = "Nodes/"+node_id+"/"+"pressure"
                     payload = int(sensor_event["state"]["pressure"])
                 elif(stype == "ZHASwitch"):
-                    topic = "jNodes/"+node_id+"/"+"button"
+                    topic = sid + "/" + sname
                     #payload = sensor_event["state"]["buttonevent"]
                     payload = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
                 else:
@@ -106,6 +106,7 @@ async def websocket_sensor_events():
             if(payload):
                 clientMQTT.publish(topic,payload)
                 log.debug("published on : %s => %s"%(topic,payload))
+        log.error("Done with the While loop")
 
 
 
@@ -126,4 +127,6 @@ clientMQTT = mqtt_start(config_file,mqtt_on_message)
 
 log.info("Entering webscoket loop")
 loop = asyncio.get_event_loop()
+log.info("after get_event_loop()")
 loop.run_until_complete(websocket_sensor_events())
+log.error("after run_until_complete()")

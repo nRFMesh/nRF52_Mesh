@@ -1,6 +1,13 @@
 {  
-    "gateway":{
-        "url":"http://10.0.0.17/api/853212563154"
+    "bridges":{
+        "LivingRoom":"10.0.0.38"
+    },
+    "rules":{
+        "wakeup":{
+            "input"     :"jNodes/96/button",
+            "event"     :"flip",
+            "output"    :"Test Small Stand"
+        }
     },
     "devices":{
         "95":{
@@ -14,7 +21,7 @@
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",
-        "subscriptions":[],
+        "subscriptions":["jNodes/96/button","lumi.sensor_cube.aqgl01/Cube 1"],
         "actions"   :["dimmer","heat","ping"],
         "rf_2_mqtt" :true,
         "mqtt_2_rf" :true
@@ -23,7 +30,7 @@
         "url":"ws://10.0.0.17:443"
     },
     "log":{
-        "logfile":"./hue.log",
+        "logfile":"./out_hue.log",
         "level":"Info"
     }
 }
