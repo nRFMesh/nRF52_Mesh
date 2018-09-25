@@ -2,6 +2,13 @@
     "bridges":{
         "LivingRoom":"10.0.0.38"
     },
+    "rules":{
+        "wakeup":{
+            "input"     :"jNodes/96/button",
+            "event"     :"flip",
+            "output"    :"Test Small Stand"
+        }
+    },
     "devices":{
         "95":{
             "topic"     :"Nodes/",
@@ -10,13 +17,14 @@
         }
     },
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
-        "client_id":"python_hue",
-        "subscribe":{
-            "Nodes"     :["dimmer"]
-        }
+        "client_id":"hci_client",
+        "subscriptions":["jNodes/96/button","lumi.sensor_cube.aqgl01/Cube 1"],
+        "actions"   :["dimmer","heat","ping"],
+        "rf_2_mqtt" :true,
+        "mqtt_2_rf" :true
     },
     "websocket":{
         "url":"ws://localhost:443"
