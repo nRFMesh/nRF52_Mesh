@@ -21,8 +21,8 @@
         "port":1883,
         "keepalive":60,
         "client_id":"hci_client",
-        "subscriptions":["jNodes/96/button","lumi.sensor_cube.aqgl01/Cube 1"],
-        "actions"   :["dimmer","heat","ping"],
+        "subscriptions":["lumi.sensor_cube.aqgl01/Cube 1"],
+        "actions"   :[],
         "rf_2_mqtt" :true,
         "mqtt_2_rf" :true
     },
