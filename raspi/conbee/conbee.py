@@ -76,6 +76,7 @@ async def websocket_sensor_events():
             sensor_event = json.loads(message)
             sid = sensor_event["id"]
             sname = sensors_map[sid]["name"]
+            smodelid = sensors_map[sid]["modelid"]
             node_id = cfg.get_node_id_from_name(sname,nodes)
             if(not node_id):
                 log.error("%s not found in nodes.json"%(sname))
@@ -94,7 +95,7 @@ async def websocket_sensor_events():
                     topic = "Nodes/"+node_id+"/"+"pressure"
                     payload = int(sensor_event["state"]["pressure"])
                 elif(stype == "ZHASwitch"):
-                    topic = sid + "/" + sname
+                    topic = smodelid + "/" + sname
                     #payload = sensor_event["state"]["buttonevent"]
                     payload = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
                 else:
