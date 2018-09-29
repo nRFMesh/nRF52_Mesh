@@ -500,7 +500,7 @@
         "channel"       : "2",
         "sleep"         : "20"
             },
-    "83":   {   "name"          :"rfserv Dongle5",
+    "83":   {   "name"          :"Dongle5",
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
         "uid"           :"0x7D F1 29 09 89 99 8C F5",
@@ -516,7 +516,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
             },
-    "84":   {   "name"          :"Dongle6",
+    "84":   {   "name"          :"rfserv Dongle6",
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
         "uid"           :"0x79 B8 80 18 9D 23 79 A1",

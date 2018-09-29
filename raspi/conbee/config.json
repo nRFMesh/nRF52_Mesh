@@ -1,5 +1,5 @@
 {  
-    "gateway":{
+    "conbee":{
         "url":"http://localhost/api/853212563154"
     },
     "devices":{
@@ -15,15 +15,14 @@
         "keepalive":60,
         "client_id":"conbee_client",
         "subscriptions":[],
-        "actions"   :["dimmer","heat","ping"],
-        "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "publish" :true,
+        "subscribe" :false
     },
     "websocket":{
         "url":"ws://localhost:443"
     },
     "log":{
         "logfile":"/home/pi/share/conbee.log",
-        "level":"Info"
+        "level":"Debug"
     }
 }

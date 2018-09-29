@@ -1,5 +1,5 @@
 {  
-    "gateway":{
+    "conbee":{
         "url":"http://10.0.0.17/api/853212563154"
     },
     "devices":{
@@ -13,11 +13,10 @@
         "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
-        "client_id":"hci_client",
+        "client_id":"conbee_client",
         "subscriptions":[],
-        "actions"   :["dimmer","heat","ping"],
-        "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "publish" :true,
+        "subscribe" :false
     },
     "websocket":{
         "url":"ws://10.0.0.17:443"

@@ -50,19 +50,15 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
                     json_payload["event"] = "flip"
                     json_payload["from"] = event_from
                     json_payload["to"] = event_to
-                #print(f"from {event_from} to {event_to} : ")
-            #print("button => cube button event")
         else:
             json_payload = {}
             json_payload["rotation"] = buttonevent
-            #print("button => cube analog rotation")
         res = json.dumps(json_payload)
     elif(modelid == "lumi.vibration.aq1"):
         json_payload = {"motion":"high"}
         res = json.dumps(json_payload)
-        print("button => vibration")
     else:
-        print("button to nothing")
+        log.error("button event modelid unknown")
     return res
 
 async def websocket_sensor_events():
@@ -111,14 +107,12 @@ async def websocket_sensor_events():
 
 
 
-config_file = cfg.configure_log(__file__)
-
 nodes_config = os.getenv('NODES_CONFIG','/home/pi/nRF52_Mesh/raspi/mesh_wizard/nodes.json')
 log.info("using NODES_CONFIG : %s",nodes_config)
 nodes = cfg.get_local_nodes(nodes_config)
 
-#config_file = cfg.get_local_json()
-response = requests.get(config_file["gateway"]["url"]+"/sensors")
+config_file = cfg.configure_log(__file__)
+response = requests.get(config_file["conbee"]["url"]+"/sensors")
 sensors_map = response.json()
 log.info("received config")
 show_sensors(sensors_map)

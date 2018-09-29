@@ -12,13 +12,13 @@ conf = {}
 def on_connect(lclient, userdata, flags, rc):
     global conf
     log.info("mqtt> connected with result code "+str(rc))
-    if(conf["mqtt"]["mqtt_2_rf"]):
+    if(conf["mqtt"]["subscribe"]):
         for sub in userdata["mqtt"]["subscriptions"]:
             log.info("mqtt> Subscription to %s",sub)
             lclient.subscribe(sub)
     else:
         log.info("mqtt> Subscriptions not enabled")
-    if(conf["mqtt"]["rf_2_mqtt"]):
+    if(conf["mqtt"]["publish"]):
         log.info("mqtt> Publishing enabled")
     else:
         log.info("mqtt> Publishing not enabled")
@@ -47,7 +47,7 @@ def mqtt_start(config,mqtt_on_message):
     global conf
     conf = config
     clientMQTT = None
-    if(config["mqtt"]["rf_2_mqtt"] or config["mqtt"]["mqtt_2_rf"]):
+    if(config["mqtt"]["publish"] or config["mqtt"]["subscribe"]):
         config["mqtt"]["enable"] = True
         cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
         clientMQTT = mqtt.Client(client_id=cid,userdata=config)
