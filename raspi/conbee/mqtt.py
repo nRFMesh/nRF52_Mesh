@@ -31,7 +31,7 @@ def ruler_loop_forever():
     return
 
 
-def mqtt_start(config,mqtt_on_message):
+def mqtt_start(config,mqtt_on_message,start_looping):
     def mqtt_connect_retries(client):
         connected = False
         while(not connected):
@@ -54,8 +54,9 @@ def mqtt_start(config,mqtt_on_message):
         clientMQTT.on_connect = on_connect
         clientMQTT.on_message = mqtt_on_message
         mqtt_connect_retries(clientMQTT)
-        #the loop will be called in the run main loop()
-        #clientMQTT.loop_start()
+        if(start_looping):
+            #the loop will be called in the run main loop()
+            clientMQTT.loop_start()
     else:
        config["mqtt"]["enable"] = False
     return clientMQTT

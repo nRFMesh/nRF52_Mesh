@@ -15,7 +15,7 @@
         "keepalive":60,
         "client_id":"hue_client",
         "subscriptions":["lumi.sensor_cube.aqgl01/Cube 1"],
-        "actions"   :["dimmer","heat","ping"],
+        "actions"   :[],
         "publish" :true,
         "subscribe" :true
     },

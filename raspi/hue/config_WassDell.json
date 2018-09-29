@@ -9,28 +9,21 @@
             "output"    :"Test Small Stand"
         }
     },
-    "devices":{
-        "95":{
-            "topic"     :"Nodes/",
-            "type"      :"dimmer",
-            "name"      :"Test Small Stand"
-        }
-    },
     "mqtt":{
         "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
-        "client_id":"hci_client",
+        "client_id":"hue_client",
         "subscriptions":["lumi.sensor_cube.aqgl01/Cube 1"],
         "actions"   :[],
-        "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "publish" :true,
+        "subscribe" :true
     },
     "websocket":{
         "url":"ws://10.0.0.17:443"
     },
     "log":{
         "logfile":"./out_hue.log",
-        "level":"Info"
+        "level":"Debug"
     }
 }

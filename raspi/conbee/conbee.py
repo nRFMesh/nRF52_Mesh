@@ -30,6 +30,7 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
     res = None
     modelid = sensors_map[sid]["modelid"]
     if(modelid == "lumi.sensor_cube.aqgl01"):
+        #TODO instead of first key should check for ids ending with 0x12 and 0x0C
         first_id = cfg.get_first_key_from_param("modelid","lumi.sensor_cube.aqgl01",sensors_map)
         if(sid == first_id):
             json_payload = {}
@@ -118,7 +119,7 @@ log.info("received config")
 show_sensors(sensors_map)
 
 #will start a separate thread for looping
-clientMQTT = mqtt_start(config_file,mqtt_on_message)
+clientMQTT = mqtt_start(config_file,mqtt_on_message,True)
 
 log.info("Entering webscoket loop")
 loop = asyncio.get_event_loop()

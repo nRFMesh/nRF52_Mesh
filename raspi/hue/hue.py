@@ -53,8 +53,9 @@ else:
 
 # -------------------- Mqtt Client -------------------- 
 #will start a separate thread for looping
-clientMQTT = mqtt_start(config,mqtt_on_message)
+clientMQTT = mqtt_start(config,mqtt_on_message,True)
 
 while(True):
     sleep(0.2)
-    clientMQTT.loop()
+    #The MQTT keeps looping on a thead
+    #All there is to do here is not to exit
