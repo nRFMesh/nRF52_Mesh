@@ -20,25 +20,25 @@
             "input":"jNodes/64/acceleration",
             "output":"Nodes/64/angle",
             "description":"captures the x3 accis of acceleration and turn it into an angle",
-            "enable" : true
+            "enable" : false
         },
         "Bathroom_Heating":{
             "input":"jNodes/45/acceleration",
             "output":"Nodes/45/angle",
             "description":"angle from the closed reference",
-            "enable" : true
+            "enable" : false
         },
         "Bedroom_Light_Up":{
             "input":"Nodes/41/button",
             "output":"Nodes/34/dimmer",
             "description":"Increeses the light of the sleeping room on button press",
-            "enable" : true
+            "enable" : false
         },
         "Bedroom_Direction_Remote":{
             "input":"jNodes/93/acceleration",
             "output":"Nodes/34/dimmer",
             "description":"Set the light depending on the Tag orientation",
-            "enable" : true
+            "enable" : false
         }
     }
 }

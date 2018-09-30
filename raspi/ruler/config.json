@@ -7,7 +7,7 @@
     },
     "log":{
         "logfile":"/home/pi/share/ruler.log",
-        "level":"Debug"
+        "level":"Info"
     },
     "rules":{
         "Bathroom_Hum_Status":{

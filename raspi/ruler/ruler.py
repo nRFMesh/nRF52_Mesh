@@ -12,8 +12,11 @@ from vectors import Vector
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
     for rule_name,rule in config["rules"].items():
-        log.info("Subscription for rule:%s %s -> %s",rule_name,rule["input"],rule["output"])
-        lclient.subscribe(rule["input"])
+        if(rule["enable"]):
+            log.info("Subscription for rule:%s %s -> %s",rule_name,rule["input"],rule["output"])
+            lclient.subscribe(rule["input"])
+    #Here custom subscriptions can be added
+    #lclient.subscribe("jNodes/+/alive")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -24,6 +27,8 @@ def on_message(client, userdata, msg):
                 payload = getattr(rules,rule_name)(msg.payload)
                 if(payload != None):
                     clientMQTT.publish(rule["output"],payload)
+    #Here Custom Rules can be run
+    #if (len(topic_parts)==3) and (topic_parts[0] == "jNodes") and (topic_parts[2]=="alive"):
 
 
 def ruler_loop_forever():
@@ -42,7 +47,7 @@ def mqtt_start():
                 log.info(  "mqtt connected to "+config["mqtt"]["host"]+":"+str(config["mqtt"]["port"])+" with id: "+ cid )
             except socket.error:
                 log.error("socket.error will try a reconnection in 10 s")
-            sleep(10)
+                sleep(10)
         return
     cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
     client = mqtt.Client(client_id=cid)

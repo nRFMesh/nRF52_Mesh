@@ -440,7 +440,7 @@
         "channel"       : "2",
         "sleep"         : "20"
             },
-    "79":   {   "name"          :"Bedroom Repeater2",
+    "79":   {   "name"          :"Livingroom Repeater2",
         "board"         :"nRF52_Dongle",
         "program"       :"nRF52_Dongle",
         "position"      :{ "x":"-2.0","y":"4","z":"0.7"},
