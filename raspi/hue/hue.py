@@ -15,7 +15,7 @@ from mqtt import mqtt_start
 def aqara_cube(name,payload):
     if(name == "Aqara Cube 1"):
         log.debug("Aqara Cube 1 - action")
-        jval = json.laods(payload)
+        jval = json.loads(payload)
         if("event" in jval):
             if(jval["event"] == "flip"):
                 lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
