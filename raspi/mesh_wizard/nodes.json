@@ -610,7 +610,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
     },
-    "95":   {   "name"          :"Xio Env 1",
+    "95":   {   "name"          :"Aqara Env 1",
         "board"         :"Xiaomi_Aquara_Env_Sensor",
         "uid"           :"",
         "mac"           :"00:15:8d:00:02:47:6b",
@@ -618,7 +618,7 @@
         "data"          : ["temperature","humidity","pressure"],
         "channel"       : "25"
     },
-    "96":   {   "name"          :"Cube 1",
+    "96":   {   "name"          :"Aqara Cube 1",
         "modelid"       :"lumi.sensor_cube.aqgl01",
         "uid"           :"",
         "mac"           :"00:15:8d:00:028f:85:31",

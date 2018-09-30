@@ -1,13 +1,7 @@
 {  
     "conbee":{
-        "url":"http://10.0.0.17/api/853212563154"
-    },
-    "devices":{
-        "95":{
-            "topic"     :"Nodes/",
-            "type"      :"dimmer",
-            "name"      :"Test Small Stand"
-        }
+        "rest":"http://10.0.0.17/api/853212563154",
+        "websocket":"ws://10.0.0.17:443"
     },
     "mqtt":{
         "host":"10.0.0.12",
@@ -17,9 +11,6 @@
         "subscriptions":[],
         "publish" :true,
         "subscribe" :false
-    },
-    "websocket":{
-        "url":"ws://10.0.0.17:443"
     },
     "log":{
         "logfile":"./out_conbee.log",

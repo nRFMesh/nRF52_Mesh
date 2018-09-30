@@ -26,47 +26,56 @@ def show_sensors(sensors_map):
         print(f"{key} : {name} : {sensor_type}")
     return
 
+def cubeevent_to_json(buttonevent,sensors_map,sid):
+    res = None
+    #TODO instead of first key should check for ids ending with 0x12 and 0x0C
+    first_id = cfg.get_first_key_from_param("modelid","lumi.sensor_cube.aqgl01",sensors_map)
+    if(sid == first_id):
+        json_payload = {}
+        if(buttonevent == 7000):
+            json_payload["event"] = "wakeup"
+        elif(buttonevent == 7007):
+            json_payload["event"] = "shake"
+        else:
+            event_to   = int(buttonevent / 1000)
+            event_from = int(buttonevent %   10)
+            if(event_from == event_to):
+                json_payload["event"] = "double_tap"
+                json_payload["face"] = event_to
+            elif(event_from == 0):
+                json_payload["event"] = "push"
+                json_payload["face"] = event_to
+            else:
+                json_payload["event"] = "flip"
+                json_payload["from"] = event_from
+                json_payload["to"] = event_to
+        res = json.dumps(json_payload)
+    else:
+        json_payload = {}
+        json_payload["rotation"] = buttonevent
+        res = json.dumps(json_payload)
+    #there will be an else that uses res None if it's not 0x12 and not 0x0C
+    return res
+
+def motionevent_to_json(buttonevent):
+    res = None
+    json_payload = {"motion":buttonevent}
+    res = json.dumps(json_payload)
+    return res
+
 def buttonevent_to_json(buttonevent,sensors_map,sid):
     res = None
     modelid = sensors_map[sid]["modelid"]
     if(modelid == "lumi.sensor_cube.aqgl01"):
-        #TODO instead of first key should check for ids ending with 0x12 and 0x0C
-        first_id = cfg.get_first_key_from_param("modelid","lumi.sensor_cube.aqgl01",sensors_map)
-        if(sid == first_id):
-            json_payload = {}
-            if(buttonevent == 7000):
-                json_payload["event"] = "wakeup"
-            elif(buttonevent == 7007):
-                json_payload["event"] = "shake"
-            else:
-                event_to   = int(buttonevent / 1000)
-                event_from = int(buttonevent %   10)
-                if(event_from == event_to):
-                    json_payload["event"] = "double_tap"
-                    json_payload["face"] = event_to
-                elif(event_from == 0):
-                    json_payload["event"] = "push"
-                    json_payload["face"] = event_to
-                else:
-                    json_payload["event"] = "flip"
-                    json_payload["from"] = event_from
-                    json_payload["to"] = event_to
-        else:
-            json_payload = {}
-            json_payload["rotation"] = buttonevent
-        res = json.dumps(json_payload)
+        res = cubeevent_to_json(buttonevent,sensors_map,sid)
     elif(modelid == "lumi.vibration.aq1"):
-        json_payload = {"motion":"high"}
-        res = json.dumps(json_payload)
+        res = motionevent_to_json(buttonevent)
     else:
         log.error("button event modelid unknown")
     return res
 
 async def websocket_sensor_events():
-    async with websockets.connect(config_file["websocket"]["url"]) as websocket:
-        #name = input("What's your name? ")
-        #await websocket.send(name)
-        #print(f"> {name}")
+    async with websockets.connect(config_file["conbee"]["websocket"]) as websocket:
         while(True):
             message = await websocket.recv()
             log.debug(message)
@@ -102,8 +111,11 @@ async def websocket_sensor_events():
                 topic = "Nodes/"+node_id+"/"+"battery_percent"
                 payload = sensor_event["config"]["battery"]
             if(payload):
-                clientMQTT.publish(topic,payload)
-                log.debug("published on : %s => %s"%(topic,payload))
+                if(config_file["mqtt"]["publish"]):
+                    clientMQTT.publish(topic,payload)
+                    log.debug("published on : %s => %s"%(topic,payload))
+                else:
+                    log.warning("publish not enabled !!!! skipped : %s => %s"%(topic,payload))
         log.error("Done with the While loop")
 
 
@@ -113,7 +125,7 @@ log.info("using NODES_CONFIG : %s",nodes_config)
 nodes = cfg.get_local_nodes(nodes_config)
 
 config_file = cfg.configure_log(__file__)
-response = requests.get(config_file["conbee"]["url"]+"/sensors")
+response = requests.get(config_file["conbee"]["rest"]+"/sensors")
 sensors_map = response.json()
 log.info("received config")
 show_sensors(sensors_map)
@@ -124,5 +136,10 @@ clientMQTT = mqtt_start(config_file,mqtt_on_message,True)
 log.info("Entering webscoket loop")
 loop = asyncio.get_event_loop()
 log.info("after get_event_loop()")
-loop.run_until_complete(websocket_sensor_events())
-log.error("after run_until_complete()")
+while(True):
+    try:
+        loop.run_until_complete(websocket_sensor_events())
+    except websockets.exceptions.ConnectionClosed:
+        log.error("conbee websocket connection lost (websockets.exceptions.ConnectionClosed)")
+        log.info("will retry connection in 10 sec")
+        sleep(10)

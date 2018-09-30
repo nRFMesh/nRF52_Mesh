@@ -14,7 +14,7 @@
         "port":1883,
         "keepalive":60,
         "client_id":"hue_client",
-        "subscriptions":["lumi.sensor_cube.aqgl01/Cube 1"],
+        "subscriptions":["lumi.sensor_cube.aqgl01/Aqara Cube 1"],
         "actions"   :[],
         "publish" :true,
         "subscribe" :true
