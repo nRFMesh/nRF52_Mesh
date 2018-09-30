@@ -19,6 +19,6 @@
     },
     "log":{
         "logfile":"/home/pi/share/rf_uart.log",
-        "level":"Debug"
+        "level":"Info"
     }
 }
