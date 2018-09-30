@@ -6,6 +6,7 @@ This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/)
 The server's python scripts running also on a raspberry pi
 * ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
 * ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
+* ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
 * ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
 * ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
 * ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
@@ -39,6 +40,9 @@ The server's python scripts running also on a raspberry pi
     jNodes/96/button {"rotation": 6288}
     jNodes/96/button {"rotation": -4747}
 
+## rf_stm32
+
+    mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
 
 ## ./boards/
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware

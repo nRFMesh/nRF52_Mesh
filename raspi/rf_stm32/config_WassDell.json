@@ -1,0 +1,26 @@
+{
+    "serial":{
+        "port":"COM6",
+        "baud":115200
+    },
+    "mqtt":{
+        "host":"10.0.0.12",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"rf_stm32",
+        "subscriptions":[
+            "Bed Heater",
+            "Retro Light Upstairs"
+        ],
+        "publish" :false,
+        "subscribe" :true
+    },
+    "log":{
+        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\rf_stm32\\rf_stm32.log",
+        "level":"Debug"
+    },
+    "heat":{
+        "node_src" : 65,
+        "node_dst" : 56
+    }
+}
