@@ -43,6 +43,7 @@ The server's python scripts running also on a raspberry pi
 ## rf_stm32
 
     mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
+    mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
 
 ## ./boards/
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware

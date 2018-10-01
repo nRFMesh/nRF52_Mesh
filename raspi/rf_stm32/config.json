@@ -1,24 +1,30 @@
 {
     "serial":{
-        "port":"/dev/ttyUSB0",
-        "baud":460800
+        "port":"/dev/ttyUSB1",
+        "baud":115200
     },
     "mqtt":{
         "host":"localhost",
         "port":1883,
         "keepalive":60,
-        "client_id":"hci_client",
+        "client_id":"rf_stm32",
         "subscriptions":[
-            "Nodes/#",
-            "cmd/request/#",
-            "remote_cmd/request/#"
+            "Bed Heater",
+            "Retro Light Upstairs/#"
         ],
-        "actions"   :["dimmer","heat","ping"],
-        "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "publish" :false,
+        "subscribe" :true
     },
     "log":{
         "logfile":"/home/pi/share/rf_uart.log",
         "level":"Info"
+    },
+    "heat":{
+        "node_src" : 65,
+        "node_dst" : 56
+    },
+    "light":{
+        "node_src" : 65,
+        "node_dst" : 25
     }
 }

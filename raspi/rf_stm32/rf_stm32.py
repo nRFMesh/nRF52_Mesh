@@ -13,16 +13,41 @@ def send_heat_duration(heat,duration):
     size = 0x07
     control = 0x72
     pid = 0x09
-    src = 65
-    dst = 56
+    src = config["heat"]["node_src"]
+    dst = config["heat"]["node_dst"]
     mesh.send([ size,control,mesh.pid["heat"],src,dst,int(heat),int(duration)])
     log.info("send heat %s during %s minutes",heat, duration)
+    return
+
+#tmsg 0x07 0x71 0x0D 0x41 0x19 0x06 0xD0
+def send_brightness_all(brightness):
+    bri = int(brightness)
+    size = 0x07
+    control = 0x71
+    pid = 0x0D
+    src = config["light"]["node_src"]
+    dst = config["light"]["node_dst"]
+    brightness_high = bri / 256
+    brightness_low = bri % 256
+    mesh.send([ size,control,mesh.pid["dimmer"],src,dst,int(brightness_high),int(brightness_low)])
+    log.info("send brightness to all channels %d ",bri)
     return
 
 
 
 def mqtt_on_message(client, userdata, msg):
     if(msg.topic == "Bed Heater"):
+        if(len(msg.payload) != 0):
+            try:
+                params = json.loads(msg.payload)
+                if("heat" in params) and ("time_mn" in params):
+                    send_heat_duration(params["heat"],params["time_mn"])
+            except json.decoder.JSONDecodeError:
+                log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+    elif(msg.topic == "Retro Light Upstairs/all"):
+        if(len(msg.payload) != 0):
+            send_brightness_all(msg.payload)
+    elif(msg.topic == "Retro Light Upstairs/channels"):
         if(len(msg.payload) != 0):
             try:
                 params = json.loads(msg.payload)

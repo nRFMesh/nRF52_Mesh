@@ -1,6 +1,6 @@
 {
     "serial":{
-        "port":"COM6",
+        "port":"COM4",
         "baud":115200
     },
     "mqtt":{
@@ -10,7 +10,7 @@
         "client_id":"rf_stm32",
         "subscriptions":[
             "Bed Heater",
-            "Retro Light Upstairs"
+            "Retro Light Upstairs/#"
         ],
         "publish" :false,
         "subscribe" :true
@@ -22,5 +22,9 @@
     "heat":{
         "node_src" : 65,
         "node_dst" : 56
+    },
+    "light":{
+        "node_src" : 65,
+        "node_dst" : 25
     }
 }
