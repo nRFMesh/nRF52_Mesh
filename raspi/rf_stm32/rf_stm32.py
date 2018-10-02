@@ -9,7 +9,7 @@ import mesh as mesh
 import cfg
 
 
-def send_heat_duration(heat,duration):
+def serial_send_heat_duration(heat,duration):
     size = 0x07
     control = 0x72
     pid = 0x09
@@ -20,7 +20,7 @@ def send_heat_duration(heat,duration):
     return
 
 #tmsg 0x07 0x71 0x0D 0x41 0x19 0x06 0xD0
-def send_brightness_all(brightness):
+def serial_send_brightness_all(brightness):
     bri = int(brightness)
     size = 0x07
     control = 0x71
@@ -33,28 +33,40 @@ def send_brightness_all(brightness):
     log.info("send brightness to all channels %d ",bri)
     return
 
+def mqtt_handle_heat_request(topics,payload):
+    if(topics[1] == "json"):
+        try:
+            params = json.loads(payload)
+            if("heat" in params) and ("time_mn" in params):
+                serial_send_heat_duration(params["heat"],params["time_mn"])
+        except json.decoder.JSONDecodeError:
+            log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+    elif(topics[1] == "1h"):
+        serial_send_heat_duration(int(payload),60)
+    elif(topics[1] == "20mn"):
+        serial_send_heat_duration(int(payload),20)
+    return
+
+def mqtt_handle_dimmer_request(topics,payload):
+    if(topics[1] == "all"):
+        serial_send_brightness_all(msg.payload)
+    elif(topics[1] == "channels"):
+        try:
+            params = json.loads(msg.payload)
+            if("heat" in params) and ("time_mn" in params):
+                send_heat_duration(params["heat"],params["time_mn"])
+        except json.decoder.JSONDecodeError:
+            log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+    return    
 
 
 def mqtt_on_message(client, userdata, msg):
-    if(msg.topic == "Bed Heater"):
-        if(len(msg.payload) != 0):
-            try:
-                params = json.loads(msg.payload)
-                if("heat" in params) and ("time_mn" in params):
-                    send_heat_duration(params["heat"],params["time_mn"])
-            except json.decoder.JSONDecodeError:
-                log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
-    elif(msg.topic == "Retro Light Upstairs/all"):
-        if(len(msg.payload) != 0):
-            send_brightness_all(msg.payload)
-    elif(msg.topic == "Retro Light Upstairs/channels"):
-        if(len(msg.payload) != 0):
-            try:
-                params = json.loads(msg.payload)
-                if("heat" in params) and ("time_mn" in params):
-                    send_heat_duration(params["heat"],params["time_mn"])
-            except json.decoder.JSONDecodeError:
-                log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+    topics = msg.topic.split('/')
+    if(len(topics) == 2) and (len(msg.payload) != 0):
+        if(topics[0] == "Bed Heater"):
+            mqtt_handle_heat_request(topics,msg.payload)
+        elif(topics[0] == "Retro Light Upstairs"):
+            mqtt_handle_dimmer_request(topics,msg.payload)
     return
 
 def loop_forever():

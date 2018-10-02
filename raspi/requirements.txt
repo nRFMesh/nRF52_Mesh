@@ -6,3 +6,4 @@ phue
 git+https://github.com/iancmcc/ouimeaux.git
 websockets
 requests
+serial

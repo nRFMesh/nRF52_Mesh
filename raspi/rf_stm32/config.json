@@ -1,15 +1,15 @@
 {
     "serial":{
-        "port":"/dev/ttyUSB1",
+        "port":"/dev/ttyUSB0",
         "baud":115200
     },
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
         "client_id":"rf_stm32",
         "subscriptions":[
-            "Bed Heater",
+            "Bed Heater/#",
             "Retro Light Upstairs/#"
         ],
         "publish" :false,
@@ -21,7 +21,7 @@
     },
     "heat":{
         "node_src" : 65,
-        "node_dst" : 56
+        "node_dst" : 28
     },
     "light":{
         "node_src" : 65,

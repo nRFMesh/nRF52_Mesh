@@ -9,22 +9,22 @@
         "keepalive":60,
         "client_id":"rf_stm32",
         "subscriptions":[
-            "Bed Heater",
+            "Bed Heater/#",
             "Retro Light Upstairs/#"
         ],
         "publish" :false,
         "subscribe" :true
     },
     "log":{
-        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\rf_stm32\\rf_stm32.log",
+        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\rf_stm32\\stm32.log",
         "level":"Debug"
     },
     "heat":{
-        "node_src" : 65,
-        "node_dst" : 56
+        "node_src" : 56,
+        "node_dst" : 28
     },
     "light":{
-        "node_src" : 65,
+        "node_src" : 56,
         "node_dst" : 25
     }
 }
