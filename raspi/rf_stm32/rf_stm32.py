@@ -49,14 +49,14 @@ def mqtt_handle_heat_request(topics,payload):
 
 def mqtt_handle_dimmer_request(topics,payload):
     if(topics[1] == "all"):
-        serial_send_brightness_all(msg.payload)
+        serial_send_brightness_all(payload)
     elif(topics[1] == "channels"):
         try:
-            params = json.loads(msg.payload)
+            params = json.loads(payload)
             if("heat" in params) and ("time_mn" in params):
                 send_heat_duration(params["heat"],params["time_mn"])
         except json.decoder.JSONDecodeError:
-            log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+            log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",payload)
     return    
 
 
