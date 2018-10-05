@@ -67,7 +67,7 @@ def wemo_loop_forever():
             power = float(devices[name].current_power)/1000
             clientMQTT.publish(topic,power)
             log.debug("%s: %s: %s",name, topic, power)
-        sleep(10)
+        sleep(config["poll_sec"])
     return
 
 def mqtt_connect_retries(client):
