@@ -1,6 +1,6 @@
 {  
     "devices":{
-        "TvSet":{
+        "Wemo bed Power":{
             "node":30
         },
         "Bathroom":{
