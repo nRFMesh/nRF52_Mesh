@@ -633,5 +633,14 @@
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
         "events"          : ["move"],
         "channel"       : "25"
+    },
+    "98":   {   "name"          :"Bed Tag8",
+        "board"         :"nRF52_Sensors",
+        "program"       :"nRF52_Sensors",
+        "uid"           :"0x8C BC 56 98 C6 3C BE D3",
+        "position"      :{ "x":"-2","y":"0.2","z":"2.3"},
+        "data"          : ["temperature","hunidity","pressure","light"],
+        "channel"       : "2",
+        "sleep"         : "20"
     }
 }
