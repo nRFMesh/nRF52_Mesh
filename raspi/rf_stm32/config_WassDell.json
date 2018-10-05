@@ -12,7 +12,7 @@
             "Bed Heater/#",
             "Retro Light Upstairs/#"
         ],
-        "publish" :false,
+        "publish" :true,
         "subscribe" :true
     },
     "log":{

@@ -12,11 +12,11 @@
             "Bed Heater/#",
             "Retro Light Upstairs/#"
         ],
-        "publish" :false,
+        "publish" :true,
         "subscribe" :true
     },
     "log":{
-        "logfile":"/home/pi/share/rf_uart.log",
+        "logfile":"/home/pi/share/stm32.log",
         "level":"Info"
     },
     "heat":{

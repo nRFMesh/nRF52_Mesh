@@ -16,6 +16,10 @@ def serial_send_heat_duration(heat,duration):
     src = config["heat"]["node_src"]
     dst = config["heat"]["node_dst"]
     mesh.send([ size,control,mesh.pid["heat"],src,dst,int(heat),int(duration)])
+    if(config["mqtt"]["publish"]):
+        topic = "Nodes/"+str(config["heat"]["node_src"])+"/heat"
+        payload = int(heat)
+        clientMQTT.publish(topic,payload)
     log.info("send heat %s during %s minutes",heat, duration)
     return
 

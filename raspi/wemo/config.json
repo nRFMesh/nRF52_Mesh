@@ -1,6 +1,6 @@
 {  
     "devices":{
-        "Wemo bed Power":{
+        "Wemo Bed Power":{
             "node":30
         },
         "Bathroom":{
@@ -24,5 +24,5 @@
         "logfile":"/home/pi/share/wemo.log",
         "level":"Info"
     },
-    "poll_sec":20
+    "poll_sec":10
 }
