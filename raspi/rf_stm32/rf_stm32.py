@@ -7,12 +7,14 @@ from mqtt import mqtt_start
 import socket
 import mesh as mesh
 import cfg
+import threading
 
-
-def serial_send_heat_duration(heat,duration):
+def off_callback():
     size = 0x07
     control = 0x72
     pid = 0x09
+    heat = 0
+    duration = 0
     src = config["heat"]["node_src"]
     dst = config["heat"]["node_dst"]
     mesh.send([ size,control,mesh.pid["heat"],src,dst,int(heat),int(duration)])
@@ -20,7 +22,22 @@ def serial_send_heat_duration(heat,duration):
         topic = "Nodes/"+str(config["heat"]["node_src"])+"/heat"
         payload = int(heat)
         clientMQTT.publish(topic,payload)
-    log.info("send heat %s during %s minutes",heat, duration)
+    return
+
+def serial_send_heat_duration(heat,duration_mn):
+    size = 0x07
+    control = 0x72
+    pid = 0x09
+    src = config["heat"]["node_src"]
+    dst = config["heat"]["node_dst"]
+    mesh.send([ size,control,mesh.pid["heat"],src,dst,int(heat),int(duration_mn)])
+    if(config["mqtt"]["publish"]):
+        topic = "Nodes/"+str(config["heat"]["node_src"])+"/heat"
+        payload = int(heat)
+        clientMQTT.publish(topic,payload)
+    threading.Timer(duration_mn*60, off_callback).start()
+    log.info("send heat %s during %s minutes",heat, duration_mn)
+
     return
 
 #tmsg 0x07 0x71 0x0D 0x41 0x19 0x06 0xD0
