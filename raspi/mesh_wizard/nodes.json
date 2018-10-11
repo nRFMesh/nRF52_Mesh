@@ -642,5 +642,13 @@
         "data"          : ["temperature","hunidity","pressure","light"],
         "channel"       : "2",
         "sleep"         : "20"
+    },
+    "99":   {   "name"          :"LargeSingleSwitch",
+        "modelid"       :"lumi.sensor_86sw1",
+        "uid"           :"",
+        "mac"           :"",
+        "position"   :{ "x":"1","y":"-1","z":"0.6"},
+        "events"          : ["move"],
+        "channel"       : "25"
     }
 }

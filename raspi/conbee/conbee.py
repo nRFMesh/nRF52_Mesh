@@ -63,6 +63,12 @@ def motionevent_to_json(buttonevent):
     res = json.dumps(json_payload)
     return res
 
+def switchevent_to_json(buttonevent):
+    res = None
+    json_payload = {"switch":buttonevent}
+    res = json.dumps(json_payload)
+    return res
+
 def buttonevent_to_json(buttonevent,sensors_map,sid):
     res = None
     modelid = sensors_map[sid]["modelid"]
@@ -70,6 +76,8 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
         res = cubeevent_to_json(buttonevent,sensors_map,sid)
     elif(modelid == "lumi.vibration.aq1"):
         res = motionevent_to_json(buttonevent)
+    elif(modelid == "lumi.sensor_86sw1"):
+        res = switchevent_to_json(buttonevent)
     else:
         log.error("button event modelid unknown")
     return res
