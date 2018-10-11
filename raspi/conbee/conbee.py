@@ -78,6 +78,9 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
         res = motionevent_to_json(buttonevent)
     elif(modelid == "lumi.sensor_86sw1"):
         res = switchevent_to_json(buttonevent)
+    elif(modelid == "lumi.sensor_motion.aq2"):
+        log.info("presence_light_event_to_json not yet supported")
+        #res = presence_light_event_to_json(buttonevent)
     else:
         log.error("button event modelid unknown")
     return res
@@ -112,6 +115,13 @@ async def websocket_sensor_events():
                     topic = smodelid + "/" + sname
                     #payload = sensor_event["state"]["buttonevent"]
                     payload = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
+                elif(stype == "ZHALightLevel"):
+                    topic = "Nodes/"+node_id+"/"+"light"
+                    payload = int(sensor_event["state"]["lux"])
+                elif(stype == "ZHAPresence"):
+                    topic = "Nodes/"+node_id+"/"+"presence"
+                    #presence is as simple as true
+                    payload = 1
                 else:
                     log.error("event type (%s) unknown"%(stype))
             elif("config" in sensor_event):

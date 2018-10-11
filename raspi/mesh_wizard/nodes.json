@@ -650,5 +650,13 @@
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
         "events"          : ["move"],
         "channel"       : "25"
+    },
+    "100":   {   "name"          :"MotionLight 1",
+        "modelid"       :"lumi.sensor_motion.aq2",
+        "uid"           :"",
+        "mac"           :"",
+        "position"   :{ "x":"1","y":"-1","z":"0.6"},
+        "events"          : ["move"],
+        "channel"       : "25"
     }
 }
