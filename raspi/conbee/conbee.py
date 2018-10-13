@@ -120,9 +120,13 @@ async def websocket_sensor_events():
                     payload = int(sensor_event["state"]["lux"])
                 elif(stype == "ZHAPresence"):
                     topic = smodelid + "/" + sname
-                    #topic = "Nodes/"+node_id+"/"+"presence"
                     #presence is as simple as true
                     payload = 1
+                elif(stype == "ZHAOpenClose"):
+                    topic = smodelid + "/" + sname
+                    payload = 0
+                    if(sensor_event["state"]["open"]):
+                        payload = 1
                 else:
                     log.error("event type (%s) unknown"%(stype))
             elif("config" in sensor_event):
