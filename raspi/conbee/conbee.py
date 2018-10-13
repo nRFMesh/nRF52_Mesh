@@ -119,7 +119,8 @@ async def websocket_sensor_events():
                     topic = "Nodes/"+node_id+"/"+"light"
                     payload = int(sensor_event["state"]["lux"])
                 elif(stype == "ZHAPresence"):
-                    topic = "Nodes/"+node_id+"/"+"presence"
+                    topic = smodelid + "/" + sname
+                    #topic = "Nodes/"+node_id+"/"+"presence"
                     #presence is as simple as true
                     payload = 1
                 else:
