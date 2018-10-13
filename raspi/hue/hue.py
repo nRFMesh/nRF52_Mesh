@@ -1,3 +1,5 @@
+#https://github.com/studioimaginaire/phue
+
 #https://pypi.python.org/pypi/paho-mqtt/1.1
 import paho.mqtt.client as mqtt
 import json
@@ -21,6 +23,16 @@ def aqara_cube(name,payload):
                 lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
+def wall_switch(name):
+    if(name == "LargeSingleSwitch"):
+        log.debug("LargeSingleSwitch - pressed")
+        if(lights["Bed Leds Cupboard"].on):
+            lights["Bed Leds Cupboard"].on = False
+        else:
+            lights["Bed Leds Cupboard"].on = True
+            lights["Bed Leds Cupboard"].brightness = 1
+    return
+
 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -29,6 +41,8 @@ def mqtt_on_message(client, userdata, msg):
         name = topic_parts[1]
         if(modelid == "lumi.sensor_cube.aqgl01"):
             aqara_cube(name,msg.payload)
+        elif(modelid == "lumi.sensor_86sw1"):
+            wall_switch(name)
     else:
         log.error("topic: "+msg.topic + "size not matching")
         
