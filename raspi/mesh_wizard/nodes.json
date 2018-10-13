@@ -658,5 +658,7 @@
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
         "events"          : ["move"],
         "channel"       : "25"
-    }
+    },
+    "101": {"name" : "lumi.sensor_wleak.aq1"},
+    "102": {"name" : "OpenClose 1"}
 }

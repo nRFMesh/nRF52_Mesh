@@ -49,9 +49,9 @@ def motion_presence(name):
 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
-    if(len(topic_parts) == 2):
-        modelid = topic_parts[0]
-        name = topic_parts[1]
+    if(len(topic_parts) == 3):
+        modelid = topic_parts[1]
+        name = topic_parts[2]
         if(modelid == "lumi.sensor_cube.aqgl01"):
             aqara_cube(name,msg.payload)
         elif(modelid == "lumi.sensor_86sw1"):

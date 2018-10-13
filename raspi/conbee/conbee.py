@@ -85,6 +85,15 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
         log.error("button event modelid unknown")
     return res
 
+def water_to_json(sensor_event):
+    res = None
+    json_payload = {}
+    json_payload["water"] = sensor_event["state"]["water"]
+    json_payload["tampered"] = sensor_event["state"]["tampered"]
+    json_payload["lowbattery"] = sensor_event["state"]["lowbattery"]
+    res = json.dumps(json_payload)
+    return res
+
 async def websocket_sensor_events():
     async with websockets.connect(config_file["conbee"]["websocket"]) as websocket:
         while(True):
@@ -111,28 +120,31 @@ async def websocket_sensor_events():
                     topic = "Nodes/"+node_id+"/"+"pressure"
                     payload = int(sensor_event["state"]["pressure"])
                 elif(stype == "ZHASwitch"):
-                    topic = smodelid + "/" + sname
+                    topic = "zigbee/" + smodelid + "/" + sname
                     #payload = sensor_event["state"]["buttonevent"]
                     payload = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
                 elif(stype == "ZHALightLevel"):
                     topic = "Nodes/"+node_id+"/"+"light"
                     payload = int(sensor_event["state"]["lux"])
                 elif(stype == "ZHAPresence"):
-                    topic = smodelid + "/" + sname
+                    topic = "zigbee/" + smodelid + "/" + sname
                     #presence is as simple as true
-                    payload = 1
+                    payload = "presence"
                 elif(stype == "ZHAOpenClose"):
-                    topic = smodelid + "/" + sname
-                    payload = 0
+                    topic = "zigbee/" + smodelid + "/" + sname
+                    payload = "closed"
                     if(sensor_event["state"]["open"]):
-                        payload = 1
+                        payload = "open"
+                elif(stype == "ZHAWater"):
+                    topic = "zigbee/" + smodelid + "/" + sname
+                    payload = water_to_json(sensor_event)
                 else:
                     log.error("event type (%s) unknown"%(stype))
             elif("config" in sensor_event):
                 #config should always contain battery
                 topic = "Nodes/"+node_id+"/"+"battery_percent"
                 payload = sensor_event["config"]["battery"]
-            if(payload):
+            if(payload is not None):
                 if(config_file["mqtt"]["publish"]):
                     clientMQTT.publish(topic,payload)
                     log.debug("published on : %s => %s"%(topic,payload))

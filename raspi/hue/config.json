@@ -14,9 +14,9 @@
         "port":1883,
         "keepalive":60,
         "client_id":"hue_client",
-        "subscriptions":[   "lumi.sensor_cube.aqgl01/Aqara Cube 1",
-                            "lumi.sensor_86sw1/LargeSingleSwitch",
-                            "lumi.sensor_motion.aq2/MotionLight 1"
+        "subscriptions":[   "zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1",
+                            "zigbee/lumi.sensor_86sw1/LargeSingleSwitch",
+                            "zigbee/lumi.sensor_motion.aq2/MotionLight 1"
                         ],
         "actions"   :[],
         "publish" :true,
