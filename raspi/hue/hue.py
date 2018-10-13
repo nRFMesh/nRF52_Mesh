@@ -3,7 +3,6 @@
 #https://pypi.python.org/pypi/paho-mqtt/1.1
 import paho.mqtt.client as mqtt
 import json
-
 from phue import Bridge
 #just to get host name
 import socket 
@@ -13,6 +12,7 @@ import logging as log
 import sys,os
 import cfg
 from mqtt import mqtt_start
+import threading
 
 def aqara_cube(name,payload):
     if(name == "Aqara Cube 1"):
@@ -33,6 +33,19 @@ def wall_switch(name):
             lights["Bed Leds Cupboard"].brightness = 1
     return
 
+def stairs_off_callback():
+    lights["Stairs Up Left"].on = False
+    log.debug("Stairs Up Left - off_callback")
+    return
+
+def motion_presence(name):
+    if(name == "MotionLight 1"):
+        log.debug("MotionLight - presence")
+        command =  {'transitiontime' : 30, 'on' : True, 'bri' : 254}
+        b.set_light("Stairs Up Left", command)
+        threading.Timer(60, stairs_off_callback).start()
+    return
+
 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -43,6 +56,8 @@ def mqtt_on_message(client, userdata, msg):
             aqara_cube(name,msg.payload)
         elif(modelid == "lumi.sensor_86sw1"):
             wall_switch(name)
+        elif(modelid == "lumi.sensor_motion.aq2"):
+            motion_presence(name)
     else:
         log.error("topic: "+msg.topic + "size not matching")
         
