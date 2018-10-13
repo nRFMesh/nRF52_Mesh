@@ -96,8 +96,7 @@ async def websocket_sensor_events():
             smodelid = sensors_map[sid]["modelid"]
             node_id = cfg.get_node_id_from_name(sname,nodes)
             if(not node_id):
-                log.error("%s not found in nodes.json"%(sname))
-                continue
+                log.warning("%s not found in nodes.json"%(sname))
             #node_id is good now convert the Zigbee sensor event type to the simple sensor MQTT name
             stype = sensors_map[sid]["type"]
             payload = None
@@ -149,6 +148,7 @@ nodes = cfg.get_local_nodes(nodes_config)
 
 config_file = cfg.configure_log(__file__)
 response = requests.get(config_file["conbee"]["rest"]+"/sensors")
+#TODO use ordered map to avoid display 1 10 11 2 3 
 sensors_map = response.json()
 log.info("received config")
 show_sensors(sensors_map)
