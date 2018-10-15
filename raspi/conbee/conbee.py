@@ -37,7 +37,7 @@ def cubeevent_to_json(buttonevent,sensors_map,sid):
         elif(buttonevent == 7007):
             json_payload["event"] = "shake"
         elif(buttonevent == 7008):
-            json_payload["event"] = "freefall"
+            json_payload["event"] = "drop"
         else:
             event_to   = int(buttonevent / 1000)
             event_from = int(buttonevent %   10)
