@@ -29,8 +29,9 @@ def wall_switch(name):
         if(lights["Bed Leds Cupboard"].on):
             lights["Bed Leds Cupboard"].on = False
         else:
-            lights["Bed Leds Cupboard"].on = True
-            lights["Bed Leds Cupboard"].brightness = 1
+            #command so that it does not go to previous level before adjusting the brightness
+            command =  {'on' : True, 'bri' : 1}
+            b.set_light("Bed Leds Cupboard", command)
     return
 
 def stairs_off_callback():

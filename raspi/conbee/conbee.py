@@ -36,6 +36,8 @@ def cubeevent_to_json(buttonevent,sensors_map,sid):
             json_payload["event"] = "wakeup"
         elif(buttonevent == 7007):
             json_payload["event"] = "shake"
+        elif(buttonevent == 7008):
+            json_payload["event"] = "freefall"
         else:
             event_to   = int(buttonevent / 1000)
             event_from = int(buttonevent %   10)
@@ -59,7 +61,15 @@ def cubeevent_to_json(buttonevent,sensors_map,sid):
 
 def motionevent_to_json(buttonevent):
     res = None
-    json_payload = {"motion":buttonevent}
+    json_payload = {}
+    if(buttonevent == 1007):
+        json_payload["event"] = "shake"
+    elif(buttonevent == 1008):
+        json_payload["event"] = "drop"
+    elif(buttonevent == 1009):
+        json_payload["event"] = "tilt"
+    else:
+        json_payload["motion"] buttonevent
     res = json.dumps(json_payload)
     return res
 
