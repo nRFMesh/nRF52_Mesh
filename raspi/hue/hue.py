@@ -30,21 +30,27 @@ def wall_switch(name):
             lights["Bed Leds Cupboard"].on = False
         else:
             #command so that it does not go to previous level before adjusting the brightness
-            command =  {'on' : True, 'bri' : 1}
-            b.set_light("Bed Leds Cupboard", command)
+            b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1})
     return
 
 def stairs_off_callback():
     lights["Stairs Up Left"].on = False
-    log.debug("Stairs Up Left - off_callback")
+    lights["Stairs Down Right"].on = False
+    log.debug("Stairs - off_callback")
     return
 
-def motion_presence(name):
+def stairs_presence(name,payload):
+    jval = json.loads(payload)
     if(name == "MotionLight 1"):
-        log.debug("MotionLight - presence")
-        command =  {'transitiontime' : 30, 'on' : True, 'bri' : 254}
-        b.set_light("Stairs Up Left", command)
-        threading.Timer(60, stairs_off_callback).start()
+        if(jval["presence"]):
+            log.debug("MotionLight Up - presence")
+            b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : 254})
+            threading.Timer(60, stairs_off_callback).start()
+    if(name == "MotionLightHue"):
+        if(jval["presence"]):
+            log.debug("MotionLight Down - presence")
+            b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : 254})
+            threading.Timer(60, stairs_off_callback).start()
     return
 
 
@@ -57,8 +63,8 @@ def mqtt_on_message(client, userdata, msg):
             aqara_cube(name,msg.payload)
         elif(modelid == "lumi.sensor_86sw1"):
             wall_switch(name)
-        elif(modelid == "lumi.sensor_motion.aq2"):
-            motion_presence(name)
+        elif((modelid == "lumi.sensor_motion.aq2") or (modelid == "SML001") ):
+            stairs_presence(name,msg.payload)
     else:
         log.error("topic: "+msg.topic + "size not matching")
         

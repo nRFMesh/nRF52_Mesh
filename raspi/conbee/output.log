@@ -1,0 +1,14 @@
+pi@rfserv:~ $ mosquitto_sub -t 'zigbee/#' -v
+zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1 {"event": "wakeup"}
+zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1 {"event": "flip", "from": 4, "to": 6}
+zigbee/lumi.vibration.aq1/lumi.vibration.aq1 7 {"event": "shake"}
+zigbee/lumi.vibration.aq1/lumi.vibration.aq1 7 {"event": "tilt"}
+zigbee/lumi.vibration.aq1/lumi.vibration.aq1 7 {"event": "tilt"}
+zigbee/lumi.vibration.aq1/lumi.vibration.aq1 7 {"event": "drop"}
+zigbee/lumi.sensor_magnet.aq2/OpenClose 1 open
+zigbee/lumi.sensor_magnet.aq2/OpenClose 1 closed
+zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1 {"rotation": -5072}
+zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1 {"rotation": 6415}
+zigbee/lumi.sensor_cube.aqgl01/Aqara Cube 1 {"event": "drop"}
+zigbee/lumi.sensor_motion.aq2/MotionLight 1 presence
+zigbee/lumi.sensor_motion.aq2/MotionLight 1 presence

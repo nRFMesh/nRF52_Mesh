@@ -8,6 +8,7 @@ import cfg
 from mqtt import mqtt_start
 import os
 import logging as log
+from collections import OrderedDict
 
 def signal_handler(signal, frame):
         print('You pressed Ctrl+C!')
@@ -20,10 +21,12 @@ def mqtt_on_message(client, userdata, msg):
     return
 
 def show_sensors(sensors_map):
-    for key,sensor in sensors_map.items():
-        name = sensor["name"]
-        sensor_type = sensor["type"]
-        print(f"{key} : {name} : {sensor_type}")
+    ordered_map = OrderedDict()
+    for i in range(len(sensors_map)):
+        index = i+1
+        name = sensors_map[str(index)]["name"]
+        sensor_type = sensors_map[str(index)]["type"]
+        print(f"{index} : {name} : {sensor_type}")
     return
 
 def cubeevent_to_json(buttonevent,sensors_map,sid):
@@ -69,7 +72,7 @@ def motionevent_to_json(buttonevent):
     elif(buttonevent == 1009):
         json_payload["event"] = "tilt"
     else:
-        json_payload["motion"] buttonevent
+        json_payload["motion"] = buttonevent
     res = json.dumps(json_payload)
     return res
 
@@ -88,9 +91,6 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
         res = motionevent_to_json(buttonevent)
     elif(modelid == "lumi.sensor_86sw1"):
         res = switchevent_to_json(buttonevent)
-    elif(modelid == "lumi.sensor_motion.aq2"):
-        log.info("presence_light_event_to_json not yet supported")
-        #res = presence_light_event_to_json(buttonevent)
     else:
         log.error("button event modelid unknown")
     return res
@@ -118,48 +118,51 @@ async def websocket_sensor_events():
                 log.warning("%s not found in nodes.json"%(sname))
             #node_id is good now convert the Zigbee sensor event type to the simple sensor MQTT name
             stype = sensors_map[sid]["type"]
-            payload = None
+
+            topic_node = "Nodes/"+node_id+"/"
+            topic_model = "zigbee/" + smodelid + "/" + sname
+            payload_model = None
+            payload_node = None
             if("state" in sensor_event):
                 if(stype == "ZHATemperature"):
-                    topic = "Nodes/"+node_id+"/"+"temperature"
-                    payload = float(sensor_event["state"]["temperature"])/100
+                    topic_node = topic_node+"temperature"
+                    payload_node = float(sensor_event["state"]["temperature"])/100
                 elif(stype == "ZHAHumidity"):
-                    topic = "Nodes/"+node_id+"/"+"humidity"
-                    payload = float(sensor_event["state"]["humidity"])/100
+                    topic_node = topic_node+"humidity"
+                    payload_node = float(sensor_event["state"]["humidity"])/100
                 elif(stype == "ZHAPressure"):
-                    topic = "Nodes/"+node_id+"/"+"pressure"
-                    payload = int(sensor_event["state"]["pressure"])
+                    topic_node = topic_node+"pressure"
+                    payload_node = int(sensor_event["state"]["pressure"])
                 elif(stype == "ZHASwitch"):
-                    topic = "zigbee/" + smodelid + "/" + sname
-                    #payload = sensor_event["state"]["buttonevent"]
-                    payload = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
+                    payload_model = buttonevent_to_json(sensor_event["state"]["buttonevent"],sensors_map,sid)
                 elif(stype == "ZHALightLevel"):
-                    topic = "Nodes/"+node_id+"/"+"light"
-                    payload = int(sensor_event["state"]["lux"])
+                    topic_node = topic_node+"light"
+                    payload_node = int(sensor_event["state"]["lux"])
+                    payload_model = json.dumps({"light":sensor_event["state"]["lux"]})
                 elif(stype == "ZHAPresence"):
-                    topic = "zigbee/" + smodelid + "/" + sname
-                    #presence is as simple as true
-                    payload = "presence"
+                    #presence is either true or false for alive
+                    payload_model = json.dumps({"presence":sensor_event["state"]["presence"]})
                 elif(stype == "ZHAOpenClose"):
-                    topic = "zigbee/" + smodelid + "/" + sname
-                    payload = "closed"
-                    if(sensor_event["state"]["open"]):
-                        payload = "open"
+                    payload_model = "closed"
+                    if(sensor_event["state"]["open"]):#convert from trueopen:true,false to "open,closed"
+                        payload_model = "open"
                 elif(stype == "ZHAWater"):
-                    topic = "zigbee/" + smodelid + "/" + sname
-                    payload = water_to_json(sensor_event)
+                    payload_model = water_to_json(sensor_event)
                 else:
                     log.error("event type (%s) unknown"%(stype))
             elif("config" in sensor_event):
                 #config should always contain battery
-                topic = "Nodes/"+node_id+"/"+"battery_percent"
-                payload = sensor_event["config"]["battery"]
-            if(payload is not None):
-                if(config_file["mqtt"]["publish"]):
-                    clientMQTT.publish(topic,payload)
-                    log.debug("published on : %s => %s"%(topic,payload))
-                else:
-                    log.warning("publish not enabled !!!! skipped : %s => %s"%(topic,payload))
+                topic_node = topic_node+"battery_percent"
+                payload_node = sensor_event["config"]["battery"]
+            if(config_file["mqtt"]["publish"]):
+                if(payload_node is not None):
+                    clientMQTT.publish(topic_node,payload_node)
+                    log.debug("published on : %s => %s"%(topic_node,payload_node))
+                if(payload_model is not None):
+                    clientMQTT.publish(topic_model,payload_model)
+                    log.debug("published on : %s => %s"%(topic_model,payload_model))
+            else:
+                log.warning("publish not enabled !!!! skipped : %s => %s"%(topic,payload))
         log.error("Done with the While loop")
 
 
@@ -170,7 +173,6 @@ nodes = cfg.get_local_nodes(nodes_config)
 
 config_file = cfg.configure_log(__file__)
 response = requests.get(config_file["conbee"]["rest"]+"/sensors")
-#TODO use ordered map to avoid display 1 10 11 2 3 
 sensors_map = response.json()
 log.info("received config")
 show_sensors(sensors_map)
