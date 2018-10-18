@@ -66,16 +66,13 @@ def stairs_presence(name,payload):
                 if(name == "MotionLight 1"):
                     log.debug(f"MotionLight Up - presence - brightness:{brightness}")
                     b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : brightness})
-                    b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : brightness})
+                    b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : int(brightness/2)})
                     threading.Timer(60, stairs_off_callback).start()
                 if(name == "MotionLightHue"):
                     log.debug(f"MotionLight Down - presence - brightness:{brightness}")
                     b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : brightness})
-                    b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : brightness})
+                    b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : int(brightness/2)})
                     threading.Timer(60, stairs_off_callback).start()
-    else:
-        print("No precense")
-
     return
 
 
