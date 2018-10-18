@@ -105,6 +105,7 @@ def water_to_json(sensor_event):
     return res
 
 async def websocket_sensor_events():
+    log.info("websocket_sensor_events() start")
     async with websockets.connect(config_file["conbee"]["websocket"]) as websocket:
         while(True):
             message = await websocket.recv()

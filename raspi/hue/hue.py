@@ -1,5 +1,6 @@
 #https://github.com/studioimaginaire/phue
 
+
 #https://pypi.python.org/pypi/paho-mqtt/1.1
 import paho.mqtt.client as mqtt
 import json
@@ -39,18 +40,43 @@ def stairs_off_callback():
     log.debug("Stairs - off_callback")
     return
 
+g_stairs_up_light = 0.0
+g_stairs_down_light = 0.0
+
 def stairs_presence(name,payload):
     jval = json.loads(payload)
-    if(name == "MotionLight 1"):
-        if(jval["presence"]):
-            log.debug("MotionLight Up - presence")
-            b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : 254})
-            threading.Timer(60, stairs_off_callback).start()
-    if(name == "MotionLightHue"):
-        if(jval["presence"]):
-            log.debug("MotionLight Down - presence")
-            b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : 254})
-            threading.Timer(60, stairs_off_callback).start()
+    print("Debug : ",jval)
+    if("light" in jval):
+        print("Debug : light in")
+        if(name == "MotionLight 1"):
+            g_stairs_up_light = float(jval["light"])
+            log.debug("MotionLight Up - light : %f"%g_stairs_up_light)
+        if(name == "MotionLightHue"):
+            g_stairs_down_light = float(jval["light"])
+            log.debug("MotionLightHue - light : %f"%g_stairs_down_light)
+    if(jval["presence"]):
+        print("precense")
+        if(g_stairs_up_light < 2):
+            brightness = 254
+        elif(g_stairs_up_light < 25):
+            brightness = 128
+        else:
+            brightness = 0
+        print("brightness %d"%brightness)
+        if(brightness > 0):
+            if(name == "MotionLight 1"):
+                log.debug("MotionLight Up - presence")
+                b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : brightness})
+                b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : brightness/2})
+                threading.Timer(60, stairs_off_callback).start()
+            if(name == "MotionLightHue"):
+                log.debug("MotionLight Down - presence")
+                b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : brightness})
+                b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : brightness/2})
+                threading.Timer(60, stairs_off_callback).start()
+    else:
+        print("No precense")
+
     return
 
 
