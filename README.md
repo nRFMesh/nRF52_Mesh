@@ -45,6 +45,14 @@ The server's python scripts running also on a raspberry pi
     mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
     mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
 
+## hue test vector
+
+    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"presence": true}'
+    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"light": 24}'
+    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
+    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
+    
+
 ## ./boards/
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware
 
