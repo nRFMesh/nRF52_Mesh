@@ -25,7 +25,7 @@ def aqara_cube(name,payload):
     return
 
 def wall_switch(name):
-    if(name == "LargeSingleSwitch"):
+    if(name == "lumi.remote.b1acn01 16") or (name == "LargeSingleSwitch"):
         log.debug("LargeSingleSwitch - pressed")
         if(lights["Bed Leds Cupboard"].on):
             lights["Bed Leds Cupboard"].on = False

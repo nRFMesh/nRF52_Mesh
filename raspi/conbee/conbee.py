@@ -91,6 +91,8 @@ def buttonevent_to_json(buttonevent,sensors_map,sid):
         res = motionevent_to_json(buttonevent)
     elif(modelid == "lumi.sensor_86sw1"):
         res = switchevent_to_json(buttonevent)
+    elif(modelid == "lumi.remote.b1acn01"):
+        res = switchevent_to_json(buttonevent)
     else:
         log.error("button event modelid unknown")
     return res
