@@ -24,14 +24,37 @@ def aqara_cube(name,payload):
                 lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
-def wall_switch(name):
-    if(name == "lumi.remote.b1acn01 16") or (name == "LargeSingleSwitch"):
-        log.debug("pressed => LargeSingleSwitch")
-        if(lights["Bed Leds Cupboard"].on):
-            lights["Bed Leds Cupboard"].on = False
+def aqara_button(name):
+    if(lights["Bed Leds Cupboard"].on):
+        if(lights["Bed Leds Cupboard"].brightness == 11):
+            lights["Bed Leds Cupboard"].brightness = 21
+            log.debug("aqara_button> set light to 21")
+        elif(lights["Bed Leds Cupboard"].brightness == 1):
+            lights["Bed Leds Cupboard"].brightness = 11
+            log.debug("aqara_button> set light to 11")
         else:
-            #command so that it does not go to previous level before adjusting the brightness
-            b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1})
+            lights["Bed Leds Cupboard"].on = False
+            log.debug("aqara_button> set light off")
+    else:
+        #command so that it does not go to previous level before adjusting the brightness
+        b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1, 'hue':8101, 'sat':194})
+        log.debug("aqara_button> set light to 1")
+    return
+
+
+def aqara_switch(name):
+    if(lights["Living 1 Table E27"].on):
+        lights["Living 1 Table E27"].on = False
+        lights["Living 2 Table E27"].on = False
+        lights["Entrance White 1"].on = False
+        lights["Entrance White 2"].on = False
+        b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 125})
+        log.debug("aqara_switch> Dining room and Entrence lights off")
+    else:
+        #command so that it does not go to previous level before adjusting the brightness
+        b.set_light("Living 1 Table E27", {'on' : True, 'bri' : 255})
+        b.set_light("Living 2 Table E27", {'on' : True, 'bri' : 255})
+        log.debug("aqara_switch> switch on Dining room")
     return
 
 def stairs_off_callback():
@@ -87,9 +110,12 @@ def mqtt_on_message(client, userdata, msg):
         if(modelid == "lumi.sensor_cube.aqgl01"):
             log.debug("modelid : aqara_cube()")
             aqara_cube(name,msg.payload)
-        elif(modelid == "lumi.remote.b1acn01") or (modelid == "lumi.sensor_86sw1"):
-            log.debug("modelid : wall_switch()")
-            wall_switch(name)
+        elif(name == "lumi.remote.b1acn01 16"):
+            log.debug("name : aqara button 16")
+            aqara_button(name)
+        elif(name == "LargeSingleSwitch"):
+            log.debug("name : LargeSingleSwitch")
+            aqara_switch(name)
         elif((modelid == "lumi.sensor_motion.aq2") or (modelid == "SML001") ):
             log.debug("modelid : stairs_presence()")
             stairs_presence(name,msg.payload)
@@ -111,6 +137,9 @@ if(cfg.ping(config["bridges"]["LivingRoom"])):
     b.connect()
     log.info("Light Objects retrieval")
     lights = b.get_light_objects('name')
+    print("_________________________")
+    print(lights["Bed Leds Cupboard"])
+    print("_________________________")
 
     log.info("Hue Lights available :")
     for name, light in lights.items():

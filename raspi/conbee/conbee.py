@@ -9,6 +9,7 @@ from mqtt import mqtt_start
 import os
 import logging as log
 from collections import OrderedDict
+from time import sleep
 
 def signal_handler(signal, frame):
         print('You pressed Ctrl+C!')
@@ -20,12 +21,23 @@ def mqtt_on_message(client, userdata, msg):
     log.error("mqtt> Error: Unexpected mqtt message")
     return
 
-def show_sensors(sensors_map):
+#does not work when 11 is missing from 1 to 16
+def show_sensors_bad_sort_missing(sensors_map):
+    print("_______________________________")
+    print(sensors_map)
+    print("_______________________________")
     ordered_map = OrderedDict()
     for i in range(len(sensors_map)):
         index = i+1
         name = sensors_map[str(index)]["name"]
         sensor_type = sensors_map[str(index)]["type"]
+        print(f"{index} : {name} : {sensor_type}")
+    return
+
+def show_sensors(sensors_map):
+    for index,sensor in sensors_map.items():
+        name = sensor["name"]
+        sensor_type = sensor["type"]
         print(f"{index} : {name} : {sensor_type}")
     return
 
