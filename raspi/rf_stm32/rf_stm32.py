@@ -9,6 +9,8 @@ import mesh as mesh
 import cfg
 import threading
 
+ligts_upstairs_on = False
+
 def off_callback():
     size = 0x07
     control = 0x72
@@ -80,14 +82,34 @@ def mqtt_handle_dimmer_request(topics,payload):
             log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",payload)
     return    
 
+def mqtt_handle_switch(payload):
+    jval = json.loads(payload)
+    if("click" in jval and jval["click"] == "single"):
+        global ligts_upstairs_on
+        if(ligts_upstairs_on):
+            mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],0)
+            ligts_upstairs_on = False
+            log.info("lights_upstairs> Off")
+        else:
+            mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],7000)
+            ligts_upstairs_on = True
+            log.info("lights_upstairs> On")
+    else:
+        log.debug("lights_upstairs>no click")
+    return
 
 def mqtt_on_message(client, userdata, msg):
+    log.debug("mqtt>%s",msg.topic)
     topics = msg.topic.split('/')
     if(len(topics) == 2) and (len(msg.payload) != 0):
         if(topics[0] == "Bed Heater"):
             mqtt_handle_heat_request(topics,msg.payload)
         elif(topics[0] == "Retro Light Upstairs"):
             mqtt_handle_dimmer_request(topics,msg.payload)
+        elif(topics[0] == "zigbee2mqtt"):
+            name = topics[1]
+            if(name == "lights upstairs"):
+                mqtt_handle_switch(msg.payload)
     return
 
 def loop_forever():

@@ -10,7 +10,8 @@
         "client_id":"rf_stm32",
         "subscriptions":[
             "Bed Heater/#",
-            "Retro Light Upstairs/#"
+            "Retro Light Upstairs/#",
+            "zigbee2mqtt/lights upstairs"
         ],
         "publish" :true,
         "subscribe" :true
