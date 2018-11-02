@@ -26,6 +26,16 @@ def aqara_cube(name,payload):
 
 def aqara_button(name):
     if(lights["Bed Leds Cupboard"].on):
+        lights["Bed Leds Cupboard"].on = False
+        log.debug("aqara_button> set light off")
+    else:
+        #command so that it does not go to previous level before adjusting the brightness
+        b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1, 'hue':8101, 'sat':194})
+        log.debug("aqara_button> set light to 1")
+    return
+
+def aqara_button_sequence(name):
+    if(lights["Bed Leds Cupboard"].on):
         if(lights["Bed Leds Cupboard"].brightness == 11):
             lights["Bed Leds Cupboard"].brightness = 21
             log.debug("aqara_button> set light to 21")
@@ -41,6 +51,21 @@ def aqara_button(name):
         log.debug("aqara_button> set light to 1")
     return
 
+def entrance_light(payload):
+    jval = json.loads(payload)
+    if("click" in jval and jval["click"] == "single"):
+        if(lights["Entrance White 1"].on):
+            lights["Entrance White 1"].on = False
+            lights["Entrance White 2"].on = False
+            log.debug("entrance_light> off")
+        else:
+            #command so that it does not go to previous level before adjusting the brightness
+            b.set_light("Entrance White 1", {'on' : True, 'bri' : 255})
+            b.set_light("Entrance White 2", {'on' : True, 'bri' : 255})
+            log.debug("entrance_light> on")
+    else:
+        log.debug("entrance_light>no click")
+    return
 
 def aqara_switch(name):
     if(lights["Living 1 Table E27"].on):
@@ -103,7 +128,11 @@ def stairs_presence(name,payload):
 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
-    if(len(topic_parts) == 3):
+    if(len(topic_parts) == 2 and topic_parts[0] == "zigbee2mqtt"):
+        name = topic_parts[1]
+        if(name == "entrance light"):
+            entrance_light(msg.payload)
+    elif(len(topic_parts) == 3):
         modelid = topic_parts[1]
         name = topic_parts[2]
         log.debug(f"mqtt> name = {name} ; modelid = {modelid}")
