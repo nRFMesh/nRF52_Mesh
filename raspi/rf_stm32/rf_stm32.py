@@ -9,7 +9,9 @@ import mesh as mesh
 import cfg
 import threading
 
-ligts_upstairs_on = False
+g_lights_upstairs_on = False
+g_esp_heating_value = 0
+
 
 def off_callback():
     size = 0x07
@@ -56,17 +58,17 @@ def serial_send_brightness_all(brightness):
     log.info("send brightness to all channels %d ",bri)
     return
 
-def mqtt_handle_heat_request(topics,payload):
-    if(topics[1] == "json"):
+def mqtt_handle_heat_request(topic_action,payload):
+    if(topic_action == "json"):
         try:
             params = json.loads(payload)
             if("heat" in params) and ("time_mn" in params):
                 serial_send_heat_duration(params["heat"],params["time_mn"])
         except json.decoder.JSONDecodeError:
             log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
-    elif(topics[1] == "1h"):
+    elif(topic_action == "1h"):
         serial_send_heat_duration(int(payload),60)
-    elif(topics[1] == "20mn"):
+    elif(topic_action == "20mn"):
         serial_send_heat_duration(int(payload),20)
     return
 
@@ -82,34 +84,70 @@ def mqtt_handle_dimmer_request(topics,payload):
             log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",payload)
     return    
 
-def mqtt_handle_switch(payload):
+def mqtt_handle_switch_lights_upstairs(payload):
     jval = json.loads(payload)
     if("click" in jval and jval["click"] == "single"):
-        global ligts_upstairs_on
-        if(ligts_upstairs_on):
+        global g_lights_upstairs_on
+        if(g_lights_upstairs_on):
             mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],0)
-            ligts_upstairs_on = False
+            g_lights_upstairs_on = False
             log.info("lights_upstairs> Off")
         else:
             mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],7000)
-            ligts_upstairs_on = True
+            g_lights_upstairs_on = True
             log.info("lights_upstairs> On")
     else:
         log.debug("lights_upstairs>no click")
     return
+
+def mqtt_handle_switch_bed_heater(payload):
+    jval = json.loads(payload)
+    global g_esp_heating_value
+    topic = "esp/bed heater/1h"
+    if("click" in jval):
+        if(jval["click"] == "single"):
+            request = g_esp_heating_value + 4
+        elif(jval["click"] == "double"):
+            request = 0
+    elif("action" in jval):
+        if(jval["action"] == "hold"):
+            request = g_esp_heating_value - 4
+            if(request < 0):
+                request = 0
+    else:
+        log.debug("bed heater>no click no action")
+    log.info("bed heater>previous %d , request to %d",g_esp_heating_value, request)
+    #update temporarily with best guess, for correct reaction without waiting the real feedback
+    g_esp_heating_value = request
+    payload = str(request)
+    clientMQTT.publish(topic,payload)
+    return
+
+def mqtt_handle_esp_bed_heater(topic_action,payload):
+    if(topic_action == "heating"):
+        global g_esp_heating_value
+        g_esp_heating_value = int(payload)
+        log.debug("esp_heater> %d",g_esp_heating_value)
+    return
+
 
 def mqtt_on_message(client, userdata, msg):
     log.debug("mqtt>%s",msg.topic)
     topics = msg.topic.split('/')
     if(len(topics) == 2) and (len(msg.payload) != 0):
         if(topics[0] == "Bed Heater"):
-            mqtt_handle_heat_request(topics,msg.payload)
+            mqtt_handle_heat_request(topics[1],msg.payload)
         elif(topics[0] == "Retro Light Upstairs"):
             mqtt_handle_dimmer_request(topics,msg.payload)
         elif(topics[0] == "zigbee2mqtt"):
             name = topics[1]
             if(name == "lights upstairs"):
-                mqtt_handle_switch(msg.payload)
+                mqtt_handle_switch_lights_upstairs(msg.payload)
+            elif(name == "bed heater"):
+                mqtt_handle_switch_bed_heater(msg.payload)
+    elif(len(topics) == 3):
+        if((topics[0] == "esp") and (topics[1] == "bed heater")):
+            mqtt_handle_esp_bed_heater(topics[2],msg.payload)
     return
 
 def loop_forever():

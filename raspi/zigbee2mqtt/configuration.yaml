@@ -1,0 +1,22 @@
+homeassistant: false
+permit_join: false
+mqtt:
+  base_topic: zigbee2mqtt
+  server: 'mqtt://10.0.0.12'
+serial:
+  port: /dev/ttyACM0
+devices:
+  '0x00158d00028f7fb5':
+    friendly_name: 'bed heater'
+    retain: false
+  '0x00158d00028cad58':
+    friendly_name: 'entrance light'
+    retain: false
+
+advanced:
+    # Optional: Logging level, options: debug, info, warn, error
+    log_level: info
+    # Optional: Location of log directory
+    log_directory: /home/pi/share/log_zigbee2mqtt_%TIMESTAMP%
+
+
