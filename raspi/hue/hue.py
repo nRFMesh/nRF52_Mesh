@@ -67,6 +67,50 @@ def entrance_light(payload):
         log.debug("entrance_light>no click")
     return
 
+
+def double_steps_brightness(light,short_time_brightness,final):
+    b.set_light(light, {'on' : True, 'bri' : short_time_brightness, 'hue':8101, 'sat':194, 'transitiontime' : 30})
+    log.debug("bedroom_sunrise> fast 3 sec to %d",short_time_brightness)
+    #the rest souldshould catch in 10 min average from 0 to max
+    if(short_time_brightness < 255):
+        brightness_left = int(255 - short_time_brightness)
+        time_left = int(brightness_left * 10 * 60 * 10 / 250)
+        b.set_light(light, {'on' : True, 'bri' : final, 'hue':8101, 'sat':194, 'transitiontime' : time_left})
+        log.debug("bedroom_sunrise> slow till %d in %d sec",final,time_left/10)
+    return
+
+def bedroom_sunrise(payload):
+    jval = json.loads(payload)
+    if("click" in jval and jval["click"] == "single"):
+        if(not lights["Bed Leds Cupboard"].on):
+            current_brightness = 0
+            short_time_brightness = 1
+        else:
+            current_brightness = lights["Bed Leds Cupboard"].brightness
+            if(current_brightness < 215):
+                short_time_brightness = current_brightness + 40
+            else:
+                short_time_brightness = 255
+        log.debug("beroom_sunrise>current brightness %d",current_brightness)
+        double_steps_brightness("Bed Leds Cupboard",short_time_brightness,255)
+    elif("action" in jval and jval["action"] == "hold"):
+        if(not lights["Bed Leds Cupboard"].on):
+            log.warn("beroom_sunrise>already off nothing to do")
+        else:
+            current_brightness = lights["Bed Leds Cupboard"].brightness
+            if(current_brightness > 41):
+                short_time_brightness = current_brightness - 40
+            elif(current_brightness > 3):
+                short_time_brightness = 1
+            else:
+                lights["Bed Leds Cupboard"].on = False
+        log.debug("beroom_sunrise>current brightness %d",current_brightness)
+        double_steps_brightness("Bed Leds Cupboard",short_time_brightness,0)
+    else:
+        log.debug("bedroom_sunrise>no click")
+    return
+
+
 def aqara_switch(name):
     if(lights["Living 1 Table E27"].on):
         lights["Living 1 Table E27"].on = False
@@ -132,6 +176,8 @@ def mqtt_on_message(client, userdata, msg):
         name = topic_parts[1]
         if(name == "entrance light"):
             entrance_light(msg.payload)
+        elif(name == "sunrise"):
+            bedroom_sunrise(msg.payload)
     elif(len(topic_parts) == 3):
         modelid = topic_parts[1]
         name = topic_parts[2]

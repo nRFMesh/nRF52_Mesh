@@ -12,7 +12,7 @@
             "Bed Heater/#",
             "esp/bed heater/#",
             "Retro Light Upstairs/#",
-            "zigbee2mqtt/lights upstairs"
+            "zigbee2mqtt/bed heater"
         ],
         "publish" :true,
         "subscribe" :true

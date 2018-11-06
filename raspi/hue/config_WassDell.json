@@ -19,7 +19,8 @@
                             "zigbee/lumi.sensor_motion.aq2/MotionLight 1",
                             "zigbee/SML001/MotionLightHue",
                             "zigbee/lumi.remote.b1acn01/lumi.remote.b1acn01 16",
-                            "zigbee2mqtt/entrance light"
+                            "zigbee2mqtt/entrance light",
+                            "zigbee2mqtt/sunrise"
                         ],
         "actions"   :[],
         "publish" :true,
