@@ -188,10 +188,13 @@ nodes = cfg.get_local_nodes(nodes_config)
 
 config_file = cfg.configure_log(__file__)
 response = requests.get(config_file["conbee"]["rest"]+"/sensors")
-sensors_map = response.json()
-log.info("received config")
-show_sensors(sensors_map)
-
+if(response.status_code == 200):
+    sensors_map = response.json()
+    log.info("received config")
+    show_sensors(sensors_map)
+else:
+    log.error("response from conbee/rest/sensors : %d"%response.status_code)
+    sys.exit(0)
 #will start a separate thread for looping
 clientMQTT = mqtt_start(config_file,mqtt_on_message,True)
 
