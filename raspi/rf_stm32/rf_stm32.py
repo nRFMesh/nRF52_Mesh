@@ -104,6 +104,7 @@ def mqtt_handle_switch_bed_heater(payload):
     jval = json.loads(payload)
     global g_esp_heating_value
     topic = "esp/bed heater/1h"
+    request = None
     if("click" in jval):
         if(jval["click"] == "single"):
             request = g_esp_heating_value + 4
@@ -116,11 +117,12 @@ def mqtt_handle_switch_bed_heater(payload):
                 request = 0
     else:
         log.debug("bed heater>no click no action")
-    log.info("bed heater>previous %d , request to %d",g_esp_heating_value, request)
-    #update temporarily with best guess, for correct reaction without waiting the real feedback
-    g_esp_heating_value = request
-    payload = str(request)
-    clientMQTT.publish(topic,payload)
+    if(request != None):
+        log.info("bed heater>previous %d , request to %d",g_esp_heating_value, request)
+        #update temporarily with best guess, for correct reaction without waiting the real feedback
+        g_esp_heating_value = request
+        payload = str(request)
+        clientMQTT.publish(topic,payload)
     return
 
 def mqtt_handle_esp_bed_heater(topic_action,payload):
