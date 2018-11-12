@@ -629,7 +629,7 @@
     "97":   {   "name"          :"lumi.vibration.aq1 7",
         "modelid"       :"lumi.vibration.aq1",
         "uid"           :"",
-        "mac"           :"00:15:8d:00:02:a4:f6",
+        "mac"           :"00:15:8d:00:02:a4:f6:1e",
         "position"   :{ "x":"1","y":"-1","z":"0.6"},
         "events"          : ["move"],
         "channel"       : "25"
