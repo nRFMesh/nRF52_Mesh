@@ -322,19 +322,3 @@ Ping node 74
 Aknowledge
 
     Nodes/79/ack 1
-
-## Unhandled exceptions
-OSError: [Errno 11] Resource temporarily unavailable
-uart> /dev/ttyUSB0
-Traceback (most recent call last):
-  File "rf_uart/mesh_controller.py", line 204, in <module>
-    loop_forever()
-  File "rf_uart/mesh_controller.py", line 130, in loop_forever
-    mesh.run()
-  File "/home/pi/nRF52_Mesh/raspi/rf_uart/mesh.py", line 219, in run
-    ser.run()
-  File "/home/pi/nRF52_Mesh/raspi/rf_uart/rf_uart.py", line 9, in run
-    line = ser.readline().decode("utf-8")
-  File "/usr/lib/python2.7/dist-packages/serial/serialposix.py", line 453, in read
-    buf = os.read(self.fd, size-len(read))
-OSError: [Errno 11] Resource temporarily unavailable

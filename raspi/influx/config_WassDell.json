@@ -1,17 +1,17 @@
 {
     "mqtt":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":1883,
         "keepalive":60
     },
     "influxdb":{
-        "host":"localhost",
+        "host":"10.0.0.12",
         "port":8086,
         "db":"meshNodes",
         "mqtt_client_id":"py_influx"
     },
     "log":{
-        "logfile":"/home/pi/share/influx_client.log",
+        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\influx\\influx.log",
         "level":"Debug"
     }
 }

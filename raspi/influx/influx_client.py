@@ -7,15 +7,18 @@ import logging as log
 import cfg
 from time import sleep
 import socket
+import json
 
 # -------------------- mqtt events -------------------- 
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
     lclient.subscribe("Nodes/#")
+    lclient.subscribe("zigbee2mqtt/#")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     try:
+        post = None
         if( (len(topic_parts) == 3) and (topic_parts[0] == "Nodes") ):
             nodeid = topic_parts[1]
             sensor = topic_parts[2]
@@ -30,13 +33,31 @@ def on_message(client, userdata, msg):
                     }
                 }
             ]
-        try:
-            clientDB.write_points(post)
-            log.debug(msg.topic+" "+str(msg.payload)+" posted")
-        except requests.exceptions.ConnectionError:
-            log.error("ConnectionError sample skipped "+msg.topic)
-        except influxdb.exceptions.InfluxDBServerError:
-            log.error("InfluxDBServerError sample skipped "+msg.topic)
+        elif( (len(topic_parts) == 2) and (topic_parts[0] == "zigbee2mqtt") ):
+            sensor = topic_parts[1]
+            fields = json.loads(msg.payload)
+            
+            if("pressure" in fields):
+                fields["pressure"] = int(fields["pressure"]) #force pressure to int
+            if("voltage" in fields):
+                fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
+            post = [
+                {
+                    "measurement": sensor,
+                    "time": datetime.datetime.utcnow(),
+                    "fields": fields
+                }
+            ]
+        if(post != None):
+            try:
+                clientDB.write_points(post)
+                log.debug(msg.topic+" "+str(msg.payload)+" posted")
+            except requests.exceptions.ConnectionError:
+                log.error("ConnectionError sample skipped "+msg.topic)
+            except influxdb.exceptions.InfluxDBServerError:
+                log.error("InfluxDBServerError sample skipped "+msg.topic)
+            except influxdb.exceptions.InfluxDBClientError as e:
+                log.error("InfluxDBClientError with "+msg.topic+" : " +str(msg.payload)+" >>> "+str(e) )
     except ValueError:
         log.error(" ValueError with : "+msg.topic+" "+str(msg.payload))
 
