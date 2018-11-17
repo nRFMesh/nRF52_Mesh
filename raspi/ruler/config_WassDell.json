@@ -6,16 +6,10 @@
         "client_id":"py_ruler"
     },
     "log":{
-        "logfile":"./ruler.log",
+        "logfile":"./log_ruler.log",
         "level":"Debug"
     },
     "rules":{
-        "Bathroom_Hum_Status":{
-            "input":"Nodes/7/humidity",
-            "output":"jNodes/56/RGB",
-            "description":"indicate when the bathroom is humid",
-            "enable" : false
-        },
         "Bathroom_Window":{
             "input":"jNodes/64/acceleration",
             "output":"Nodes/64/angle",
@@ -28,17 +22,11 @@
             "description":"angle from the closed reference",
             "enable" : false
         },
-        "Bedroom_Light_Up":{
-            "input":"Nodes/41/button",
-            "output":"Nodes/34/dimmer",
-            "description":"Increeses the light of the sleeping room on button press",
-            "enable" : false
-        },
-        "Bedroom_Direction_Remote":{
-            "input":"jNodes/93/acceleration",
-            "output":"Nodes/34/dimmer",
-            "description":"Set the light depending on the Tag orientation",
-            "enable" : false
+        "Kitchen_Move":{
+            "input":"zigbee2mqtt/kitchen move",
+            "output":"zigbee2mqtt/printer light/set",
+            "description":"low light for night hungers",
+            "enable" : true
         }
     }
 }

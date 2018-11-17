@@ -11,6 +11,30 @@ def static_vars(**kwargs):
         return func
     return decorate
 
+@static_vars(isLightOn=False)
+def Kitchen_Move(input):
+    sensor = json.loads(input)
+    command = None
+    if(sensor["occupancy"]):
+        if(sensor["illuminance"] < 30):
+            command = {"state":"ON"}
+            Kitchen_Move.isLightOn = True
+            log.info("Kitchen_Move>switch lights on")
+        else:
+            command = None
+            log.debug("Kitchen_Move>bright no light needed")
+    else:
+        if(Kitchen_Move.isLightOn):
+            command = {"state":"OFF"}
+            log.info("Kitchen_Move>switch lights off")
+            Kitchen_Move.isLightOn = False
+        else:
+            command = None
+            log.debug("Kitchen_Move>light is already off")
+    return json.dumps(command)
+
+    return command
+
 def Bathroom_Hum_Status(input):
     red = 0
     green = 0
