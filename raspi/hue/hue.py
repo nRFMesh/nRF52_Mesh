@@ -110,6 +110,26 @@ def bedroom_sunrise(payload):
         log.debug("bedroom_sunrise>no click")
     return
 
+isLightOn = False
+
+def night_hunger(payload):
+    global isLightOn
+    sensor = json.loads(payload)
+    if(sensor["occupancy"]):
+        if(sensor["illuminance"] < 30):
+            lights["printer light"].on = True
+            isLightOn = True
+            log.info("Kitchen_Move>switch lights on")
+        else:
+            log.debug("Kitchen_Move>bright no light needed")
+    else:
+        if(isLightOn):
+            lights["printer light"].on = False
+            log.info("Kitchen_Move>switch lights off")
+            isLightOn = False
+        else:
+            log.debug("Kitchen_Move>light is already off")
+    return 
 
 def aqara_switch(name):
     if(lights["Living 1 Table E27"].on):
@@ -178,6 +198,8 @@ def mqtt_on_message(client, userdata, msg):
             entrance_light(msg.payload)
         elif(name == "sunrise"):
             bedroom_sunrise(msg.payload)
+        elif(name == "kitchen move"):
+            night_hunger(msg.payload)
     elif(len(topic_parts) == 3):
         modelid = topic_parts[1]
         name = topic_parts[2]
