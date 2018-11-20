@@ -23,7 +23,7 @@ def aqara_cube(payload):
             lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
-def aqara_button(name):
+def night_leds_button():
     if(lights["Bed Leds Cupboard"].on):
         lights["Bed Leds Cupboard"].on = False
         log.debug("aqara_button> set light off")
@@ -260,6 +260,8 @@ def mqtt_on_message(client, userdata, msg):
             dining_switch()
         elif(name == "cube"):
             aqara_cube(msg.payload)
+        elif(name == "night leds button"):
+            night_leds_button()
     elif(len(topic_parts) == 3):
         modelid = topic_parts[1]
         name = topic_parts[2]
@@ -269,7 +271,7 @@ def mqtt_on_message(client, userdata, msg):
             aqara_cube(msg.payload)
         elif(name == "lumi.remote.b1acn01 16"):
             log.debug("name : aqara button 16")
-            aqara_button(name)
+            night_leds_button()
         elif(name == "LargeSingleSwitch"):
             log.debug("name : LargeSingleSwitch")
             dining_switch()
