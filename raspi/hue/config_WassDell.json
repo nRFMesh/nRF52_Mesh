@@ -10,7 +10,7 @@
         }
     },
     "mqtt":{
-        "host":"10.0.0.12",
+        "host":"10.0.0.42",
         "port":1883,
         "keepalive":60,
         "client_id":"hue_client",
@@ -21,7 +21,10 @@
                             "zigbee/lumi.remote.b1acn01/lumi.remote.b1acn01 16",
                             "zigbee2mqtt/entrance light",
                             "zigbee2mqtt/sunrise",
-                            "zigbee2mqtt/kitchen move"
+                            "zigbee2mqtt/kitchen move",
+                            "zig/stairs up move",
+                            "zig/stairs down move",
+                            "zig/dining switch"
                         ],
         "actions"   :[],
         "publish" :true,

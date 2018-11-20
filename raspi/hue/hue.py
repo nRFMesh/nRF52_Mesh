@@ -15,13 +15,12 @@ import cfg
 from mqtt import mqtt_start
 import threading
 
-def aqara_cube(name,payload):
-    if(name == "Aqara Cube 1"):
-        log.debug("action => Aqara Cube 1")
-        jval = json.loads(payload)
-        if("event" in jval):
-            if(jval["event"] == "flip"):
-                lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
+def aqara_cube(payload):
+    log.debug("action => Aqara Cube 1")
+    sensor = json.loads(payload)
+    if("event" in sensor):
+        if(sensor["event"] == "flip"):
+            lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
 def aqara_button(name):
@@ -131,19 +130,19 @@ def night_hunger(payload):
             log.debug("Kitchen_Move>light is already off")
     return 
 
-def aqara_switch(name):
+def dining_switch():
     if(lights["Living 1 Table E27"].on):
         lights["Living 1 Table E27"].on = False
         lights["Living 2 Table E27"].on = False
         lights["Entrance White 1"].on = False
         lights["Entrance White 2"].on = False
         b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 125})
-        log.debug("aqara_switch> Dining room and Entrence lights off")
+        log.debug("dining_switch> Dining room and Entrence lights off")
     else:
         #command so that it does not go to previous level before adjusting the brightness
         b.set_light("Living 1 Table E27", {'on' : True, 'bri' : 255})
         b.set_light("Living 2 Table E27", {'on' : True, 'bri' : 255})
-        log.debug("aqara_switch> switch on Dining room")
+        log.debug("dining_switch> switch on Dining room")
     return
 
 def stairs_off_callback():
@@ -190,6 +189,57 @@ def stairs_presence(name,payload):
     return
 
 
+#new zig on mano
+def stairs_up_move(payload):
+    global g_stairs_up_light
+    global g_stairs_down_light
+    #log.debug("stairs_presence : %s"%payload)
+    sensor = json.loads(payload)
+    if("illuminance" in sensor):
+        log.debug("light => %f"%sensor["illuminance"])
+        g_stairs_up_light = float(sensor["illuminance"])
+        log.debug("light => stairs up : %f"%g_stairs_up_light)
+    if("occupancy" in sensor):
+        log.debug("presence => %d"%sensor["occupancy"])
+        if(sensor["occupancy"]):
+            if(g_stairs_up_light < 2):
+                brightness = 254
+            elif(g_stairs_up_light < 12):
+                brightness = 128
+            else:
+                brightness = 10
+            log.debug(f"presence => MotionLight Up - brightness:{brightness}")
+            b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : brightness})
+            b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : int(brightness/2)})
+            threading.Timer(60, stairs_off_callback).start()
+    return
+
+def stairs_down_move(payload):
+    global g_stairs_up_light
+    global g_stairs_down_light
+    #log.debug("stairs_presence : %s"%payload)
+    sensor = json.loads(payload)
+    if("illuminance" in sensor):
+        log.debug("light => %f"%sensor["illuminance"])
+        g_stairs_down_light = float(sensor["illuminance"])
+        log.debug("light => MotionLightHue: %f"%g_stairs_down_light)
+    if("occupancy" in sensor):
+        log.debug("presence => %d"%sensor["occupancy"])
+        if(sensor["occupancy"]):
+            if(g_stairs_up_light < 2):
+                brightness = 254
+            elif(g_stairs_up_light < 12):
+                brightness = 128
+            else:
+                brightness = 10
+            log.debug(f"presence => MotionLight Down - brightness:{brightness}")
+            b.set_light("Stairs Down Right", {'transitiontime' : 10, 'on' : True, 'bri' : brightness})
+            b.set_light("Stairs Up Left", {'transitiontime' : 30, 'on' : True, 'bri' : int(brightness/2)})
+            threading.Timer(60, stairs_off_callback).start()
+    return
+
+
+
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     if(len(topic_parts) == 2 and topic_parts[0] == "zigbee2mqtt"):
@@ -200,19 +250,29 @@ def mqtt_on_message(client, userdata, msg):
             bedroom_sunrise(msg.payload)
         elif(name == "kitchen move"):
             night_hunger(msg.payload)
+    elif(len(topic_parts) == 2 and topic_parts[0] == "zig"):
+        name = topic_parts[1]
+        if(name == "stairs up move"):
+            stairs_up_move(msg.payload)
+        elif(name == "stairs down move"):
+            stairs_down_move(msg.payload)
+        elif(name == "dining switch"):
+            dining_switch()
+        elif(name == "cube"):
+            aqara_cube(msg.payload)
     elif(len(topic_parts) == 3):
         modelid = topic_parts[1]
         name = topic_parts[2]
         log.debug(f"mqtt> name = {name} ; modelid = {modelid}")
         if(modelid == "lumi.sensor_cube.aqgl01"):
             log.debug("modelid : aqara_cube()")
-            aqara_cube(name,msg.payload)
+            aqara_cube(msg.payload)
         elif(name == "lumi.remote.b1acn01 16"):
             log.debug("name : aqara button 16")
             aqara_button(name)
         elif(name == "LargeSingleSwitch"):
             log.debug("name : LargeSingleSwitch")
-            aqara_switch(name)
+            dining_switch()
         elif((modelid == "lumi.sensor_motion.aq2") or (modelid == "SML001") ):
             log.debug("modelid : stairs_presence()")
             stairs_presence(name,msg.payload)
