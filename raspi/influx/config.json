@@ -2,7 +2,8 @@
     "mqtt":{
         "host":"localhost",
         "port":1883,
-        "keepalive":60
+        "keepalive":60,
+        "root_topic":"zigbee2mqtt"
     },
     "influxdb":{
         "host":"localhost",

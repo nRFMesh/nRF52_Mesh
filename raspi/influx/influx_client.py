@@ -13,8 +13,7 @@ import json
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
     lclient.subscribe("Nodes/#")
-    lclient.subscribe("zigbee2mqtt/#")
-    lclient.subscribe("zig/#")
+    lclient.subscribe(config["mqtt"]["root_topic"]+"/#")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -34,7 +33,7 @@ def on_message(client, userdata, msg):
                     }
                 }
             ]
-        elif( (len(topic_parts) == 2) and (topic_parts[0] == "zigbee2mqtt") ):
+        elif( (len(topic_parts) == 2) and (topic_parts[0] == config["mqtt"]["root_topic"]) ):
             sensor = topic_parts[1]
             fields = json.loads(msg.payload)
             
