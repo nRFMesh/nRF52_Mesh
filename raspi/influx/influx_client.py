@@ -14,6 +14,7 @@ def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
     lclient.subscribe("Nodes/#")
     lclient.subscribe("zigbee2mqtt/#")
+    lclient.subscribe("zig/#")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
