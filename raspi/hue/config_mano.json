@@ -17,7 +17,8 @@
         "subscriptions":[   "zig/stairs up move",
                             "zig/stairs down move",
                             "zig/dining switch",
-                            "zig/night leds button"
+                            "zig/night leds button",
+                            "zig/cube"
                         ],
         "actions"   :[],
         "publish" :true,
