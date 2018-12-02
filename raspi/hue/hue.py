@@ -23,14 +23,16 @@ def aqara_cube(payload):
             lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
-def night_leds_button():
-    if(lights["Bed Leds Cupboard"].on):
-        lights["Bed Leds Cupboard"].on = False
-        log.debug("aqara_button> set light off")
-    else:
-        #command so that it does not go to previous level before adjusting the brightness
-        b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1, 'hue':8101, 'sat':194})
-        log.debug("aqara_button> set light to 1")
+def night_leds_button(payload):
+    sensor = json.loads(payload)
+    if("click" in sensor and sensor["click"] == "single"):
+        if(lights["Bed Leds Cupboard"].on):
+            lights["Bed Leds Cupboard"].on = False
+            log.debug("aqara_button> set light off")
+        else:
+            #command so that it does not go to previous level before adjusting the brightness
+            b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1, 'hue':8101, 'sat':194})
+            log.debug("aqara_button> set light to 1")
     return
 
 def aqara_button_sequence(name):
@@ -130,19 +132,21 @@ def night_hunger(payload):
             log.debug("Kitchen_Move>light is already off")
     return 
 
-def dining_switch():
-    if(lights["Living 1 Table E27"].on):
-        lights["Living 1 Table E27"].on = False
-        lights["Living 2 Table E27"].on = False
-        lights["Entrance White 1"].on = False
-        lights["Entrance White 2"].on = False
-        b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 125})
-        log.debug("dining_switch> Dining room and Entrence lights off")
-    else:
-        #command so that it does not go to previous level before adjusting the brightness
-        b.set_light("Living 1 Table E27", {'on' : True, 'bri' : 255})
-        b.set_light("Living 2 Table E27", {'on' : True, 'bri' : 255})
-        log.debug("dining_switch> switch on Dining room")
+def dining_switch(payload):
+    sensor = json.loads(payload)
+    if("click" in sensor and sensor["click"] == "single"):
+        if(lights["Living 1 Table E27"].on):
+            lights["Living 1 Table E27"].on = False
+            lights["Living 2 Table E27"].on = False
+            lights["Entrance White 1"].on = False
+            lights["Entrance White 2"].on = False
+            b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 125})
+            log.debug("dining_switch> Dining room and Entrence lights off")
+        else:
+            #command so that it does not go to previous level before adjusting the brightness
+            b.set_light("Living 1 Table E27", {'on' : True, 'bri' : 255})
+            b.set_light("Living 2 Table E27", {'on' : True, 'bri' : 255})
+            log.debug("dining_switch> switch on Dining room")
     return
 
 def stairs_off_callback():
@@ -220,11 +224,11 @@ def mqtt_on_message(client, userdata, msg):
         elif(name == "stairs down move"):
             stairs_down_move(msg.payload)
         elif(name == "dining switch"):
-            dining_switch()
+            dining_switch(msg.payload)
         elif(name == "cube"):
             aqara_cube(msg.payload)
         elif(name == "night leds button"):
-            night_leds_button()
+            night_leds_button(msg.payload)
     else:
         log.error("topic: "+msg.topic + "size not matching")
         
