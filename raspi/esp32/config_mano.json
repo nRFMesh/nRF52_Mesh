@@ -1,9 +1,9 @@
 {
     "mqtt":{
-        "host":"10.0.0.12",
+        "host":"localhost",
         "port":1883,
         "keepalive":60,
-        "client_id":"rf_stm32",
+        "client_id":"esp32_py",
         "subscriptions":[
             "status/#",
             "Nodes/98/temperature",

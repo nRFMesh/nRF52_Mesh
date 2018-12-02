@@ -1809,7 +1809,7 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "5m",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -1848,5 +1848,5 @@
   "timezone": "",
   "title": "Last Day sensors",
   "uid": "bx08eiWgz",
-  "version": 13
+  "version": 20
 }
