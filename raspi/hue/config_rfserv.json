@@ -1,0 +1,32 @@
+{  
+    "bridges":{
+        "LivingRoom":"10.0.0.38"
+    },
+    "rules":{
+        "wakeup":{
+            "input"     :"jNodes/96/button",
+            "event"     :"flip",
+            "output"    :"Test Small Stand"
+        }
+    },
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"hue_client",
+        "subscriptions":[   "zigbee2mqtt/entrance light",
+                            "zigbee2mqtt/sunrise",
+                            "zigbee2mqtt/kitchen move"
+                        ],
+        "actions"   :[],
+        "publish" :true,
+        "subscribe" :true
+    },
+    "websocket":{
+        "url":"ws://localhost:443"
+    },
+    "log":{
+        "logfile":"/home/pi/share/hue.log",
+        "level":"Debug"
+    }
+}
