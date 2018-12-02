@@ -1,0 +1,32 @@
+{
+    "mqtt":{
+        "host":"localhost",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"py_ruler"
+    },
+    "log":{
+        "logfile":"/home/pi/share/ruler.log",
+        "level":"Info"
+    },
+    "rules":{
+        "Bathroom_Window":{
+            "input":"jNodes/64/acceleration",
+            "output":"Nodes/64/angle",
+            "description":"captures the x3 accis of acceleration and turn it into an angle",
+            "enable" : false
+        },
+        "Bathroom_Heating":{
+            "input":"jNodes/45/acceleration",
+            "output":"Nodes/45/angle",
+            "description":"angle from the closed reference",
+            "enable" : false
+        },
+        "Kitchen_Move":{
+            "input":"zig/kitchen move",
+            "output":"zig/printer light/set",
+            "description":"low light for night hungers",
+            "enable" : false
+        }
+    }
+}

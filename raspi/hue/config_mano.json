@@ -18,7 +18,8 @@
                             "zig/stairs down move",
                             "zig/dining switch",
                             "zig/night leds button",
-                            "zig/cube"
+                            "zig/cube",
+                            "zig/kitchen move"
                         ],
         "actions"   :[],
         "publish" :true,
