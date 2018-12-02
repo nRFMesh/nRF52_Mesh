@@ -23,8 +23,8 @@
             "enable" : true
         },
         "Kitchen_Move":{
-            "input":"zigbee2mqtt/kitchen move",
-            "output":"zigbee2mqtt/printer light/set",
+            "input":"zig/kitchen move",
+            "output":"zig/printer light/set",
             "description":"low light for night hungers",
             "enable" : true
         }

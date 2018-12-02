@@ -116,7 +116,7 @@ def mqtt_on_message(client, userdata, msg):
     elif(len(topics) == 2):
         if(topics[0] == "status"):
             esp_status(topics[1],msg.payload)
-        elif(topics[0] == "zigbee2mqtt"):
+        elif(topics[0] == "zig"):
             name = topics[1]
             if(name == "bed heater"):
                 bed_heater_switch(msg.payload)

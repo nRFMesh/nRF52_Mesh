@@ -142,7 +142,7 @@ def mqtt_on_message(client, userdata, msg):
             mqtt_handle_heat_request(topics[1],msg.payload)
         elif(topics[0] == "Retro Light Upstairs"):
             mqtt_handle_dimmer_request(topics,msg.payload)
-        elif(topics[0] == "zigbee2mqtt"):
+        elif(topics[0] == "zig"):
             name = topics[1]
             if(name == "lights upstairs"):
                 mqtt_handle_switch_lights_upstairs(msg.payload)

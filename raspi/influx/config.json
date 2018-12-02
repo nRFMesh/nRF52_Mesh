@@ -3,7 +3,7 @@
         "host":"localhost",
         "port":1883,
         "keepalive":60,
-        "root_topic":"zigbee2mqtt"
+        "root_topic":"zig"
     },
     "influxdb":{
         "host":"localhost",

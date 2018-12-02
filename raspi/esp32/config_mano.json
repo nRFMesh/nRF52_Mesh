@@ -7,7 +7,7 @@
         "subscriptions":[
             "status/#",
             "Nodes/98/temperature",
-            "zigbee2mqtt/bed heater",
+            "zig/bed heater",
             "esp/bed heater/#"
         ],
         "publish" :true,

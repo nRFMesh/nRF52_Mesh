@@ -209,7 +209,7 @@ def stairs_down_move(payload):
 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
-    if(len(topic_parts) == 2 and topic_parts[0] == "zigbee2mqtt"):
+    if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
         name = topic_parts[1]
         if(name == "entrance light"):
             entrance_light(msg.payload)
@@ -217,9 +217,7 @@ def mqtt_on_message(client, userdata, msg):
             bedroom_sunrise(msg.payload)
         elif(name == "kitchen move"):
             night_hunger(msg.payload)
-    elif(len(topic_parts) == 2 and topic_parts[0] == "zig"):
-        name = topic_parts[1]
-        if(name == "stairs up move"):
+        elif(name == "stairs up move"):
             stairs_up_move(msg.payload)
         elif(name == "stairs down move"):
             stairs_down_move(msg.payload)
