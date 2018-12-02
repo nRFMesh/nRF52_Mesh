@@ -4,9 +4,14 @@
         "port":1883,
         "keepalive":60,
         "client_id":"rf_stm32",
-        "subscriptions":[],
+        "subscriptions":[
+            "status/#",
+            "Nodes/98/temperature",
+            "zigbee2mqtt/bed heater",
+            "esp/bed heater/#"
+        ],
         "publish" :true,
-        "subscribe" :false
+        "subscribe" :true
     },
     "log":{
         "logfile":"/home/pi/share/esp32.log",

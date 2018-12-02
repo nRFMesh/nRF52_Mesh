@@ -137,6 +137,7 @@ def mqtt_on_message(client, userdata, msg):
     log.debug("mqtt>%s",msg.topic)
     topics = msg.topic.split('/')
     if(len(topics) == 2) and (len(msg.payload) != 0):
+        #"Bed Heater" is the STM32 dongle to serial topic
         if(topics[0] == "Bed Heater"):
             mqtt_handle_heat_request(topics[1],msg.payload)
         elif(topics[0] == "Retro Light Upstairs"):
