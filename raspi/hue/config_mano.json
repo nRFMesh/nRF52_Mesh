@@ -19,7 +19,9 @@
                             "zig/dining switch",
                             "zig/night leds button",
                             "zig/cube",
-                            "zig/kitchen move"
+                            "zig/kitchen move",
+                            "zig/entrance light",
+                            "zig/sunrise"
                         ],
         "actions"   :[],
         "publish" :true,

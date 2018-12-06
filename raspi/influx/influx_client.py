@@ -8,14 +8,10 @@ import cfg
 from time import sleep
 import socket
 import json
+from mqtt import mqtt_start
 
 # -------------------- mqtt events -------------------- 
-def on_connect(lclient, userdata, flags, rc):
-    log.info("mqtt connected with result code "+str(rc))
-    lclient.subscribe("Nodes/#")
-    lclient.subscribe(config["mqtt"]["root_topic"]+"/#")
-
-def on_message(client, userdata, msg):
+def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     try:
         post = None
@@ -33,7 +29,7 @@ def on_message(client, userdata, msg):
                     }
                 }
             ]
-        elif( (len(topic_parts) == 2) and (topic_parts[0] == config["mqtt"]["root_topic"]) ):
+        elif( len(topic_parts) == 2 ):
             sensor = topic_parts[1]
             fields = json.loads(msg.payload)
             
@@ -41,6 +37,8 @@ def on_message(client, userdata, msg):
                 fields["pressure"] = int(fields["pressure"]) #force pressure to int
             if("voltage" in fields):
                 fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
+            if("temperature" in fields):
+                fields["temperature"] = float(fields["temperature"]) #force temperature to float
             post = [
                 {
                     "measurement": sensor,
@@ -61,17 +59,6 @@ def on_message(client, userdata, msg):
     except ValueError:
         log.error(" ValueError with : "+msg.topic+" "+str(msg.payload))
 
-def mqtt_connect_retries():
-    connected = False
-    while(not connected):
-        try:
-            clientMQTT.connect(config["mqtt"]["host"], config["mqtt"]["port"], config["mqtt"]["keepalive"])
-            connected = True
-        except socket.error:
-            log.error("socket.error will try a reconnection in 10 s")
-        sleep(10)
-    return
-
 # -------------------- main -------------------- 
 config = cfg.configure_log(__file__)
 
@@ -80,21 +67,13 @@ clientDB = InfluxDBClient(    config["influxdb"]["host"],
                             config["influxdb"]["port"], 
                             'root', 'root', 
                             config["influxdb"]["db"])
-
-
-
 #clientDB.create_database(config["influxdb"]["db"])
-#print("database created")
-#clientDB.write_points(post)
-#result = clientDB.query('select temperature from node15;')
-#print("Query Result: {0}".format(result))
 
 # -------------------- Mqtt Client -------------------- 
-cid = config["influxdb"]["mqtt_client_id"] +"_"+socket.gethostname()
-clientMQTT = mqtt.Client(client_id=cid)
-clientMQTT.on_connect = on_connect
-clientMQTT.on_message = on_message
+#will start a separate thread for looping
+clientMQTT = mqtt_start(config,mqtt_on_message,True)
 
-mqtt_connect_retries()
-
-clientMQTT.loop_forever()
+while(True):
+    sleep(0.2)
+    #The MQTT keeps looping on a thead
+    #All there is to do here is not to exit

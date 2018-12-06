@@ -3,13 +3,36 @@
         "host":"localhost",
         "port":1883,
         "keepalive":60,
-        "root_topic":"zig"
+        "client_id":"py_influx",
+        "subscriptions":[   "Nodes_/#",
+                            "zig/bed heater",
+                            "zig/entrance light",
+                            "zig/sunrise",
+                            "zig/entrance door",
+                            "zig/bathroom window",
+                            "zig/bedroom window",
+                            "zig/motion button",
+                            "zig/bed weather",
+                            "zig/balcony weather",
+                            "zig/kitchen move",
+                            "zig/stairs down move",
+                            "zig/floody",
+                            "zig/desk motion",
+                            "zig/desk weather",
+                            "zig/stairs down move",
+                            "zig/stairs up move",
+                            "zig/dining switch",
+                            "zig/cube",
+                            "zig/night leds button"
+                                    ],
+        "publish" :false,
+        "subscribe" :true
+                    
     },
     "influxdb":{
         "host":"localhost",
         "port":8086,
-        "db":"meshNodes",
-        "mqtt_client_id":"py_influx"
+        "db":"meshNodes"
     },
     "log":{
         "logfile":"/home/pi/share/influx_client.log",
