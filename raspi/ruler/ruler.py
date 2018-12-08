@@ -25,6 +25,7 @@ def on_message(client, userdata, msg):
             if(rule["enable"]):
                 #call the Fuction with the same name as the Rule 
                 payload = getattr(rules,rule_name)(msg.payload)
+                #payload = rules.Upstairs_Heat(msg.payload)
                 if(payload != None):
                     clientMQTT.publish(rule["output"],payload)
     #Here Custom Rules can be run

@@ -7,7 +7,7 @@
     },
     "log":{
         "logfile":"/home/pi/share/ruler.log",
-        "level":"Info"
+        "level":"Debug"
     },
     "rules":{
         "Bathroom_Window":{
@@ -27,6 +27,12 @@
             "output":"zig/printer light/set",
             "description":"low light for night hungers",
             "enable" : false
+        },
+        "Upstairs_Heat":{
+            "input":"zig/desk motion",
+            "output":"central heating/upstairs",
+            "description":"from heat handle angle to the heating value",
+            "enable" : true
         }
     }
 }

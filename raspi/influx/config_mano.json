@@ -4,7 +4,7 @@
         "port":1883,
         "keepalive":60,
         "client_id":"py_influx",
-        "subscriptions":[   "Nodes_/#",
+        "subscriptions":[   "Nodes/#",
                             "zig/bed heater",
                             "zig/entrance light",
                             "zig/sunrise",

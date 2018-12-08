@@ -3,6 +3,7 @@ from time import time
 import json
 from functools import reduce
 from vectors import Vector
+import math
 
 def static_vars(**kwargs):
     def decorate(func):
@@ -10,6 +11,32 @@ def static_vars(**kwargs):
             setattr(func, k, kwargs[k])
         return func
     return decorate
+
+def safe_angle(vect,ref):
+    result = 0
+    try:
+        result = vect.angle(ref)
+    except ValueError:
+        log.error("====>Handled Exception for ValueError")
+        print(vect)
+    return result
+    
+def Upstairs_Heat(input):
+    v_ref_abs = Vector(math.radians(3),math.radians(81),math.radians(9))
+    v_max_angle = 306
+    a = json.loads(input)
+    v_acc   = Vector(math.radians(a["angle_x"]),math.radians(a["angle_y"]),math.radians(a["angle_z"]))
+    angle = safe_angle(v_acc,v_ref_abs)
+    if(float(a["angle_x"]) < -5):
+        log.debug("Upstairs_Heat>Other side a = %f"%angle)
+        angle = 360 - angle
+    if(type(angle) == float):
+        #angle = v_acc.angle(v_closed)
+        log.debug("Upstairs_Heat> =>output(%f)"%(angle))
+    else:
+        log.error("Upstairs_Heat>not float")
+    return int(100 * angle / v_max_angle)
+
 
 @static_vars(isLightOn=False)
 def Kitchen_Move(input):
@@ -95,14 +122,6 @@ def Button_To_Heat_Down(input):
         result = None # ignored, do nothing
     return result
 
-def safe_angle(vect,ref):
-    try:
-        return vect.angle(ref)
-    except ValueError:
-        log.debug("Handled Exception for ValueError")
-        print(vect)
-    return None
-    
 
 def Bathroom_Window(input):
     a = json.loads(input)
