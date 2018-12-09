@@ -30,7 +30,7 @@
         },
         "Upstairs_Heat":{
             "input":"zig/desk motion",
-            "output":"central heating/upstairs",
+            "output":"heating/upstairs",
             "description":"from heat handle angle to the heating value",
             "enable" : true
         }

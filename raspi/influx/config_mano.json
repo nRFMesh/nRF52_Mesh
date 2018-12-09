@@ -23,7 +23,8 @@
                             "zig/stairs up move",
                             "zig/dining switch",
                             "zig/cube",
-                            "zig/night leds button"
+                            "zig/night leds button",
+                            "heating/upstairs"
                                     ],
         "publish" :false,
         "subscribe" :true

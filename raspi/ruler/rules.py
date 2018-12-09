@@ -35,7 +35,8 @@ def Upstairs_Heat(input):
         log.debug("Upstairs_Heat> =>output(%f)"%(angle))
     else:
         log.error("Upstairs_Heat>not float")
-    return int(100 * angle / v_max_angle)
+    message = {"heating" : int(100 * angle / v_max_angle)}
+    return json.dumps(message)
 
 
 @static_vars(isLightOn=False)
