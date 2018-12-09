@@ -94,6 +94,11 @@ def bedroom_sunrise(payload):
                 short_time_brightness = 255
         log.debug("beroom_sunrise>current brightness %d",current_brightness)
         double_steps_brightness("Bed Leds Cupboard",short_time_brightness,255)
+    elif("click" in jval and jval["click"] == "double"):
+        if(not lights["Bed Leds Cupboard"].on):
+            b.set_light(light, {'on' : True, 'bri' : 255, 'hue':8101, 'sat':194})
+        else:
+            lights["Bed Leds Cupboard"].on = False
     elif("action" in jval and jval["action"] == "hold"):
         if(not lights["Bed Leds Cupboard"].on):
             log.warn("beroom_sunrise>already off nothing to do")
