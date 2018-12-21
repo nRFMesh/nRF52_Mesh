@@ -12,7 +12,9 @@
             "Bed Heater/#",
             "esp/bed heater/#",
             "Retro Light Upstairs/#",
-            "zig/bed heater"
+            "zig/bed heater",
+            "zig/retrolight1",
+            "zig/retrolight2"
         ],
         "publish" :true,
         "subscribe" :true

@@ -4,7 +4,7 @@
         "baud":115200
     },
     "mqtt":{
-        "host":"10.0.0.12",
+        "host":"10.0.0.42",
         "port":1883,
         "keepalive":60,
         "client_id":"rf_stm32",
@@ -12,7 +12,9 @@
             "Bed Heater/#",
             "esp/bed heater/#",
             "Retro Light Upstairs/#",
-            "zig/bed heater"
+            "zig/bed heater",
+            "zig/retrolight1",
+            "zig/retrolight2"
         ],
         "publish" :true,
         "subscribe" :true

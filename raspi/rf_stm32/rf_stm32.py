@@ -144,7 +144,7 @@ def mqtt_on_message(client, userdata, msg):
             mqtt_handle_dimmer_request(topics,msg.payload)
         elif(topics[0] == "zig"):
             name = topics[1]
-            if(name == "lights upstairs"):
+            if(name == "retrolight1") or (name == "retrolight2"):
                 mqtt_handle_switch_lights_upstairs(msg.payload)
             elif(name == "bed heater"):
                 mqtt_handle_switch_bed_heater(msg.payload)
