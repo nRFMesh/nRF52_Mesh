@@ -16,7 +16,7 @@ def interpolate(col1,col2,coeff):
     return res
 
 def pixels_all(color):
-    topic = "esp/"+panel_name+"/all"
+    topic = "esp/"+panel_name+"/pixels/all"
     panel = {}
     panel["red"]    = int(color.get_red()*255)
     panel["green"]  = int(color.get_green()*255)
@@ -25,7 +25,7 @@ def pixels_all(color):
     return
 
 def pixels_one(index,color):
-    topic = "esp/"+panel_name+"/one"
+    topic = "esp/"+panel_name+"/pixels/one"
     panel = {}
     panel["index"]    = index
     panel["red"]    = int(color.get_red()*255)
@@ -35,7 +35,7 @@ def pixels_one(index,color):
     return
 
 def pixels_list(col_list):
-    topic = "esp/"+panel_name+"/list"
+    topic = "esp/"+panel_name+"/pixels/list"
     panel = {}
     rgb_list = []
     for col in col_list:
@@ -58,9 +58,22 @@ def panel_flash(color, duration_ms):
     panel = {}
     panel["action"] = "flash"
     panel["duration_ms"] = duration_ms
-    panel["r"] = int(col.get_red()*255))
-    panel["g"] = int(col.get_green()*255))
-    panel["b"] = int(col.get_blue()*255))
+    panel["r"] = int(color.get_red()*255)
+    panel["g"] = int(color.get_green()*255)
+    panel["b"] = int(color.get_blue()*255)
+    clientMQTT.publish(topic,json.dumps(panel))
+    return
+
+def panel_wave(color, duration_ms, freq, length):
+    topic = "esp/"+panel_name+"/panel"
+    panel = {}
+    panel["action"] = "wave"
+    panel["duration_ms"] = duration_ms
+    panel["freq"] = freq
+    panel["length"] = length
+    panel["r"] = int(color.get_red()*255)
+    panel["g"] = int(color.get_green()*255)
+    panel["b"] = int(color.get_blue()*255)
     clientMQTT.publish(topic,json.dumps(panel))
     return
 
@@ -91,6 +104,11 @@ def pixels_blink():
     pixels_off()
     return
 
+def test_waves():
+    panel_wave( Color(rgb=(0, 10/255, 0)), 800000, 2, 32 )
+    sleep(0.3)
+    panel_wave( Color(rgb=(0,0 ,10/255)), 800000, -3, 32 )
+    return
 # -------------------- main -------------------- 
 config = cfg.get_local_json()
 #will start a separate thread for looping
@@ -103,5 +121,6 @@ clientMQTT = mqtt_start(config,None,False)
 #pixels_off()
 #panel_off()
 
-panel_flash(Color(rgb=(0, 0, 0)))
+#panel_flash(Color(rgb=(0, 0, 0)))
 
+test_waves()
