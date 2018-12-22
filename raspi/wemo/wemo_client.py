@@ -9,12 +9,15 @@ import socket
 # -------------------- mqtt events -------------------- 
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
-    #lclient.subscribe("#")
+    lclient.subscribe("zig/tree")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
+    log.info("MQTT> message %s",msg.payload)
     try:
-        if( (len(topic_parts) == 3) and (topic_parts[0] == "Nodes") ):
+        if( (len(topic_parts) == 2) and (topic_parts[1] == "tree") ):
+            log.info("MQTT> tree")
+        elif( (len(topic_parts) == 3) and (topic_parts[0] == "Nodes") ):
             nodeid = topic_parts[1]
             sensor = topic_parts[2]
             measurement = "node"+nodeid
@@ -59,15 +62,25 @@ def wemo_start():
     #switch.explain()
     return devices
 
-def wemo_loop_forever():
-    while(True):
+g_mqtt_loop_count = 0
+
+def mqtt_publish_loop()
+    g_mqtt_loop_count = g_mqtt_loop_count + 1
+    if((g_mqtt_loop_count % 1000) == 0)
         for name in devices:
             log.debug("%s: bin state: %s",name,devices[name].basicevent.GetBinaryState())
             topic = "Nodes/"+str(config["devices"][name]["node"])+"/power"
             power = float(devices[name].current_power)/1000
             clientMQTT.publish(topic,power)
             log.debug("%s: %s: %s",name, topic, power)
-        sleep(config["poll_sec"])
+    return
+
+def wemo_loop_forever():
+    while(True):
+        clientMQTT.loop()
+        sleep(0.01)
+        mqtt_publish_loop()
+        #sleep(config["poll_sec"])
     return
 
 def mqtt_connect_retries(client):
@@ -95,8 +108,10 @@ config = cfg.configure_log(__file__)
 
 #will start a separate thread for looping
 clientMQTT = mqtt_start()
+log.info("=> mqtt started")
 
 devices = wemo_start()
+log.info("=> wemo started")
 
 #loop forever
 wemo_loop_forever()
