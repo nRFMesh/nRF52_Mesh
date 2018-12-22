@@ -22,7 +22,7 @@
     },
     "log":{
         "logfile":"/home/pi/share/wemo.log",
-        "level":"Debug"
+        "level":"Info"
     },
     "poll_sec":10
 }
