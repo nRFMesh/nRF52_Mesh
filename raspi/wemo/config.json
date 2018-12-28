@@ -18,7 +18,12 @@
         "valuesTopics":{
             "HeadTopic"     :"Nodes/",
             "actions"   :["power"]
-        }
+        },
+        "subscriptions":[
+            "zig/tree"
+        ],
+        "publish" :true,
+        "subscribe" :true
     },
     "log":{
         "logfile":"/home/pi/share/wemo.log",

@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+from mqtt import mqtt_start
 from ouimeaux.environment import Environment
 #https://ouimeaux.readthedocs.io/en/latest/
 import datetime
@@ -9,9 +10,6 @@ import socket
 import json
 
 # -------------------- mqtt events -------------------- 
-def on_connect(lclient, userdata, flags, rc):
-    log.info("mqtt connected with result code "+str(rc))
-    lclient.subscribe("zig/tree")
 
 def on_zig_tree(payload):
     log.info("MQTT> tree button press")
@@ -31,7 +29,7 @@ def on_zig_tree(payload):
         log.error("Error> No 'Wemo Bed Power' available ")
     return
 
-def on_message(client, userdata, msg):
+def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     log.info("MQTT> message %s",msg.payload)
     try:
@@ -83,7 +81,7 @@ def wemo_start():
     return devices
 
 
-def mqtt_publish_loop():
+def mqtt_publish_once():
     for name in devices:
         log.debug("%s: bin state: %s",name,devices[name].basicevent.GetBinaryState())
         topic = "Nodes/"+str(config["devices"][name]["node"])+"/power"
@@ -92,43 +90,22 @@ def mqtt_publish_loop():
         log.debug("%s: %s: %s",name, topic, power)
     return
 
-def wemo_loop_forever():
+def wemo_publish_loop():
     while(True):
-        clientMQTT.loop()
-        #sleep(0.01)
-        mqtt_publish_loop()
+        mqtt_publish_once()
         sleep(config["poll_sec"])
     return
-
-def mqtt_connect_retries(client):
-    connected = False
-    while(not connected):
-        try:
-            client.connect(config["mqtt"]["host"], config["mqtt"]["port"], config["mqtt"]["keepalive"])
-            connected = True
-        except socket.error:
-            log.error("socket.error will try a reconnection in 10 s")
-        sleep(10)
-    return
-
-def mqtt_start():
-    cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
-    clientMQTT = mqtt.Client(client_id=cid)
-    clientMQTT.on_connect = on_connect
-    clientMQTT.on_message = on_message
-    mqtt_connect_retries(clientMQTT)
-    clientMQTT.loop_start()
-    return clientMQTT
 
 # -------------------- main -------------------- 
 config = cfg.configure_log(__file__)
 
 #will start a separate thread for looping
-clientMQTT = mqtt_start()
+clientMQTT = mqtt_start(config,mqtt_on_message,True)
+
 log.info("=> mqtt started")
 
 devices = wemo_start()
 log.info("=> wemo started")
 
 #loop forever
-wemo_loop_forever()
+wemo_publish_loop()
