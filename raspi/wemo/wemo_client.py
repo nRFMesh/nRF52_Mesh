@@ -15,16 +15,16 @@ def on_connect(lclient, userdata, flags, rc):
 
 def on_zig_tree(payload):
     log.info("MQTT> tree button press")
-    if("Wemo Bed Power" in devices):
+    if("Christmas Tree" in devices):
         sensor = json.loads(payload)
         if("click" in sensor and sensor["click"] == "single"):
             #state = devices["Wemo Bed Power"].basicevent.GetBinaryState()
             #the state is inconsistent and does not get updated soon enough ~ 10 sec
             log.info("Wemo Tree> switching on")
-            devices["Wemo Bed Power"].on()
+            devices["Christmas Tree"].on()
         elif("action" in sensor and sensor["action"] == "hold"):
                 log.info("Wemo Tree> switching off")
-                devices["Wemo Bed Power"].off()
+                devices["Christmas Tree"].off()
         else:
             log.error("Error> unhandled button event")
     else:
