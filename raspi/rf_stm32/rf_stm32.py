@@ -96,6 +96,14 @@ def mqtt_handle_switch_lights_upstairs(payload):
             mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],7000)
             g_lights_upstairs_on = True
             log.info("lights_upstairs> On")
+    if("action" in jval and jval["action"] == "hold"):
+            mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],2000)
+            g_lights_upstairs_on = True
+            log.info("lights_upstairs> dimmed")
+    if("click" in jval and jval["click"] == "double"):
+            mqtt_handle_dimmer_request(["Retro Light Upstairs","all"],7000)
+            g_lights_upstairs_on = True
+            log.info("lights_upstairs> double bright up")
     else:
         log.debug("lights_upstairs>no click")
     return

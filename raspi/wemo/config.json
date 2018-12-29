@@ -1,6 +1,6 @@
 {  
     "devices":{
-        "Wemo Bed Power":{
+        "Christmas Tree":{
             "node":30
         },
         "Bathroom":{
@@ -18,11 +18,16 @@
         "valuesTopics":{
             "HeadTopic"     :"Nodes/",
             "actions"   :["power"]
-        }
+        },
+        "subscriptions":[
+            "zig/tree"
+        ],
+        "publish" :true,
+        "subscribe" :true
     },
     "log":{
         "logfile":"/home/pi/share/wemo.log",
-        "level":"Debug"
+        "level":"Info"
     },
     "poll_sec":10
 }
