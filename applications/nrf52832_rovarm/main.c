@@ -201,7 +201,9 @@ void app_mesh_message(message_t* msg)
 {
     if(msg->pid == 0x17)//bldc
     {
-        sprintf(uart_message,"bldc(%u)\r\n",*(msg->payload));
+        uint8_t val = *(msg->payload);
+        bldc_set((float)val,1.0);
+        sprintf(uart_message,"bldc(%u)\r\n",val);
         ser_send(uart_message);
     }
     else

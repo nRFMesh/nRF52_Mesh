@@ -9,14 +9,9 @@
 
 #include "boards.h"
 
-#include "nrf_drv_ppi.h"
-#include "nrf_drv_timer.h"
-#include "nrf_drv_gpiote.h"
+#include "nrf_drv_pwm.h"
 
 #include "nrf.h"
-#include "nrf_gpiote.h"
-#include "nrf_gpio.h"
-
 #include "app_error.h"
 #include "app_util.h"
 
@@ -24,68 +19,89 @@
     #error this file shall only be included if the BLDC is activated
 #endif
 
-#if (TIMER_ENABLED != 1)
-    #error the timer instance must be enabled for bldc module
-#endif
+static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
 
-const nrf_drv_timer_t TIMER_BLDC = NRF_DRV_TIMER_INSTANCE(APP_BLDC_TIMER_INSTANCE);
-
-void timer_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
-
-
-void bldc_events_setup()
+static uint16_t const              pwm_top_period  = 800;//50 us for 16 MHz clock
+static nrf_pwm_values_individual_t pwm_values;
+static nrf_pwm_sequence_t const    pwm_playback =
 {
-    uint32_t compare_evt_addr;
-    uint32_t gpiote_task_addr;
-    nrf_ppi_channel_t ppi_channel;
-    ret_code_t err_code;
-    nrf_drv_gpiote_out_config_t config = GPIOTE_CONFIG_OUT_TASK_TOGGLE(false);
+    .values.p_individual = &pwm_values,
+    .length              = NRF_PWM_VALUES_LENGTH(pwm_values),
+    .repeats             = 0,
+    .end_delay           = 0
+};
 
-    err_code = nrf_drv_gpiote_out_init(GPIO_M_P1, &config);
-    APP_ERROR_CHECK(err_code);
+static void demo1_handler(nrf_drv_pwm_evt_type_t event_type)
+{
+    /*
+    if (event_type == NRF_DRV_PWM_EVT_FINISHED)
+    {
+        uint8_t channel    = m_demo1_phase >> 1;
+        bool    down       = m_demo1_phase & 1;
+        bool    next_phase = false;
 
+        uint16_t * p_channels = (uint16_t *)&pwm_values;
+        uint16_t value = p_channels[channel];
+        if (down)
+        {
+            value -= m_demo1_step;
+            if (value == 0)
+            {
+                next_phase = true;
+            }
+        }
+        else
+        {
+            value += m_demo1_step;
+            if (value >= m_demo1_top)
+            {
+                next_phase = true;
+            }
+        }
+        p_channels[channel] = value;
 
-    nrf_drv_timer_extended_compare(&TIMER_BLDC, (nrf_timer_cc_channel_t)0, 200 * 1000UL, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
-
-    err_code = nrf_drv_ppi_channel_alloc(&ppi_channel);
-    APP_ERROR_CHECK(err_code);
-
-    compare_evt_addr = nrf_drv_timer_event_address_get(&TIMER_BLDC, NRF_TIMER_EVENT_COMPARE0);
-    gpiote_task_addr = nrf_drv_gpiote_out_task_addr_get(GPIO_M_P1);
-
-    err_code = nrf_drv_ppi_channel_assign(ppi_channel, compare_evt_addr, gpiote_task_addr);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_ppi_channel_enable(ppi_channel);
-    APP_ERROR_CHECK(err_code);
-
-    nrf_drv_gpiote_out_task_enable(GPIO_M_P1);
+        if (next_phase)
+        {
+            if (++m_demo1_phase >= 2 * NRF_PWM_CHANNEL_COUNT)
+            {
+                m_demo1_phase = 0;
+            }
+        }
+    }
+    */
 }
 
 void bldc_init()
 {
-    ret_code_t err_code;
+    nrf_drv_pwm_config_t const config0 =
+    {
+        .output_pins =
+        {
+            GPIO_M_P1, // channel 0
+            GPIO_M_P2, // channel 1
+            GPIO_M_P3, // channel 2
+            NRFX_PWM_PIN_NOT_USED  // channel 3
+        },
+        .irq_priority = APP_IRQ_PRIORITY_LOWEST,
+        .base_clock   = NRF_PWM_CLK_16MHz,
+        .count_mode   = NRF_PWM_MODE_UP_AND_DOWN,//NRF_PWM_MODE_UP_AND_DOWN,NRF_PWM_MODE_UP
+        .top_value    = pwm_top_period,
+        .load_mode    = NRF_PWM_LOAD_INDIVIDUAL,
+        .step_mode    = NRF_PWM_STEP_AUTO
+    };
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, demo1_handler));
 
-    err_code = nrf_drv_ppi_init();
-    APP_ERROR_CHECK(err_code);
+    pwm_values.channel_0 = 50  | 0x8000;
+    pwm_values.channel_1 = 200 | 0x8000;
+    pwm_values.channel_2 = 400 | 0x8000;
+    pwm_values.channel_3 = 0   | 0x8000;
 
-    err_code = nrf_drv_gpiote_init();
-    APP_ERROR_CHECK(err_code);
-
-    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
-    err_code = nrf_drv_timer_init(&TIMER_BLDC, &timer_cfg, timer_dummy_handler);
-    APP_ERROR_CHECK(err_code);
-
-    // Setup PPI channel with event from TIMER compare and task GPIOTE pin toggle.
-    bldc_events_setup();
-
-    // Enable timer
-    nrf_drv_timer_enable(&TIMER_BLDC);
+    (void)nrf_drv_pwm_simple_playback(&m_pwm0, &pwm_playback, 1,NRF_DRV_PWM_FLAG_LOOP);
 
 }
 
 void bldc_set(float alpha, float norm)
 {
-
+    pwm_values.channel_0 = (uint16_t) alpha | 0x8000;//polarity
 }
 
