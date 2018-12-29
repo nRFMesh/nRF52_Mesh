@@ -71,9 +71,9 @@ extern "C" {
 
 #define BUTTONS_LIST {  }
 
-#define GPIO_M_P1 29
-#define GPIO_M_P2 30
-#define GPIO_M_P3 31
+#define GPIO_M_P1 31
+#define GPIO_M_P2 29
+#define GPIO_M_P3 30
 #define GPIO_M_EN 11
 
 #define RX_PIN_NUMBER  7

@@ -35,6 +35,7 @@
 //apps
 #include "clocks.h"
 #include "mesh.h"
+#include "bldc.h"
 #include "app_ser.h"
 
 #include "nrf_mtx.h"
@@ -227,6 +228,8 @@ int main(void)
 
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
+
+    bldc_init();
 
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
 
