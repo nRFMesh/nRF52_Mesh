@@ -143,7 +143,7 @@ def bldc(target_node,alpha):
     log.debug(f"msg > bldc from {this_node_id} -> {target_node} set alpha = {alpha}")
     control = 0x70
     mesh.send([control,mesh.pid["bldc"],this_node_id,target_node,alpha])
-    loop(2)
+    #loop(2)
     return
 
 
@@ -177,6 +177,9 @@ get_node_id()
 if(args.function == 'l'):
     loop(1000000)
 
-bldc(75,37)
-loop(200)
+#bldc(75,37)
+#loop(200)
 
+for i in range(5000):
+    bldc(75,i%256)
+    sleep(0.002)

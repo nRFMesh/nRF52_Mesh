@@ -202,13 +202,8 @@ void app_mesh_message(message_t* msg)
     if(msg->pid == 0x17)//bldc
     {
         uint8_t val = *(msg->payload);
-        bldc_set((float)val,1.0);
+        bldc_set(val,1.0);
         sprintf(uart_message,"bldc(%u)\r\n",val);
-        ser_send(uart_message);
-    }
-    else
-    {
-        sprintf(uart_message,"app_mesh_message( unhandled )\r\n");
         ser_send(uart_message);
     }
 }

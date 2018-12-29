@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "sdk_common.h"
 #include "sdk_config.h"
@@ -21,7 +22,7 @@
 
 static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
 
-static uint16_t const              pwm_top_period  = 800;//50 us for 16 MHz clock
+static uint16_t const              pwm_top_period  = 400;//25 us for 16 MHz clock
 static nrf_pwm_values_individual_t pwm_values;
 static nrf_pwm_sequence_t const    pwm_playback =
 {
@@ -31,44 +32,12 @@ static nrf_pwm_sequence_t const    pwm_playback =
     .end_delay           = 0
 };
 
-static void demo1_handler(nrf_drv_pwm_evt_type_t event_type)
+#define M_PI 3.14159265358979323846
+
+uint16_t sin_Table[256];
+
+static void pwm_dummy_handler(nrf_drv_pwm_evt_type_t event_type)
 {
-    /*
-    if (event_type == NRF_DRV_PWM_EVT_FINISHED)
-    {
-        uint8_t channel    = m_demo1_phase >> 1;
-        bool    down       = m_demo1_phase & 1;
-        bool    next_phase = false;
-
-        uint16_t * p_channels = (uint16_t *)&pwm_values;
-        uint16_t value = p_channels[channel];
-        if (down)
-        {
-            value -= m_demo1_step;
-            if (value == 0)
-            {
-                next_phase = true;
-            }
-        }
-        else
-        {
-            value += m_demo1_step;
-            if (value >= m_demo1_top)
-            {
-                next_phase = true;
-            }
-        }
-        p_channels[channel] = value;
-
-        if (next_phase)
-        {
-            if (++m_demo1_phase >= 2 * NRF_PWM_CHANNEL_COUNT)
-            {
-                m_demo1_phase = 0;
-            }
-        }
-    }
-    */
 }
 
 void bldc_init()
@@ -89,19 +58,31 @@ void bldc_init()
         .load_mode    = NRF_PWM_LOAD_INDIVIDUAL,
         .step_mode    = NRF_PWM_STEP_AUTO
     };
-    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, demo1_handler));
-
-    pwm_values.channel_0 = 50  | 0x8000;
-    pwm_values.channel_1 = 200 | 0x8000;
-    pwm_values.channel_2 = 400 | 0x8000;
-    pwm_values.channel_3 = 0   | 0x8000;
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_dummy_handler));
 
     (void)nrf_drv_pwm_simple_playback(&m_pwm0, &pwm_playback, 1,NRF_DRV_PWM_FLAG_LOOP);
 
+    for(int i=0;i<256;i++)
+    {
+            float angle = i * 2*M_PI /256;
+            sin_Table[i] = pwm_top_period * (sin(angle)+1) / 2;
+    }
+
+    bldc_set(0, 1.0);
 }
 
-void bldc_set(float alpha, float norm)
+void bldc_set(int angle, float norm)
 {
-    pwm_values.channel_0 = (uint16_t) alpha | 0x8000;//polarity
-}
+    int a1 = angle % 256;
+    uint16_t pwm1_buf = norm * sin_Table[a1];
+    int a2 = a1 + 85;
+    if(a2>=256)a2-=256;
+    uint16_t pwm2_buf = norm * sin_Table[a2];
+    int a3 = a1 + 170;
+    if(a3>=256)a3-=256;
+    uint16_t pwm3_buf = norm * sin_Table[a3];
 
+    pwm_values.channel_0 = pwm1_buf | 0x8000;
+    pwm_values.channel_1 = pwm2_buf | 0x8000;
+    pwm_values.channel_2 = pwm3_buf | 0x8000;
+}

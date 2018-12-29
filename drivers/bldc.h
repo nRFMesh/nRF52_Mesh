@@ -5,6 +5,6 @@
 #include <stdint.h>
 
 void bldc_init();
-void bldc_set(float alpha, float norm);
+void bldc_set(int angle, float norm);
 
 #endif /*__APP_BLDC_H__*/
