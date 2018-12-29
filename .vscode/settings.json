@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "sdk_common.h": "c",
+        "nrf_drv_ppi.h": "c"
+    }
+}
