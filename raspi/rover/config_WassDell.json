@@ -7,18 +7,14 @@
         "host":"10.0.0.12",
         "port":1883,
         "keepalive":60,
-        "client_id":"hci_client",
-        "subscriptions":[
-            "Nodes/#",
-            "cmd/request/#",
-            "remote_cmd/request/#"
-        ],
-        "actions"   :["dimmer","heat","ping"],
-        "rf_2_mqtt" :true,
-        "mqtt_2_rf" :true
+        "client_id":"rover_client",
+        "subscriptions":[],
+        "actions"   :[],
+        "publish" :true,
+        "subscribe" :false
     },
     "log":{
-        "logfile":"D:\\Dev\\nRF52_Mesh\\raspi\\rf_uart\\hci_client.log",
-        "level":"Debug"
+        "logfile":"D:\\Dev\\nRF52_Mesh\\raspi\\rover\\rover_client.log",
+        "level":"Info"
     }
 }

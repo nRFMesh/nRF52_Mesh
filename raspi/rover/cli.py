@@ -17,8 +17,8 @@ import os
 
 import mesh as mesh
 import cfg
+from mqtt import mqtt_start
 
-#%%
 def mesh_do_action(cmd,remote,params):
     control = 0x71
     try:
@@ -74,7 +74,23 @@ def execute_command(cmd,params):
    by other modules
 '''
 def mesh_on_broadcast(msg):
-    log.info("rf  > %s %s : %s"%(msg["src"],mesh.node_name(msg["src"]),mesh.inv_pid[int(msg["pid"])]))
+    try:
+        log_text = f'rf > src:{msg["src"]} - {mesh.node_name(msg["src"])} : pid={mesh.inv_pid[int(msg["pid"])]}'
+        log.debug(log_text)
+        if(config["mqtt"]["publish"]):
+            publishing = mesh.publish(msg)
+            for topic,payload in publishing.items():
+                clientMQTT.publish(topic,payload)
+    except KeyError :
+        log.error(f"no pid,msg in {json.dumps(msg)}")
+    return
+
+def node_log(msg):
+    log_text = f'log >{json.dumps(msg)}'
+    log.debug(log_text)
+    if(config["mqtt"]["publish"]):
+        topic = "jNodes/"+msg["src"]+"/log"
+        clientMQTT.publish(topic,msg)
     return
 
 def mesh_on_message(msg):
@@ -102,9 +118,13 @@ def mesh_on_cmd_response(resp,is_remote):
         this_node_id = int(resp["node_id"])
     return
 
+def mqtt_on_message(client, userdata, msg):
+    log.error("mqtt> Unexpected topic %s",msg.topic)
+    return
+
 def loop(nb):
     while(nb > 0):
-        sleep(0.05)
+        #sleep(0.05)
         mesh.run()
         nb = nb - 1
     return
@@ -167,7 +187,9 @@ this_node_id = 0
 #so that the command line can only override the config if required
 chan = int(args.channel)
 
-mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response)
+clientMQTT = mqtt_start(config,mqtt_on_message)
+
+mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response,node_log)
 
 set_channel(chan)
 
@@ -177,9 +199,13 @@ get_node_id()
 if(args.function == 'l'):
     loop(1000000)
 
+
+while(True):
+    mesh.run()
+
 #bldc(75,37)
 #loop(200)
 
-for i in range(5000):
-    bldc(75,i%256)
-    sleep(0.002)
+#for i in range(5000):
+#    bldc(75,i%256)
+#    sleep(0.002)

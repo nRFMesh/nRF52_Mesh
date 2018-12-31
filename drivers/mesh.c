@@ -79,6 +79,7 @@ static nrf_esb_payload_t    rx_payload;
 static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
+static uint8_t g_ttl = 2;
 
 static app_mesh_rf_handler_t m_app_rf_handler;
 
@@ -686,11 +687,16 @@ void mesh_tx_reset()
     mesh_tx_pid(Mesh_Pid_Reset);
 }
 
+void mesh_ttl_set(uint8_t ttl)
+{
+    g_ttl = ttl;
+}
+
 void mesh_response_data(uint8_t pid,uint8_t dest,uint8_t * data,uint8_t size)
 {
     message_t msg;
 
-    msg.control = 0x00 | 2;         // response | ttl = 2
+    msg.control = 0x00 | g_ttl;         // response | ttl = g_ttl
     msg.pid     = pid;
     msg.source  = UICR_NODE_ID;
     msg.dest    = dest;
@@ -704,7 +710,7 @@ void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size)
 {
     message_t msg;
 
-    msg.control = 0x80 | 2;         // broadcast | ttl = 2
+    msg.control = 0x80 | g_ttl;         // broadcast | ttl = g_ttl
     msg.pid     = pid;
     msg.source  = UICR_NODE_ID;
     msg.payload = data;

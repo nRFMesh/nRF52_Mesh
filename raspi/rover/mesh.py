@@ -40,6 +40,7 @@ pid = {
     "battery"       : 0x15,
     "text"          : 0x16,
     "bldc"          : 0x17,
+    "json"          : 0x18,
     "test_rf_resp"  : 0x30
 }
 
@@ -176,6 +177,13 @@ def publish(msg):
     elif(inv_pid[int(msg["pid"])] == "reset"):
         topic = "Nodes/"+msg["src"]+"/reset"
         pub[topic] = float(msg["reset"])
+    elif(inv_pid[int(msg["pid"])] == "text"):
+        topic = "jNodes/"+msg["src"]+"/text"
+        #remove less relevant keys, already in topic
+        del msg["pid"]
+        del msg["ctrl"]
+        del msg["src"]
+        pub[topic] = json.dumps(msg)
     return pub
 
 def line2dict(line):
@@ -215,18 +223,21 @@ def serial_on_line(line):
     elif("cmd" in ldict):
         on_cmd_response(ldict,False)
         log.info("cmd resp > "+line)
+    elif("nodeid" in ldict):
+        node_log(ldict)
     return
 
 def run():
     ser.run()
     return
 
-def start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response):
+def start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response,node_log):
     global on_broadcast
     global on_message
     global on_cmd_response
     on_broadcast = mesh_on_broadcast
     on_cmd_response = mesh_on_cmd_response
     on_message = mesh_on_message
+    on_log = node_log
     ser.serial_start(config,serial_on_line)
     return

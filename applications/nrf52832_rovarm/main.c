@@ -175,6 +175,12 @@ void app_mesh_message(message_t* msg)
     }
 }
 
+void log_count(uint32_t count)
+{
+    char log_msg[64];
+    sprintf(log_msg,"ts:%lu;loop:%lu",timestamp_get(),count);
+    mesh_bcast_text(log_msg);
+}
 
 int main(void)
 {
@@ -193,6 +199,7 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
+    timestamp_init();
     bldc_init();
 
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
@@ -201,18 +208,8 @@ int main(void)
 
     //Cannot use non-blocking with buffers from const code memory
     //reset is a status which single event is reset, that status takes the event name
-    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
+    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1;ts:%lu\r\n",get_this_node_id(),mesh_channel(),timestamp_get());
     ser_send(rtc_message);
-
-    timestamp_init();
-
-    sprintf(uart_message,"timestamp = %lu\r\n",timestamp_get());
-    ser_send(uart_message);
-
-    nrf_delay_ms(500);
-
-    sprintf(uart_message,"timestamp = %lu\r\n",timestamp_get());
-    ser_send(uart_message);
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
@@ -221,14 +218,22 @@ int main(void)
     rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
+    mesh_ttl_set(0);
+
+    nrf_delay_ms(200);
 
     // ------------------------- Start Events ------------------------- 
-
+    int loop_count = 0;
     while(true)
     {
         mesh_consume_rx_messages();
         //TODO required delay as the serial_write does not execute with two close consecutive calls
         nrf_delay_ms(1);
+        //if((loop_count % 2) == 0)
+        {
+            log_count(loop_count);
+        }
+        loop_count++;
     }
 }
 /*lint -restore */
