@@ -37,8 +37,7 @@
 #include "mesh.h"
 #include "bldc.h"
 #include "app_ser.h"
-
-#include "nrf_mtx.h"
+#include "timestamp.h"
 
 void app_mesh_broadcast(message_t* msg);
 void app_mesh_message(message_t* msg);
@@ -49,38 +48,6 @@ char uart_message[64];
 uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
-
-void blink_red(int time,int afteroff)
-{
-    bsp_board_led_on(1);
-    bsp_board_led_off(0);
-    nrf_delay_ms(time);
-    bsp_board_leds_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink_blue(int time,int afteroff)
-{
-    bsp_board_led_on(0);
-    bsp_board_led_off(1);
-    nrf_delay_ms(time);
-    bsp_board_leds_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink()
-{
-    nrf_delay_ms(500);
-    blink_red(200,500);
-    blink_blue(500,500);
-    bsp_board_leds_on();
-}
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -237,7 +204,15 @@ int main(void)
     sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
     ser_send(rtc_message);
 
-    blink();
+    timestamp_init();
+
+    sprintf(uart_message,"timestamp = %lu\r\n",timestamp_get());
+    ser_send(uart_message);
+
+    nrf_delay_ms(500);
+
+    sprintf(uart_message,"timestamp = %lu\r\n",timestamp_get());
+    ser_send(uart_message);
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);

@@ -49,19 +49,55 @@
 
 // <h> Application
 
-// <e> APP_BLDC_ENABLED - Application pwm with PPI and Timers
+// <e> BLDC_ENABLED - Application pwm with PPI and Timers
 //==========================================================
-#ifndef APP_BLDC_ENABLED
-#define APP_BLDC_ENABLED 1
+#ifndef BLDC_ENABLED
+#define BLDC_ENABLED 1
 #endif
 
-// <o> APP_BLDC_TIMER_INSTANCE  - Timer instance to be used
+// <o> BLDC_PWM_INSTANCE  - Timer instance to be used
+ 
+// <0=> TIMER HW INSTANCE 0
+// <1=> TIMER HW INSTANCE 1
+
+#ifndef BLDC_PWM_INSTANCE
+#define BLDC_PWM_INSTANCE 0
+#endif
+
+// </e>
+
+
+
+// <e> TIMESTAMP_ENABLED - Application pwm with PPI and Timers
+//==========================================================
+#ifndef TIMESTAMP_ENABLED
+#define TIMESTAMP_ENABLED 1
+#endif
+
+// <o> TIMESTAMP_TIMER_INSTANCE  - Timer instance to be used
  
 // <1=> TIMER HW INSTANCE 1
 // <2=> TIMER HW INSTANCE 2
 
-#ifndef APP_BLDC_TIMER_INSTANCE
-#define APP_BLDC_TIMER_INSTANCE 1
+#ifndef TIMESTAMP_TIMER_INSTANCE
+#define TIMESTAMP_TIMER_INSTANCE 1
+#endif
+
+// </e>
+
+// <e> MESH_TIMER_ENABLED - Mesh timeout timer
+//==========================================================
+#ifndef MESH_TIMER_ENABLED
+#define MESH_TIMER_ENABLED 1
+#endif
+
+// <o> MESH_TIMER_INSTANCE  - Timer instance to be used
+ 
+// <0=> TIMER HW INSTANCE 0
+// <1=> TIMER HW INSTANCE 1
+
+#ifndef MESH_TIMER_INSTANCE
+#define MESH_TIMER_INSTANCE 0
 #endif
 
 // </e>

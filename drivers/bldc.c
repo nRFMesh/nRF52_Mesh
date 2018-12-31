@@ -16,11 +16,11 @@
 #include "app_error.h"
 #include "app_util.h"
 
-#if(APP_BLDC_ENABLED != 1)
+#if(BLDC_ENABLED != 1)
     #error this file shall only be included if the BLDC is activated
 #endif
 
-static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
+static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(BLDC_PWM_INSTANCE);
 
 static uint16_t const              pwm_top_period  = 400;//25 us for 16 MHz clock
 static nrf_pwm_values_individual_t pwm_values;

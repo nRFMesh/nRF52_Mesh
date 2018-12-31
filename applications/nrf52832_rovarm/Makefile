@@ -20,6 +20,7 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/bldc.c \
   $(PROJ_DIR)/drivers/app_ser.c \
   $(PROJ_DIR)/drivers/utils.c \
+  $(PROJ_DIR)/drivers/timestamp.c \
   $(PROJ_DIR)/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \

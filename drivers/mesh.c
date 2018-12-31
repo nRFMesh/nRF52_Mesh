@@ -94,8 +94,8 @@ uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size);
 //-------------------------------------------------------------
 //----------------------- Payload Store -----------------------
 //-------------------------------------------------------------
-#if (TIMER_ENABLED == 1)
-const nrf_drv_timer_t TIMER_ACK = NRF_DRV_TIMER_INSTANCE(0);
+#if (MESH_TIMER_ENABLED == 1)
+const nrf_drv_timer_t TIMER_ACK = NRF_DRV_TIMER_INSTANCE(MESH_TIMER_INSTANCE);
 
 /**
  * @brief Handler for timer events.
@@ -115,7 +115,7 @@ void timer_ack_event_handler(nrf_timer_event_t event_type, void* p_context)
             break;
     }
 }
-#endif /*TIMER_ENABLED*/
+#endif /*MESH_TIMER_ENABLED*/
 
 
 
@@ -169,9 +169,9 @@ nrf_esb_payload_t* window_get_payload(uint8_t control)
     }
     else
     {
-        #if(TIMER_ENABLED == 1)
+        #if(MESH_TIMER_ENABLED == 1)
         nrf_drv_timer_enable(&TIMER_ACK);
-        #endif /*TIMER_ENABLED*/
+        #endif /*MESH_TIMER_ENABLED*/
     }
 
     return res;
@@ -501,7 +501,7 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
     NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
 
 
-    #if (TIMER_ENABLED == 1)
+    #if (MESH_TIMER_ENABLED == 1)
         nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
         err_code = nrf_drv_timer_init(&TIMER_ACK, &timer_cfg, timer_ack_event_handler);
         VERIFY_SUCCESS(err_code);
@@ -512,7 +512,7 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
             &TIMER_ACK, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
 
         nrf_drv_timer_enable(&TIMER_ACK);
-    #endif/*TIMER_ENABLED*/
+    #endif/*MESH_TIMER_ENABLED*/
 
     if(UICR_is_listening())
     {
