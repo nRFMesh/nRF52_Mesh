@@ -2,6 +2,7 @@
 #include "app_ser.h"
 
 #include "sdk_common.h"
+#include "sdk_config.h"
 
 #include "boards.h"
 
@@ -110,7 +111,13 @@ static void ser_event_handler(nrf_serial_t const * p_serial,nrf_serial_event_t e
             }
         break;
         case NRF_SERIAL_EVENT_DRV_ERR:
-            ser_evt_drv_err_count++;
+            {
+                ser_evt_drv_err_count++;
+                nrf_serial_rx_drain(&serial_uart);
+                nrf_serial_uninit(&serial_uart);
+                nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
+                uart_cmd_count = 0;
+            }
         break;
         case NRF_SERIAL_EVENT_FIFO_ERR:
             ser_evt_fifo_err_count++;
