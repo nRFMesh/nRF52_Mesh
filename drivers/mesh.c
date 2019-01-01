@@ -725,7 +725,7 @@ void mesh_bcast_text(char *text)
     uint8_t size = strlen(text);
     if(size>MAX_MESH_MESSAGE_SIZE)//truncate in case of long message
     {
-        text[size-1] = '>';
+        text[MAX_MESH_MESSAGE_SIZE-1] = '>';
         size = MAX_MESH_MESSAGE_SIZE;
     }
     mesh_bcast_data(Mesh_Pid_Text,(uint8_t*)text,size);

@@ -672,5 +672,23 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "105":   {   "name"          :"n59 rf test 2",
+        "board"         :"sensortag_for_dongle",
+        "program"       :"dongle test",
+        "uid"           :"0x4F B4 9A 49 35 B5 7D 3A",
+        "add"           :"",
+        "data"          : [],
+        "channel"       : "10",
+        "sleep"         : "60",
+        "is_listening"  : "0xBABA",
+        "is_router"     : "0",
+        "is_uart_cmd"   : "0xBABA",
+        "is_rf_cmd"     : "0xBABA",
+        "is_rf2uart"    : "0xBABA",
+        "is_testmode"   : "0",
+        "rtx_timeout"   : "5",
+        "rtx_count"     : "3"
     }
+    
 }

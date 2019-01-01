@@ -204,7 +204,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    rtc_config(app_rtc_handler);
+    //rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
 

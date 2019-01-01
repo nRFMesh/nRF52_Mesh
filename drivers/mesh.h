@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 //should match NRF_ESB_MAX_PAYLOAD_LENGTH
-#define MAX_MESH_MESSAGE_SIZE 40
+#define MAX_MESH_MESSAGE_SIZE (NRF_ESB_MAX_PAYLOAD_LENGTH-4)
 
 typedef struct 
 {

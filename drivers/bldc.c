@@ -86,3 +86,10 @@ void bldc_set(int angle, float norm)
     pwm_values.channel_1 = pwm2_buf | 0x8000;
     pwm_values.channel_2 = pwm3_buf | 0x8000;
 }
+
+void bldc_pwm_get(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3)
+{
+    *pwm1 = pwm_values.channel_0 & ~0x8000;
+    *pwm2 = pwm_values.channel_1 & ~0x8000;
+    *pwm3 = pwm_values.channel_2 & ~0x8000;
+}
