@@ -45,8 +45,12 @@
 
 #if defined(BOARD_PCA10040)
   #include "pca10040.h"
+#elif defined(BOARD_PCA10059)
+  #include "pca10059.h"
 #elif defined(BOARD_NRF52_SENSOR_TAG)
   #include "nrf52_sensortag.h"
+#elif defined(BOARD_NRF52832_ROVARM)
+  #include "nrf52832_rovarm.h"
 #elif defined(BOARD_NRF52_DONGLE)
   #include "nrf52_dongle.h"
 #elif defined(BOARD_NRF52_BUTTONS)

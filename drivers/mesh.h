@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 //should match NRF_ESB_MAX_PAYLOAD_LENGTH
-#define MAX_MESH_MESSAGE_SIZE 40
+#define MAX_MESH_MESSAGE_SIZE (NRF_ESB_MAX_PAYLOAD_LENGTH-4)
 
 typedef struct 
 {
@@ -92,6 +92,7 @@ uint32_t mesh_tx_alive();
 
 void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size);
 void mesh_bcast_text(char *text);
+void mesh_ttl_set(uint8_t ttl);
 
 uint32_t mesh_tx_button(uint8_t state);
 void mesh_tx_light(uint32_t light);

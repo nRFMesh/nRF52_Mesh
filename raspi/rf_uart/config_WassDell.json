@@ -1,6 +1,6 @@
 {
     "serial":{
-        "port":"COM12",
+        "port":"COM18",
         "baud":460800
     },
     "mqtt":{
@@ -18,7 +18,7 @@
         "mqtt_2_rf" :true
     },
     "log":{
-        "logfile":"D:\\Projects\\nRF52_Mesh\\raspi\\rf_uart\\hci_client.log",
+        "logfile":"D:\\Dev\\nRF52_Mesh\\raspi\\rf_uart\\hci_client.log",
         "level":"Debug"
     }
 }

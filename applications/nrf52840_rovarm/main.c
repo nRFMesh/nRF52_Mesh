@@ -41,7 +41,6 @@
 
 char rtc_message[64];
 char uart_message[64];
-char rf_message[128];
 uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
@@ -108,6 +107,7 @@ void rf_mesh_handler(message_t* msg)
         //Pure routers should not waste time sending messages over uart
         if(UICR_is_rf2uart())
         {
+            char rf_message[128];
             mesh_parse(msg,rf_message);
             ser_send(rf_message);
         }
@@ -198,15 +198,13 @@ int main(void)
     sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
     ser_send(rtc_message);
 
-    #if USED_BOARD_IS_BOARD_NRF52_DONGLE
-        blink();
-    #endif
+    blink();
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    //rtc_config(app_rtc_handler);
+    rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
 

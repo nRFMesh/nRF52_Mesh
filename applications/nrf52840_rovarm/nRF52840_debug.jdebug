@@ -12,16 +12,16 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.SetDevice ("nRF52832_xxAA");
+  Project.SetDevice ("nRF52840_xxAA");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
   Project.AddSvdFile ("Cortex-M4F.svd");
-  Project.AddSvdFile ("C:/Program Files/SEGGER/Ozone V2.50b/Config/Peripherals/nrf52.svd");
+  Project.AddSvdFile ("C:/Program Files/SEGGER/Ozone V2.50b/Config/Peripherals/nrf52840.svd");
   //
   // User settings
   //
-  File.Open ("D:/Dev/nRF52_Mesh/applications/nrf52_dongle/_build/nrf52832_xxaa.out");
+  File.Open ("D:/Dev/nRF52_Mesh/applications/nrf52_rovarm/_build/nrf52840_xxaa.out");
 }
 
 /*********************************************************************

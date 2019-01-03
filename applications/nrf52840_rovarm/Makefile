@@ -1,16 +1,15 @@
-PROJECT_NAME     := nRF52_Dongle
-TARGETS          := nrf52832_xxaa
+PROJECT_NAME     := nRF52_RoverArm
+TARGETS          := nrf52840_xxaa
 OUTPUT_DIRECTORY := _build
 
-#BOARD selection : BOARD_NRF52_DONGLE, BOARD_NRF52_SENSOR_TAG
-#USED_BOARD := BOARD_NRF52_DONGLE
-USED_BOARD := BOARD_NRF52_SENSOR_TAG
+USED_BOARD := BOARD_PCA10059
+#USED_BOARD := BOARD_NRF52_SENSOR_TAG
 
 SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
 
-$(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := ./esb_ptx_prx_gcc_nrf52.ld
+$(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
+  LINKER_SCRIPT  := ./openthread_nrf52840_bootloader.ld
 
 #  $(PROJ_DIR)/drivers/bme280/bme280.cpp \
 
@@ -109,7 +108,7 @@ CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DESB_PRESENT
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DNRF52
-CFLAGS += -DNRF52832_XXAA
+CFLAGS += -DNRF52840_XXAA
 CFLAGS += -DNRF52_PAN_74
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
@@ -133,7 +132,7 @@ ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DESB_PRESENT
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DNRF52
-ASMFLAGS += -DNRF52832_XXAA
+ASMFLAGS += -DNRF52840_XXAA
 ASMFLAGS += -DNRF52_PAN_74
 
 # Linker flags
@@ -146,10 +145,10 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
 
-nrf52832_xxaa: CFLAGS += -D__HEAP_SIZE=8192
-nrf52832_xxaa: CFLAGS += -D__STACK_SIZE=8192
-nrf52832_xxaa: ASMFLAGS += -D__HEAP_SIZE=8192
-nrf52832_xxaa: ASMFLAGS += -D__STACK_SIZE=8192
+nrf52840_xxaa: CFLAGS += -D__HEAP_SIZE=8192
+nrf52840_xxaa: CFLAGS += -D__STACK_SIZE=8192
+nrf52840_xxaa: ASMFLAGS += -D__HEAP_SIZE=8192
+nrf52840_xxaa: ASMFLAGS += -D__STACK_SIZE=8192
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
@@ -159,12 +158,12 @@ LIB_FILES += -lc -lnosys -lm
 .PHONY: default help
 
 # Default target - first one defined
-default: nrf52832_xxaa
+default: nrf52840_xxaa
 
 # Print all targets that can be built
 help:
 	@echo following targets are available:
-	@echo		nrf52832_xxaa
+	@echo		nrf52840_xxaa
 	@echo		sdk_config - starting external tool for editing sdk_config.h
 	@echo		flash      - flashing binary
 
@@ -187,7 +186,7 @@ regs:
 	nrfjprog --readregs -f nrf52
 
 # Flash the program
-flash: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
+flash: $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
 	@echo Flashing: $<
 	nrfjprog -f nrf52 --program $< --sectorerase
 	nrfjprog -f nrf52 --reset

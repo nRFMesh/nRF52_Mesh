@@ -79,6 +79,7 @@ static nrf_esb_payload_t    rx_payload;
 static message_t rx_msg;
 static volatile bool esb_completed = false;
 static volatile bool esb_tx_complete = false;
+static uint8_t g_ttl = 2;
 
 static app_mesh_rf_handler_t m_app_rf_handler;
 
@@ -94,8 +95,8 @@ uint8_t cmd_parse_response(char* text,uint8_t*data,uint8_t size);
 //-------------------------------------------------------------
 //----------------------- Payload Store -----------------------
 //-------------------------------------------------------------
-#if (TIMER_ENABLED == 1)
-const nrf_drv_timer_t TIMER_ACK = NRF_DRV_TIMER_INSTANCE(0);
+#if (MESH_TIMER_ENABLED == 1)
+const nrf_drv_timer_t TIMER_ACK = NRF_DRV_TIMER_INSTANCE(MESH_TIMER_INSTANCE);
 
 /**
  * @brief Handler for timer events.
@@ -115,7 +116,7 @@ void timer_ack_event_handler(nrf_timer_event_t event_type, void* p_context)
             break;
     }
 }
-#endif /*TIMER_ENABLED*/
+#endif /*MESH_TIMER_ENABLED*/
 
 
 
@@ -169,9 +170,9 @@ nrf_esb_payload_t* window_get_payload(uint8_t control)
     }
     else
     {
-        #if(TIMER_ENABLED == 1)
+        #if(MESH_TIMER_ENABLED == 1)
         nrf_drv_timer_enable(&TIMER_ACK);
-        #endif /*TIMER_ENABLED*/
+        #endif /*MESH_TIMER_ENABLED*/
     }
 
     return res;
@@ -501,7 +502,7 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
     NRF_LOG_INFO("channel %d",UICR_RF_CHANNEL);
 
 
-    #if (TIMER_ENABLED == 1)
+    #if (MESH_TIMER_ENABLED == 1)
         nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
         err_code = nrf_drv_timer_init(&TIMER_ACK, &timer_cfg, timer_ack_event_handler);
         VERIFY_SUCCESS(err_code);
@@ -512,7 +513,7 @@ uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_h
             &TIMER_ACK, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
 
         nrf_drv_timer_enable(&TIMER_ACK);
-    #endif/*TIMER_ENABLED*/
+    #endif/*MESH_TIMER_ENABLED*/
 
     if(UICR_is_listening())
     {
@@ -686,11 +687,16 @@ void mesh_tx_reset()
     mesh_tx_pid(Mesh_Pid_Reset);
 }
 
+void mesh_ttl_set(uint8_t ttl)
+{
+    g_ttl = ttl;
+}
+
 void mesh_response_data(uint8_t pid,uint8_t dest,uint8_t * data,uint8_t size)
 {
     message_t msg;
 
-    msg.control = 0x00 | 2;         // response | ttl = 2
+    msg.control = 0x00 | g_ttl;         // response | ttl = g_ttl
     msg.pid     = pid;
     msg.source  = UICR_NODE_ID;
     msg.dest    = dest;
@@ -704,7 +710,7 @@ void mesh_bcast_data(uint8_t pid,uint8_t * data,uint8_t size)
 {
     message_t msg;
 
-    msg.control = 0x80 | 2;         // broadcast | ttl = 2
+    msg.control = 0x80 | g_ttl;         // broadcast | ttl = g_ttl
     msg.pid     = pid;
     msg.source  = UICR_NODE_ID;
     msg.payload = data;
@@ -719,7 +725,7 @@ void mesh_bcast_text(char *text)
     uint8_t size = strlen(text);
     if(size>MAX_MESH_MESSAGE_SIZE)//truncate in case of long message
     {
-        text[size-1] = '>';
+        text[MAX_MESH_MESSAGE_SIZE-1] = '>';
         size = MAX_MESH_MESSAGE_SIZE;
     }
     mesh_bcast_data(Mesh_Pid_Text,(uint8_t*)text,size);

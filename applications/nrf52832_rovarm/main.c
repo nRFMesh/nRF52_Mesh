@@ -35,48 +35,23 @@
 //apps
 #include "clocks.h"
 #include "mesh.h"
+#include "bldc.h"
 #include "app_ser.h"
+#include "timestamp.h"
+#include "utils.h"
 
-#include "nrf_mtx.h"
+
+void app_mesh_broadcast(message_t* msg);
+void app_mesh_message(message_t* msg);
+
+void rov_handle_raw(uint8_t *payload,uint8_t length);
 
 char rtc_message[64];
+char rf_message[64];
 char uart_message[64];
-char rf_message[128];
 uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
-
-void blink_red(int time,int afteroff)
-{
-    bsp_board_led_on(1);
-    bsp_board_led_off(0);
-    nrf_delay_ms(time);
-    bsp_board_leds_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink_blue(int time,int afteroff)
-{
-    bsp_board_led_on(0);
-    bsp_board_led_off(1);
-    nrf_delay_ms(time);
-    bsp_board_leds_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink()
-{
-    nrf_delay_ms(500);
-    blink_red(200,500);
-    blink_blue(500,500);
-    bsp_board_leds_on();
-}
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -90,6 +65,7 @@ void rf_mesh_handler(message_t* msg)
     if(MESH_IS_BROADCAST(msg->control))
     {
         is_relevant_host = true;
+        app_mesh_broadcast(msg);
     }
     else if((msg->dest == get_this_node_id()))
     {
@@ -102,12 +78,17 @@ void rf_mesh_handler(message_t* msg)
         {
             mesh_execute_cmd(msg->payload,msg->payload_length,true,msg->source);
         }
+        else
+        {
+            app_mesh_message(msg);
+        }
     }
     if(is_relevant_host)
     {
         //Pure routers should not waste time sending messages over uart
         if(UICR_is_rf2uart())
         {
+            char rf_message[128];
             mesh_parse(msg,rf_message);
             ser_send(rf_message);
         }
@@ -133,7 +114,16 @@ void app_serial_handler(const char*msg,uint8_t size)
         ser_send(uart_message);
     #endif
 
-    if(UICR_is_uart_cmd())
+    if(strbegins(msg,"rov:"))
+    {
+        uint8_t data[32];//TODO define global max cmd size
+        uint8_t data_size;
+        if(text2bin(msg+4,size-4,data,&data_size))
+        {
+            rov_handle_raw(data,data_size);
+        }
+    }
+    else if(UICR_is_uart_cmd())//here handle "msg:" and "cmd:"
     {
         mesh_text_request(msg,size);
     }
@@ -162,14 +152,62 @@ void mesh_cmd_response(const char*text,uint8_t length)
  */
 void app_rtc_handler()
 {
-    uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
-    
-    NRF_LOG_INFO("id:%d:alive:%lu",get_this_node_id(),alive_count);
+    //corrupts other transmissions, unprotected critical sections
+    //uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
+    //NRF_LOG_INFO("id:%d:alive:%lu",get_this_node_id(),alive_count);
     #ifdef UART_SELF_ALIVE
         sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",get_this_node_id(),alive_count,uart_rx_size);
         ser_send(rtc_message);
     #endif
-    UNUSED_VARIABLE(alive_count);
+    //UNUSED_VARIABLE(alive_count);
+}
+
+void app_mesh_broadcast(message_t* msg)
+{
+    if(msg->pid == 0x17)//bldc
+    {
+        sprintf(uart_message,"exec:app_mesh_broadcast()\r\n");//Add line ending and NULL terminate it with sprintf
+        ser_send(uart_message);
+    }
+    else
+    {
+        sprintf(uart_message,"exec:app_mesh_broadcast( unhandled )\r\n");//Add line ending and NULL terminate it with sprintf
+        ser_send(uart_message);
+    }
+}    
+
+
+void app_mesh_message(message_t* msg)
+{
+    if(msg->pid == 0x17)//bldc
+    {
+        rov_handle_raw(msg->payload,msg->payload_length);
+    }
+}
+
+void log_count(uint32_t count)
+{
+    sprintf(rf_message,"ts:%lu;loop:%lu",timestamp_get(),count);
+    mesh_bcast_text(rf_message);
+}
+void log_bldc_pwm()
+{
+    uint16_t pwm1,pwm2,pwm3;
+    bldc_pwm_get(&pwm1,&pwm2,&pwm3);
+    sprintf(rf_message,"ts:%lu;p1:%u;p2:%u;p3:%u",timestamp_get(),pwm1,pwm2,pwm3);
+    mesh_bcast_text(rf_message);
+}
+//This function handles commands coming from either serial or rf
+void rov_handle_raw(uint8_t *payload,uint8_t length)
+{
+    uint8_t alpha = *(payload);
+    if(length == 2)
+    {
+        float norm = (float)payload[1] / 255.0;
+        bldc_set(alpha,norm);
+        sprintf(uart_message,"len:%u;alpha:%u;norm:%0.2f\r\n",length,alpha,norm);
+        ser_send(uart_message);
+    }
 }
 
 int main(void)
@@ -189,34 +227,42 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
+    timestamp_init();
+    bldc_init();
+
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
 
     ser_init(app_serial_handler);
 
     //Cannot use non-blocking with buffers from const code memory
     //reset is a status which single event is reset, that status takes the event name
-    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
+    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1;ts:%lu\r\n",get_this_node_id(),mesh_channel(),timestamp_get());
     ser_send(rtc_message);
-
-    #if USED_BOARD_IS_BOARD_NRF52_DONGLE
-        blink();
-    #endif
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
-    //rtc_config(app_rtc_handler);
+    rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
+    mesh_ttl_set(0);
+
+    nrf_delay_ms(200);
 
     // ------------------------- Start Events ------------------------- 
-
+    int loop_count = 0;
     while(true)
     {
         mesh_consume_rx_messages();
         //TODO required delay as the serial_write does not execute with two close consecutive calls
         nrf_delay_ms(1);
+        if((loop_count % 500) == 0)
+        {
+            //log_count(loop_count);
+            log_bldc_pwm();
+        }
+        loop_count++;
     }
 }
 /*lint -restore */

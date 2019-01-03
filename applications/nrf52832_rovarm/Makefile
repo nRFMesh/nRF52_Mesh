@@ -2,9 +2,7 @@ PROJECT_NAME     := nRF52_Dongle
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-#BOARD selection : BOARD_NRF52_DONGLE, BOARD_NRF52_SENSOR_TAG
-#USED_BOARD := BOARD_NRF52_DONGLE
-USED_BOARD := BOARD_NRF52_SENSOR_TAG
+USED_BOARD := BOARD_NRF52832_ROVARM
 
 SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
@@ -19,8 +17,10 @@ SRC_FILES += \
   ./main.c \
   $(PROJ_DIR)/drivers/clocks.c \
   $(PROJ_DIR)/drivers/mesh.c \
+  $(PROJ_DIR)/drivers/bldc.c \
   $(PROJ_DIR)/drivers/app_ser.c \
   $(PROJ_DIR)/drivers/utils.c \
+  $(PROJ_DIR)/drivers/timestamp.c \
   $(PROJ_DIR)/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
@@ -49,10 +49,11 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_timer.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_saadc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
 

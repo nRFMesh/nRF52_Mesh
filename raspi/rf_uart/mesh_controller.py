@@ -1,14 +1,25 @@
+#%%
 import sys
 import logging as log
 import argparse
 from time import sleep,time
 import json
-from mqtt import mqtt_start
 import socket
+import os
+
+# attempt for jupyter
+#nb_dir = os.path.split(os.getcwd())[0]
+#if nb_dir not in sys.path:
+#    sys.path.append(nb_dir)
+#from raspi.rf_uart.mqtt import mqtt_start
+#import raspi.rf_uart.mesh as mesh
+#import raspi.rf_uart.cfg as cfg
+
+from mqtt import mqtt_start
 import mesh as mesh
 import cfg
 
-
+#%%
 def mesh_do_action(cmd,remote,params):
     control = 0x71
     try:
@@ -169,8 +180,8 @@ def ping(target_node):
     return
 
 def test1():
-    remote_set_channel(74,10)
-    set_channel(10)
+    remote_set_channel(74,2)
+    set_channel(2)
     ping(74)
     loop_forever()
     return
@@ -197,10 +208,11 @@ set_channel(chan)
 
 get_node_id()
 
+#%%
 if(args.function == 'l'):
     loop_forever()
 
-loop_forever()
+#loop_forever()
 
 #ping(75)
-#test1()
+test1()
