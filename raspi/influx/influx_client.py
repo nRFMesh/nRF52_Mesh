@@ -39,6 +39,8 @@ def mqtt_on_message(client, userdata, msg):
                 fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
             if("temperature" in fields):
                 fields["temperature"] = float(fields["temperature"]) #force temperature to float
+            if("battery" in fields):
+                fields["battery"] = int(fields["battery"]) #force battery to int
             post = [
                 {
                     "measurement": sensor,

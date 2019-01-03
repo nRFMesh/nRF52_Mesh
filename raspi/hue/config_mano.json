@@ -32,6 +32,6 @@
     },
     "log":{
         "logfile":"/home/pi/share/hue.log",
-        "level":"Debug"
+        "level":"Info"
     }
 }

@@ -7,7 +7,7 @@
     },
     "log":{
         "logfile":"/home/pi/share/ruler.log",
-        "level":"Debug"
+        "level":"Info"
     },
     "rules":{
         "Bathroom_Window":{
@@ -33,6 +33,13 @@
             "output":"heating/upstairs",
             "description":"from heat handle angle to the heating value",
             "enable" : true
+        },
+        "Bedroom_Heat_1":{
+            "input":"zig/motion 1_6",
+            "output":"heating/bedroom_1",
+            "description":"from heat handle angle to the heating value",
+            "enable" : true
         }
+        
     }
 }

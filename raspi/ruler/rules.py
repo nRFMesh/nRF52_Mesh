@@ -38,6 +38,23 @@ def Upstairs_Heat(input):
     message = {"heating" : int(100 * angle / v_max_angle)}
     return json.dumps(message)
 
+def Bedroom_Heat_1(input):
+    v_ref_abs = Vector(math.radians(8),math.radians(-76),math.radians(11))
+    v_max_angle = 306
+    a = json.loads(input)
+    v_acc   = Vector(math.radians(a["angle_x"]),math.radians(a["angle_y"]),math.radians(a["angle_z"]))
+    angle = safe_angle(v_acc,v_ref_abs)
+    if(float(a["angle_x"]) < -5):
+        log.debug("Bedroom_Heat_1>Other side a = %f"%angle)
+        angle = 360 - angle
+    if(type(angle) == float):
+        #angle = v_acc.angle(v_closed)
+        log.debug("Bedroom_Heat_1> =>output(%f)"%(angle))
+    else:
+        log.error("Bedroom_Heat_1>not float")
+    message = {"heating" : int(100 * angle / v_max_angle)}
+    return json.dumps(message)
+
 
 @static_vars(isLightOn=False)
 def Kitchen_Move(input):

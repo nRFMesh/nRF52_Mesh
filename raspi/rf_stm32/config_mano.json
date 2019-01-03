@@ -21,7 +21,7 @@
     },
     "log":{
         "logfile":"/home/pi/share/stm32.log",
-        "level":"Debug"
+        "level":"Info"
     },
     "heat":{
         "node_src" : 65,

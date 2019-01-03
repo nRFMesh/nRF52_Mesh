@@ -36,7 +36,7 @@
         "db":"meshNodes"
     },
     "log":{
-        "logfile":"/home/pi/share/influx_client.log",
-        "level":"Debug"
+        "logfile":"/home/pi/share/influx_client_4.log",
+        "level":"Info"
     }
 }

@@ -98,3 +98,36 @@ posts = [
 ```
 SELECT "value" FROM "cpu_load"
 ```
+
+### purse wrong data types
+
+    >influx
+    use meshNodes
+    SHOW SERIES
+    SHOW FIELD KEYS FROM "entrance light"
+    SELECT "battery" FROM "entrance light"
+    
+    DELETE FROM "entrance light" WHERE time > 1543760602123951871 AND time < 1546526296817206017
+
+does not drop the types
+
+    DROP MEASUREMENT "bed weather"
+
+    SHOW FIELD KEYS FROM "entrance light"
+
+drops the types, but still present after exit and return
+
+    DELETE from "entrance light" where time > 0
+
+drops the types permanently
+    DROP SERIES FROM "entrance light"
+
+does not work :
+
+    drop series from "bed weather" where battery='100.00';
+    delete series from "bed weather" where battery='100.00';
+
+step:
+* retrieve measurements
+* modify
+* re-insert
