@@ -192,7 +192,7 @@ void log_count(uint32_t count)
 
 void log_steps()
 {
-    sprintf(rf_message,"ts:%lu;A:%ld;B:%ld;H:%ld",g_capture_time,g_pos_A,g_pos_B,g_pos_H);
+    sprintf(rf_message,"tp:encoder;ts:%lu;pos:%ld",g_capture_time,g_pos_A%600);
     mesh_bcast_text(rf_message);
 }
 
@@ -239,7 +239,7 @@ void init_decoder()
 
 void encoder_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    //nrf_drv_gpiote_out_toggle(PIN_ENCODER_Debug);
+    nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
     g_capture_time = timestamp_get();
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_B))
@@ -252,10 +252,12 @@ void encoder_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         g_pos_A--;
         g_pos_H--;
     }
+    nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
 }
 
 void encoder_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
+    nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
     g_capture_time = timestamp_get();
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_A))
@@ -268,6 +270,7 @@ void encoder_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         g_pos_B++;
         g_pos_H++;
     }
+    nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
 }
 
 void init_gpio_decoder()
@@ -295,7 +298,8 @@ void init_gpio_decoder()
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_gpiote_in_event_enable(PIN_ENCODER_A, true);
-    nrf_drv_gpiote_in_event_enable(PIN_ENCODER_B, true);
+    //will not enable the B events, to leave enough cpu for A events
+    //nrf_drv_gpiote_in_event_enable(PIN_ENCODER_B, true);
 }
 
 int main(void)
@@ -341,24 +345,31 @@ int main(void)
     init_gpio_decoder();
 
     // ------------------------- Start Events ------------------------- 
+    uint32_t time_now = timestamp_get();
+    uint32_t time_next = time_now;
     int loop_count = 0;
     while(true)
     {
-        mesh_consume_rx_messages();
-        //TODO required delay as the serial_write does not execute with two close consecutive calls
-        nrf_delay_ms(1);
-        if(m_capture)
-        {
-            log_steps();
-            nrf_delay_ms(3);
-            m_capture = false;
-        }
+        time_next += 4000;
         if((loop_count % 1000) == 0)
         {
             g_capture_time = timestamp_get();
             m_capture = true;
         }
+        if(m_capture)
+        {
+            log_steps();
+            m_capture = false;
+        }
+
+        mesh_consume_rx_messages();
+
         loop_count++;
+
+        while(time_now < time_next)
+        {
+            time_now = timestamp_get();
+        }
     }
 }
 /*lint -restore */
