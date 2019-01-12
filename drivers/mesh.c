@@ -373,6 +373,12 @@ void mesh_esb_2_message_payload(nrf_esb_payload_t *p_rx_payload,message_t *msg)
 
 void mesh_rx_handler(message_t* msg)
 {
+    //The app gets everything - and at top for time sync
+    if(m_app_rf_handler != NULL)
+    {
+        m_app_rf_handler(msg);
+    }
+
     bool is_to_be_forwarded = false;
     if(msg->dest == UICR_NODE_ID)//current node id match
     {
@@ -391,12 +397,6 @@ void mesh_rx_handler(message_t* msg)
         is_to_be_forwarded = true;
     }
     
-    //The app gets everything
-    if(m_app_rf_handler != NULL)
-    {
-        m_app_rf_handler(msg);
-    }
-
     //as the message forward is destructive it is to be done at the last step
     if(is_to_be_forwarded)
     {

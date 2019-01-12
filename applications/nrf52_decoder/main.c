@@ -65,7 +65,12 @@ static volatile int32_t g_pos_H = 1200;
 static volatile uint32_t g_capture_time = 0;
 static volatile bool m_capture = false;
 
+static uint32_t g_time_now = 0;
+static uint32_t g_time_next = 0;
+
+//A - Green - 29 - scl
 #define PIN_ENCODER_A 29
+//B - White - 30 - sda
 #define PIN_ENCODER_B 30
 #define PIN_ENCODER_Debug 31
 
@@ -78,6 +83,15 @@ static volatile bool m_capture = false;
  */
 void rf_mesh_handler(message_t* msg)
 {
+    if(msg->pid == 0x40)//sync
+    {
+        nrf_gpio_pin_set(PIN_ENCODER_Debug);
+        timestamp_reset();
+        g_time_now = timestamp_get();
+        g_time_next = g_time_now;
+        nrf_gpio_pin_clear(PIN_ENCODER_Debug);
+    }
+
     bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
     if(MESH_IS_BROADCAST(msg->control))
@@ -239,7 +253,7 @@ void init_decoder()
 
 void encoder_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
+    //nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
     g_capture_time = timestamp_get();
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_B))
@@ -252,12 +266,12 @@ void encoder_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         g_pos_A--;
         g_pos_H--;
     }
-    nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
+    //nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
 }
 
 void encoder_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
+    //nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
     g_capture_time = timestamp_get();
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_A))
@@ -270,7 +284,7 @@ void encoder_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         g_pos_B++;
         g_pos_H++;
     }
-    nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
+    //nrf_drv_gpiote_out_clear(PIN_ENCODER_Debug);
 }
 
 void init_gpio_decoder()
@@ -280,10 +294,7 @@ void init_gpio_decoder()
     err_code = nrf_drv_gpiote_init();
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_gpiote_out_config_t out_config = GPIOTE_CONFIG_OUT_SIMPLE(false);
-
-    err_code = nrf_drv_gpiote_out_init(PIN_ENCODER_Debug, &out_config);
-    APP_ERROR_CHECK(err_code);
+    nrf_gpio_cfg_output(PIN_ENCODER_Debug);
 
     nrf_drv_gpiote_in_config_t in_A_config = GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
     in_A_config.pull = NRF_GPIO_PIN_PULLUP;
@@ -345,12 +356,21 @@ int main(void)
     init_gpio_decoder();
 
     // ------------------------- Start Events ------------------------- 
-    uint32_t time_now = timestamp_get();
-    uint32_t time_next = time_now;
+    g_time_now = timestamp_get();
+    g_time_next = g_time_now;
     int loop_count = 0;
     while(true)
     {
-        time_next += 4000;
+        mesh_consume_rx_messages();
+
+        uint32_t g_time_log = g_time_next + 1000;
+        g_time_next += 4000;
+
+        while(g_time_now < g_time_log)
+        {
+            g_time_now = timestamp_get();
+        }
+        //--------------- log time --------------------------
         if((loop_count % 1000) == 0)
         {
             g_capture_time = timestamp_get();
@@ -361,15 +381,13 @@ int main(void)
             log_steps();
             m_capture = false;
         }
-
-        mesh_consume_rx_messages();
-
         loop_count++;
 
-        while(time_now < time_next)
+        while(g_time_now < g_time_next)
         {
-            time_now = timestamp_get();
+            g_time_now = timestamp_get();
         }
+        //--------------- loop time --------------------------
     }
 }
 /*lint -restore */

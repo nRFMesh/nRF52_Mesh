@@ -53,3 +53,8 @@ uint32_t timestamp_get()
     return nrf_drv_timer_capture(&TIMER_TIMESTAMP, 0);//Capture channel 0 used
 }
 
+void timestamp_reset()
+{
+    return nrf_drv_timer_clear(&TIMER_TIMESTAMP);
+}
+

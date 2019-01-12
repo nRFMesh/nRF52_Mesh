@@ -53,6 +53,11 @@ uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
 
+static uint32_t g_time_now = 0;
+static uint32_t g_time_next = 0;
+
+#define GPIO_Sync_Controller 12
+
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
  * 
@@ -60,6 +65,15 @@ extern uint32_t ser_evt_tx_count;
  */
 void rf_mesh_handler(message_t* msg)
 {
+    if(msg->pid == 0x40)//sync
+    {
+        nrf_gpio_pin_set(GPIO_Sync_Controller);
+        timestamp_reset();
+        g_time_now = timestamp_get();
+        g_time_next = g_time_now;
+        nrf_gpio_pin_clear(GPIO_Sync_Controller);
+    }
+
     bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
     if(MESH_IS_BROADCAST(msg->control))
@@ -171,8 +185,8 @@ void app_mesh_broadcast(message_t* msg)
     }
     else
     {
-        sprintf(uart_message,"exec:app_mesh_broadcast( unhandled )\r\n");//Add line ending and NULL terminate it with sprintf
-        ser_send(uart_message);
+        //sprintf(uart_message,"exec:app_mesh_broadcast( unhandled )\r\n");//Add line ending and NULL terminate it with sprintf
+        //ser_send(uart_message);
     }
 }    
 
@@ -194,7 +208,7 @@ void log_bldc_pwm()
 {
     uint16_t pwm1,pwm2,pwm3;
     bldc_pwm_get(&pwm1,&pwm2,&pwm3);
-    sprintf(rf_message,"ts:%lu;p1:%u;p2:%u;p3:%u",timestamp_get(),pwm1,pwm2,pwm3);
+    sprintf(rf_message,"ts:%lu;tp:controller;p1:%u;p2:%u;p3:%u",timestamp_get(),pwm1,pwm2,pwm3);
     mesh_bcast_text(rf_message);
 }
 //This function handles commands coming from either serial or rf
@@ -205,8 +219,10 @@ void rov_handle_raw(uint8_t *payload,uint8_t length)
     {
         float norm = (float)payload[1] / 255.0;
         bldc_set(alpha,norm);
-        sprintf(uart_message,"len:%u;alpha:%u;norm:%0.2f\r\n",length,alpha,norm);
-        ser_send(uart_message);
+        //sprintf(uart_message,"len:%u;alpha:%u;norm:%0.2f\r\n",length,alpha,norm);
+        //ser_send(uart_message);
+        sprintf(rf_message,"ts:%lu;tp:controller;alpha:%u",timestamp_get(),alpha);
+        mesh_bcast_text(rf_message);
     }
 }
 
@@ -230,7 +246,7 @@ int main(void)
     timestamp_init();
     bldc_init();
 
-    //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
+    nrf_gpio_cfg_output(GPIO_Sync_Controller);
 
     ser_init(app_serial_handler);
 
@@ -251,18 +267,35 @@ int main(void)
     nrf_delay_ms(200);
 
     // ------------------------- Start Events ------------------------- 
+    g_time_now = timestamp_get();
+    g_time_next = g_time_now;
     int loop_count = 0;
     while(true)
     {
         mesh_consume_rx_messages();
+
+        uint32_t g_time_log = g_time_next + 1500;
+        g_time_next += 4000;
+
         //TODO required delay as the serial_write does not execute with two close consecutive calls
-        nrf_delay_ms(1);
+        while(g_time_now < g_time_log)
+        {
+            g_time_now = timestamp_get();
+        }
+        //--------------- log time --------------------------
         if((loop_count % 500) == 0)
         {
             //log_count(loop_count);
             log_bldc_pwm();
         }
         loop_count++;
+
+
+        while(g_time_now < g_time_next)
+        {
+            g_time_now = timestamp_get();
+        }
+        //--------------- loop time --------------------------
     }
 }
 /*lint -restore */

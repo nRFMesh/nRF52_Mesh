@@ -68,7 +68,9 @@ void bldc_init()
             sin_Table[i] = pwm_top_period * (sin(angle)+1) / 2;
     }
 
-    bldc_set(0, 1.0);
+    nrf_gpio_cfg_output(GPIO_M_EN);
+    nrf_gpio_pin_set(GPIO_M_EN);
+    bldc_set(0, 0.0);
 }
 
 void bldc_set(int angle, float norm)

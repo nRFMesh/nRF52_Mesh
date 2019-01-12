@@ -39,6 +39,12 @@
 
 #include "nrf_mtx.h"
 
+#define Debug_PIO_RF_Mesh   29
+#define Debug_PIO_CMD_Resp  30
+#define Debug_PIO_Serial    31
+
+
+
 char rtc_message[64];
 char uart_message[64];
 char rf_message[128];
@@ -85,6 +91,7 @@ void blink()
  */
 void rf_mesh_handler(message_t* msg)
 {
+    nrf_gpio_pin_set(Debug_PIO_RF_Mesh);
     bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
     if(MESH_IS_BROADCAST(msg->control))
@@ -109,9 +116,10 @@ void rf_mesh_handler(message_t* msg)
         if(UICR_is_rf2uart())
         {
             mesh_parse(msg,rf_message);
-            ser_send(rf_message);
+            ser_send(rf_message);// collision
         }
     }
+    nrf_gpio_pin_clear(Debug_PIO_RF_Mesh);
 }
 
 /**
@@ -123,6 +131,7 @@ void rf_mesh_handler(message_t* msg)
 //#define UART_MIRROR
 void app_serial_handler(const char*msg,uint8_t size)
 {
+    nrf_gpio_pin_set(Debug_PIO_Serial);
     uart_rx_size+= size;
     //the input (msg) is really the RX DMA pointer location
     //and the output (uart_message) is reall the TX DMA pointer location
@@ -137,6 +146,7 @@ void app_serial_handler(const char*msg,uint8_t size)
     {
         mesh_text_request(msg,size);
     }
+    nrf_gpio_pin_clear(Debug_PIO_Serial);
 }
 
 /**
@@ -149,9 +159,11 @@ void app_serial_handler(const char*msg,uint8_t size)
  */
 void mesh_cmd_response(const char*text,uint8_t length)
 {
+    nrf_gpio_pin_set(Debug_PIO_CMD_Resp);
     memcpy(uart_message,text,length);
     sprintf(uart_message+length,"\r\n");//Add line ending and NULL terminate it with sprintf
-    ser_send(uart_message);
+    ser_send(uart_message);// collision
+    nrf_gpio_pin_clear(Debug_PIO_CMD_Resp);
 }
 
 
@@ -189,7 +201,9 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
-    //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
+    nrf_gpio_cfg_output(Debug_PIO_RF_Mesh);
+    nrf_gpio_cfg_output(Debug_PIO_CMD_Resp);
+    nrf_gpio_cfg_output(Debug_PIO_Serial);  
 
     ser_init(app_serial_handler);
 

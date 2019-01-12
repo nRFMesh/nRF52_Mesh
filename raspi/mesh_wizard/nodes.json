@@ -689,6 +689,21 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "106":   {   "name"          :"bldc driver",
+        "board"         :"sensortag_for_bldc",
+        "program"       :"rover arm",
+        "uid"           :"0x7B 11 20 67 75 CE E7 71",
+        "channel"       : "10",
+        "sleep"         : "60",
+        "is_listening"  : "0xBABA",
+        "is_router"     : "0",
+        "is_uart_cmd"   : "0xBABA",
+        "is_rf_cmd"     : "0xBABA",
+        "is_rf2uart"    : "0xBABA",
+        "is_testmode"   : "0",
+        "rtx_timeout"   : "5",
+        "rtx_count"     : "3"
     }
     
 }
