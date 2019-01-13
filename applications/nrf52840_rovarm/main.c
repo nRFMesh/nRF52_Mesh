@@ -23,6 +23,8 @@
 #include "boards.h"
 #include "app_util.h"
 
+#include "bsp.h"
+
 //for the log
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -43,14 +45,46 @@ char rtc_message[64];
 char uart_message[64];
 uint32_t uart_rx_size=0;
 
+#define GPIO_CUSTOM_Debug 10
+
+#define led2_green_on()   bsp_board_led_on(0)
+#define led2_green_off()  bsp_board_led_off(0)
+#define led1_red_on()     bsp_board_led_on(1)
+#define led1_red_off()    bsp_board_led_off(1)
+#define led1_green_on()    bsp_board_led_on(2)
+#define led1_green_off()   bsp_board_led_off(2)
+#define led1_blue_on()   bsp_board_led_on(3)
+#define led1_blue_off()  bsp_board_led_off(3)
+
 extern uint32_t ser_evt_tx_count;
+
+void blink_green1(int time,int afteroff)
+{
+    led1_green_on();
+    nrf_delay_ms(time);
+    led1_green_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
+
+void blink_green(int time,int afteroff)
+{
+    led2_green_on();
+    nrf_delay_ms(time);
+    led2_green_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
 
 void blink_red(int time,int afteroff)
 {
-    bsp_board_led_on(1);
-    bsp_board_led_off(0);
+    led1_red_on();
     nrf_delay_ms(time);
-    bsp_board_leds_off();
+    led1_red_off();
     if(afteroff)
     {
         nrf_delay_ms(afteroff);
@@ -59,10 +93,9 @@ void blink_red(int time,int afteroff)
 
 void blink_blue(int time,int afteroff)
 {
-    bsp_board_led_on(0);
-    bsp_board_led_off(1);
+    led1_blue_on();
     nrf_delay_ms(time);
-    bsp_board_leds_off();
+    led1_blue_off();
     if(afteroff)
     {
         nrf_delay_ms(afteroff);
@@ -174,47 +207,61 @@ void app_rtc_handler()
 
 int main(void)
 {
+    //MAKE SURE
+    //UICR.NFCPINS = 0xFFFFFFFE - Disabled
+    //UICR.REGOUT0 = 0xFFFFFFFD - 3.3 V
+
     uint32_t err_code;
 
     // ------------------------- Start Init ------------------------- 
-    err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
-
-    NRF_LOG_INFO("__________________________________");
-    NRF_LOG_INFO("Hello from the nRF52 UART Dongle");
-    NRF_LOG_INFO("__________________________________");
-
-
     clocks_start();
+
+
     bsp_board_init(BSP_INIT_LEDS);
 
-    //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
+    nrf_gpio_cfg_output(GPIO_CUSTOM_Debug);
+    nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
+    nrf_delay_ms(100);
+    nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
 
-    ser_init(app_serial_handler);
+
+    blink_red(100,200);
+    blink_green(100,200);
+    blink_blue(100,200);
+    //ser_init(app_serial_handler);
 
     //Cannot use non-blocking with buffers from const code memory
     //reset is a status which single event is reset, that status takes the event name
-    sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
-    ser_send(rtc_message);
+    //sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
+    //ser_send(rtc_message);
 
-    blink();
+    blink_red(500,500);
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
 
+    blink_green(500,500);
     //only allow interrupts to start after init is done
     rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
+    blink_blue(500,500);
 
     // ------------------------- Start Events ------------------------- 
-
+    char rf_message[128];
+    int count = 0;
     while(true)
     {
+        nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
         mesh_consume_rx_messages();
-        //TODO required delay as the serial_write does not execute with two close consecutive calls
-        nrf_delay_ms(1);
+        nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
+        blink_green(10,100);
+        if(count%50 == 0)
+        {
+            sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
+            mesh_bcast_text(rf_message);
+        }
+        count++;
     }
 }
 /*lint -restore */

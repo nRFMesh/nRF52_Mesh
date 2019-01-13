@@ -9,7 +9,7 @@ SDK_ROOT := ../../nRF5_SDK_15.0.0_prf
 PROJ_DIR := ../..
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
-  LINKER_SCRIPT  := ./openthread_nrf52840_bootloader.ld
+  LINKER_SCRIPT  := ./openthread_nrf52840.ld
 
 #  $(PROJ_DIR)/drivers/bme280/bme280.cpp \
 

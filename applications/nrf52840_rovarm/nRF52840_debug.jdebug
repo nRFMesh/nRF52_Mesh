@@ -12,7 +12,7 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.SetDevice ("nRF52840_xxAA");
+  Project.SetDevice ("nRF52832_xxAA");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
@@ -21,7 +21,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
-  File.Open ("D:/Dev/nRF52_Mesh/applications/nrf52_rovarm/_build/nrf52840_xxaa.out");
+  File.Open ("D:/Dev/nRF52_Mesh/applications/nrf52840_rovarm/_build/nrf52840_xxaa.out");
 }
 
 /*********************************************************************
