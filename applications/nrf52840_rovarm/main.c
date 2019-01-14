@@ -207,7 +207,7 @@ void app_rtc_handler()
 
 int main(void)
 {
-    //MAKE SURE
+    //--------------------- Important UICR settings --------------------- 
     //UICR.NFCPINS = 0xFFFFFFFE - Disabled
     //UICR.REGOUT0 = 0xFFFFFFFD - 3.3 V
 
@@ -219,43 +219,23 @@ int main(void)
 
     bsp_board_init(BSP_INIT_LEDS);
 
-    nrf_gpio_cfg_output(GPIO_CUSTOM_Debug);
-    nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
-    nrf_delay_ms(100);
-    nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
-
-
     blink_red(100,200);
     blink_green(100,200);
     blink_blue(100,200);
-    //ser_init(app_serial_handler);
-
-    //Cannot use non-blocking with buffers from const code memory
-    //reset is a status which single event is reset, that status takes the event name
-    //sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1\r\n",get_this_node_id(),mesh_channel());
-    //ser_send(rtc_message);
-
-    blink_red(500,500);
 
     err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
-
-    blink_green(500,500);
-    //only allow interrupts to start after init is done
     rtc_config(app_rtc_handler);
 
     mesh_tx_reset();
-    blink_blue(500,500);
 
     // ------------------------- Start Events ------------------------- 
     char rf_message[128];
     int count = 0;
     while(true)
     {
-        nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
         mesh_consume_rx_messages();
-        nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
-        blink_green(10,100);
+        blink_green(1,100);
         if(count%50 == 0)
         {
             sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
