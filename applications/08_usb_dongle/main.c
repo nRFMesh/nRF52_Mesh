@@ -12,12 +12,13 @@
 */
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "sdk_common.h"
-#include "nrf.h"
-#include "nrf_error.h"
+
+#include "sdk_config.h"
+
+//#include "nrf.h"
+//#include "nrf_error.h"
 #include "nrf_delay.h"
 #include "nrf_gpio.h"
 #include "boards.h"
@@ -25,7 +26,6 @@
 
 #include "bsp.h"
 
-#include "usb_print.h"
 
 //for the log
 #include "nrf_log.h"
@@ -37,11 +37,13 @@
 #include "uicr_user_defines.h"
 //drivers
 //apps
-#include "clocks.h"
+//#include "clocks.h"
 #include "mesh.h"
 #include "app_ser.h"
 
 #include "nrf_mtx.h"
+
+#include "usb_print.h"
 
 char rtc_message[64];
 char uart_message[64];

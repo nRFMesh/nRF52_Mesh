@@ -3,7 +3,10 @@
         "sdk_common.h": "c",
         "nrf_drv_ppi.h": "c",
         "stdint.h": "c",
-        "sdk_config.h": "c"
+        "sdk_config.h": "c",
+        "boards.h": "c",
+        "pca10059.h": "c",
+        "nrf.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -89,26 +89,6 @@
 
 // </e>
 
-// <e> CLOCKS_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef CLOCKS_CONFIG_LOG_ENABLED
-#define CLOCKS_CONFIG_LOG_ENABLED 1
-#endif
-// <o> CLOCKS_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef CLOCKS_CONFIG_LOG_LEVEL
-#define CLOCKS_CONFIG_LOG_LEVEL 2
-#endif
-
-// </e>
-
-
 // <e> BME_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef BME_CONFIG_LOG_ENABLED
@@ -201,102 +181,90 @@
 //==========================================================
 
 // <h> nRF_Drivers 
+
+// <e> NRFX_CLOCK_ENABLED - nrfx_clock - CLOCK peripheral driver
 //==========================================================
-// <e> CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver
-//==========================================================
-#ifndef CLOCK_ENABLED
-#define CLOCK_ENABLED 1
+#ifndef NRFX_CLOCK_ENABLED
+#define NRFX_CLOCK_ENABLED 1
 #endif
-#if  CLOCK_ENABLED
-    // <o> CLOCK_CONFIG_XTAL_FREQ  - HF XTAL Frequency
-    
-    // <0=> Default (64 MHz) 
+// <o> NRFX_CLOCK_CONFIG_LF_SRC  - LF Clock Source
+ 
+// <0=> RC 
+// <1=> XTAL 
+// <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
 
-    #ifndef CLOCK_CONFIG_XTAL_FREQ
-    #define CLOCK_CONFIG_XTAL_FREQ 0
-    #endif
+#ifndef NRFX_CLOCK_CONFIG_LF_SRC
+#define NRFX_CLOCK_CONFIG_LF_SRC 1
+#endif
 
-    // <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
-    
-    // <0=> RC 
-    // <1=> XTAL 
-    // <2=> Synth 
+// <o> NRFX_CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
 
-    #ifndef CLOCK_CONFIG_LF_SRC
-    #define CLOCK_CONFIG_LF_SRC 1
-    #endif
+#ifndef NRFX_CLOCK_CONFIG_IRQ_PRIORITY
+#define NRFX_CLOCK_CONFIG_IRQ_PRIORITY 6
+#endif
 
-    // <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
-    
+// <e> NRFX_CLOCK_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRFX_CLOCK_CONFIG_LOG_ENABLED
+#define NRFX_CLOCK_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_CLOCK_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
 
-    // <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-    // <0=> 0 (highest) 
-    // <1=> 1 
-    // <2=> 2 
-    // <3=> 3 
-    // <4=> 4 
-    // <5=> 5 
-    // <6=> 6 
-    // <7=> 7 
+#ifndef NRFX_CLOCK_CONFIG_LOG_LEVEL
+#define NRFX_CLOCK_CONFIG_LOG_LEVEL 3
+#endif
 
-    #ifndef CLOCK_CONFIG_IRQ_PRIORITY
-    #define CLOCK_CONFIG_IRQ_PRIORITY 6
-    #endif
+// <o> NRFX_CLOCK_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
 
-    // <e> CLOCK_CONFIG_LOG_ENABLED - Enables logging in the module.
-    //==========================================================
-    #ifndef CLOCK_CONFIG_LOG_ENABLED
-    #define CLOCK_CONFIG_LOG_ENABLED 0
-    #endif
-    #if  CLOCK_CONFIG_LOG_ENABLED
-        // <o> CLOCK_CONFIG_LOG_LEVEL  - Default Severity level
-        
-        // <0=> Off 
-        // <1=> Error 
-        // <2=> Warning 
-        // <3=> Info 
-        // <4=> Debug 
+#ifndef NRFX_CLOCK_CONFIG_INFO_COLOR
+#define NRFX_CLOCK_CONFIG_INFO_COLOR 0
+#endif
 
-        #ifndef CLOCK_CONFIG_LOG_LEVEL
-        #define CLOCK_CONFIG_LOG_LEVEL 3
-        #endif
+// <o> NRFX_CLOCK_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
 
-        // <o> CLOCK_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-        
-        // <0=> Default 
-        // <1=> Black 
-        // <2=> Red 
-        // <3=> Green 
-        // <4=> Yellow 
-        // <5=> Blue 
-        // <6=> Magenta 
-        // <7=> Cyan 
-        // <8=> White 
+#ifndef NRFX_CLOCK_CONFIG_DEBUG_COLOR
+#define NRFX_CLOCK_CONFIG_DEBUG_COLOR 0
+#endif
 
-        #ifndef CLOCK_CONFIG_INFO_COLOR
-        #define CLOCK_CONFIG_INFO_COLOR 0
-        #endif
+// </e>
 
-        // <o> CLOCK_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-        
-        // <0=> Default 
-        // <1=> Black 
-        // <2=> Red 
-        // <3=> Green 
-        // <4=> Yellow 
-        // <5=> Blue 
-        // <6=> Magenta 
-        // <7=> Cyan 
-        // <8=> White 
-
-        #ifndef CLOCK_CONFIG_DEBUG_COLOR
-        #define CLOCK_CONFIG_DEBUG_COLOR 0
-        #endif
-
-    #endif //CLOCK_CONFIG_LOG_ENABLED
-    // </e>
-
-#endif //CLOCK_ENABLED
 // </e>
 
 // <e> NRFX_POWER_ENABLED - nrfx_power - POWER peripheral driver
@@ -304,43 +272,75 @@
 #ifndef NRFX_POWER_ENABLED
 #define NRFX_POWER_ENABLED 1
 #endif
-#if NRFX_POWER_ENABLED
+// <o> NRFX_POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
 
-    // <o> NRFX_POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
-    
-    // <0=> 0 (highest) 
-    // <1=> 1 
-    // <2=> 2 
-    // <3=> 3 
-    // <4=> 4 
-    // <5=> 5 
-    // <6=> 6 
-    // <7=> 7 
-
-    #ifndef NRFX_POWER_CONFIG_IRQ_PRIORITY
-    #define NRFX_POWER_CONFIG_IRQ_PRIORITY 6
-    #endif
-
-    // <q> NRFX_POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
-    
-
-    // <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
-
-    #ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCEN
-    #define NRFX_POWER_CONFIG_DEFAULT_DCDCEN 0
-    #endif
-
-    // <q> NRFX_POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
-    
-
-    // <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
-
-    #ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCENHV
-    #define NRFX_POWER_CONFIG_DEFAULT_DCDCENHV 0
-    #endif
+#ifndef NRFX_POWER_CONFIG_IRQ_PRIORITY
+#define NRFX_POWER_CONFIG_IRQ_PRIORITY 6
 #endif
-// </e>
 
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCEN
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCEN 0
+#endif
+
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCENHV
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCENHV 0
+#endif
+
+// </e>
+// <e> NRF_CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver - legacy layer
+//==========================================================
+#ifndef NRF_CLOCK_ENABLED
+#define NRF_CLOCK_ENABLED 1
+#endif
+// <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
+ 
+// <0=> RC 
+// <1=> XTAL 
+// <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
+
+#ifndef CLOCK_CONFIG_LF_SRC
+#define CLOCK_CONFIG_LF_SRC 1
+#endif
+
+// <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef CLOCK_CONFIG_IRQ_PRIORITY
+#define CLOCK_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// </e>
 
 // <e> POWER_ENABLED - nrf_drv_power - POWER peripheral driver - legacy layer
 //==========================================================
