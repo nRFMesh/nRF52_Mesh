@@ -282,7 +282,7 @@ int main(void)
     mesh_tx_reset();*/
 
     // ------------------------- Start Events ------------------------- 
-    char rf_message[128];
+    //char rf_message[128];
     int count = 0;
     while(true)
     {
@@ -291,8 +291,8 @@ int main(void)
         usb_print_loop();
         if(count%50 == 0)
         {
-            sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
-            mesh_bcast_text(rf_message);
+            //sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
+            //mesh_bcast_text(rf_message);
             usb_printf("count:  %d\r\n", count);
         }
         count++;

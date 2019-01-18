@@ -261,10 +261,7 @@ void usb_printf(const char *format, ...)
             }
         }
         g_is_tx_done = false;
-        buffer[0] = 'H';
-        buffer[1] = '\r';
-        buffer[2] = '\n';
-        ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, buffer, 3);
+        ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, buffer, length);
         APP_ERROR_CHECK(ret);
 
         va_end (args);
