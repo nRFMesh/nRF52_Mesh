@@ -10,6 +10,9 @@
 #include "utils.h"
 #include <stdio.h>
 
+#include "boards.h"
+#include "nrf_delay.h"
+
 /**
  * @brief prints a buffer in hex string
  * 
@@ -122,4 +125,39 @@ uint8_t text2bin(const char*text,uint8_t length,uint8_t*data,uint8_t*size)
         (*size)++;//incremeneted to inform the user of the size
     }
     return 1;
+}
+
+
+
+void blink_green(int time,int afteroff)
+{
+    led2_green_on();
+    nrf_delay_ms(time);
+    led2_green_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
+
+void blink_red(int time,int afteroff)
+{
+    led1_red_on();
+    nrf_delay_ms(time);
+    led1_red_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
+}
+
+void blink_blue(int time,int afteroff)
+{
+    led1_blue_on();
+    nrf_delay_ms(time);
+    led1_blue_off();
+    if(afteroff)
+    {
+        nrf_delay_ms(afteroff);
+    }
 }

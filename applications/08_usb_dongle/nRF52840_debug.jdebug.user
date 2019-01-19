@@ -1,14 +1,14 @@
-OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=1, w=995, h=642, FilterBarShown=0, ExecCountersShown=0
-OpenWindow="Console", DockArea=RIGHT, x=0, y=2, w=995, h=365, FilterBarShown=0, 
-OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=2, w=995, h=365, FilterBarShown=0, 
-OpenWindow="Watched Data", DockArea=RIGHT, x=0, y=1, w=995, h=642, FilterBarShown=0, 
-OpenWindow="Functions", DockArea=LEFT, x=0, y=1, w=1052, h=1276, FilterBarShown=1, 
-OpenWindow="Memory1", DockArea=RIGHT, x=0, y=0, w=995, h=744, FilterBarShown=0, 
-OpenWindow="Registers", DockArea=LEFT, x=0, y=1, w=1052, h=1276, FilterBarShown=0, 
-OpenWindow="Breakpoints", DockArea=LEFT, x=0, y=0, w=1052, h=503, FilterBarShown=0, 
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=1, w=995, h=649, FilterBarShown=0, ExecCountersShown=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=2, w=995, h=354, FilterBarShown=0, 
+OpenWindow="Watched Data", DockArea=RIGHT, x=0, y=1, w=995, h=649, FilterBarShown=0, 
+OpenWindow="Functions", DockArea=LEFT, x=0, y=1, w=1052, h=1264, FilterBarShown=1, 
+OpenWindow="Memory1", DockArea=RIGHT, x=0, y=0, w=995, h=748, FilterBarShown=0, 
+OpenWindow="Registers", DockArea=LEFT, x=0, y=1, w=1052, h=1264, FilterBarShown=0, 
+OpenWindow="Console", DockArea=RIGHT, x=0, y=2, w=995, h=354, FilterBarShown=0, 
+OpenWindow="Breakpoints", DockArea=LEFT, x=0, y=0, w=1052, h=515, FilterBarShown=0, 
 OpenToolbar="Debug", Floating=0, x=0, y=0
 TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Info";"Source"], ColWidths=[330;225;509]
 TableHeader="Watched Data", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Size";"Refresh";"Type"], ColWidths=[133;134;134;74;105;415]
 TableHeader="Functions", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Address";"Size";"#Insts";"Source"], ColWidths=[275;122;74;96;459]
-TableHeader="Registers", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[250;132;887]
+TableHeader="Registers", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[250;132;670]
 TableHeader="Breakpoints", SortCol="State", SortOrder="ASCENDING", VisibleCols=["State";"Location";"Permitted Impl.";"Actual Impl.";"Context";"Task Filter";"Skip #";"Condition"], ColWidths=[85;242;176;146;770;128;96;122]
