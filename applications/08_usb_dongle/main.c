@@ -37,7 +37,7 @@
 #include "uicr_user_defines.h"
 //drivers
 //apps
-//#include "clocks.h"
+#include "clocks.h"
 #include "mesh.h"
 #include "app_ser.h"
 
@@ -260,7 +260,7 @@ int main(void)
     //UICR.NFCPINS = 0xFFFFFFFE - Disabled
     //UICR.REGOUT0 = 0xFFFFFFFD - 3.3 V
 
-    usb_print_init(usb_rx_handler);
+    clocks_start();
 
     bsp_board_init(BSP_INIT_LEDS);
 
@@ -268,31 +268,29 @@ int main(void)
     blink_green(100,200);
     blink_blue(100,200);
 
-/*
+
     // ------------------------- Start Init ------------------------- 
-    clocks_start();
 
+    usb_print_init(usb_rx_handler);
 
+    mesh_init(rf_mesh_handler,mesh_cmd_response);
 
-
-    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
-    APP_ERROR_CHECK(err_code);
     rtc_config(app_rtc_handler);
 
-    mesh_tx_reset();*/
+    mesh_tx_reset();
 
     // ------------------------- Start Events ------------------------- 
-    //char rf_message[128];
+    char rf_message[128];
     int count = 0;
     while(true)
     {
-        //mesh_consume_rx_messages();
+        mesh_consume_rx_messages();
         blink_green(1,100);
         usb_print_loop();
         if(count%50 == 0)
         {
-            //sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
-            //mesh_bcast_text(rf_message);
+            sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
+            mesh_bcast_text(rf_message);
             usb_printf("count:  %d\r\n", count);
         }
         count++;

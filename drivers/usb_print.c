@@ -175,16 +175,6 @@ void usb_print_init(usb_rx_handler_t handler)
         .ev_state_proc = usbd_user_ev_handler
     };
 
-    ret = nrf_drv_clock_init();
-    APP_ERROR_CHECK(ret);
-    
-    nrf_drv_clock_lfclk_request(NULL);
-
-    while(!nrf_drv_clock_lfclk_is_running())
-    {
-        /* Just waiting */
-    }
-
     app_usbd_serial_num_generate();
 
     ret = app_usbd_init(&usbd_config);
