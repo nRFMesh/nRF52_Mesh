@@ -23,8 +23,6 @@
 #include "utils.h"
 #include "nrf_delay.h"
 
-bool g_usd_message_active = false;
-
 #define LED_USB_RESUME      (BSP_BOARD_LED_0)
 #define LED_RED             (BSP_BOARD_LED_1)
 #define LED_CDC_ACM_RX      (BSP_BOARD_LED_2)
@@ -70,7 +68,9 @@ APP_USBD_CDC_ACM_GLOBAL_DEF(m_app_cdc_acm,
 
 static char m_rx_buffer[READ_SIZE];
 static usb_rx_handler_t m_usb_rx_handler;
-static bool g_is_ready_to_write = false;
+
+static bool g_is_port_open = false;
+static bool g_is_write_buffer_ready = true;
 
 /**
  * @brief User event handler @ref app_usbd_cdc_acm_user_ev_handler_t (headphones)
@@ -91,15 +91,15 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                                                    m_rx_buffer,
                                                    READ_SIZE);
             UNUSED_VARIABLE(ret);
-            g_is_ready_to_write = true;
+            g_is_port_open = true;
             break;
         }
         case APP_USBD_CDC_ACM_USER_EVT_PORT_CLOSE:
             //bsp_board_led_off(LED_CDC_ACM_OPEN);
-            g_is_ready_to_write = false;
+            g_is_port_open = false;
             break;
         case APP_USBD_CDC_ACM_USER_EVT_TX_DONE:
-            g_is_ready_to_write = true;
+            g_is_write_buffer_ready = true;
             //bsp_board_led_invert(LED_CDC_ACM_TX);
             break;
         case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
@@ -210,59 +210,43 @@ void usb_print_loop()
     }
 }
 
-bool usb_print_enabled()
-{
-    return g_usd_message_active;
-}
-
-void usb_print_enable(bool enable)
-{
-    g_usd_message_active = enable;
-}
-
 void usb_print(const void * p_buf,size_t length)
 {
-    if(g_usd_message_active)
+    if(!g_is_port_open)
     {
-        int count = 0;
-        while(!g_is_ready_to_write)
-        {
-            app_usbd_event_queue_process();
-            blink_red(100,100);
-            if(count++ == 200)
-            {
-                blink_red(500,500);
-                return;
-            }
-        }
+        blink_red(10,10);
+        return;
+    }
+    if(!g_is_write_buffer_ready)
+    {
+        app_usbd_event_queue_process();
+        blink_red(10,10);
+        return;
+    }
 
-        //set the variable before, in case the isr triggers before the retur of the write
-        g_is_ready_to_write = false;
-        ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, p_buf, length);
-        if(ret == NRF_ERROR_INVALID_STATE)
-        {
-            blink_red(1000,200);
-        }
+    //set the variable before, in case the isr triggers before the retur of the write
+    g_is_write_buffer_ready = false;
+    ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, p_buf, length);
+    if(ret == NRF_ERROR_INVALID_STATE)
+    {
+        blink_red(1000,200);
     }
 }
 
 void usb_printf(const char *format, ...)
 {
-    if(g_usd_message_active)
+    char buffer[256];
+    va_list args;
+    va_start (args, format);
+    size_t length = vsnprintf (buffer,256,format, args);
+    va_end (args);
+
+    //does not produce length higher than 64 chars
+    if(length > 64)
     {
-        char buffer[256];
-        va_list args;
-        va_start (args, format);
-        size_t length = vsnprintf (buffer,256,format, args);
-        if(length > 64)
-        {
-            length = 64;
-            buffer[63] = '>';
-        }
-
-        usb_print(buffer, length);
-
-        va_end (args);
+        length = 64;
+        buffer[63] = '>';
     }
-    
+
+    usb_print(buffer, length);
 }

@@ -60,7 +60,7 @@ uint32_t uart_rx_size=0;
  */
 void rf_mesh_handler(message_t* msg)
 {
-    led1_blue_on();
+    led2_green_on();
     bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
     if(MESH_IS_BROADCAST(msg->control))
@@ -91,7 +91,7 @@ void rf_mesh_handler(message_t* msg)
             nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
         }
     }
-    led1_blue_off();
+    led2_green_off();
 }
 
 /**
@@ -150,36 +150,8 @@ void usb_rx_handler(char rx)
     {
         case '0':
         {
-            bool current_state = usb_print_enabled();
-            if(current_state)
-            {
-                usb_printf("printf will be disabled\r\n");
-                usb_print_enable(false);
-            }
-            else
-            {
-                usb_print_enable(true);
-                usb_printf("printf has been enabled\r\n");
-            }
         }
         break;
-        case '1':
-        {
-           
-            break;
-        }
-
-        case '2':
-        {
-            
-            break;
-        }
-
-        case '9':
-        {
-            
-            break;
-        }
 
         default:
             break;
@@ -216,6 +188,7 @@ int main(void)
     // ------------------------- Start Events ------------------------- 
     while(true)
     {
+        //not optimal, should rather consume one rf message, then process one usb event
         mesh_consume_rx_messages();
         usb_print_loop();
     }
