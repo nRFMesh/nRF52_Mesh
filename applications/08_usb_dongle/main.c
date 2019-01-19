@@ -38,8 +38,8 @@
 //drivers
 //apps
 #include "clocks.h"
+#include "utils.h"
 #include "mesh.h"
-#include "app_ser.h"
 
 #include "nrf_mtx.h"
 
@@ -51,76 +51,16 @@ uint32_t uart_rx_size=0;
 
 #define GPIO_CUSTOM_Debug 10
 
-#define led2_green_on()   bsp_board_led_on(0)
-#define led2_green_off()  bsp_board_led_off(0)
-#define led1_red_on()     bsp_board_led_on(1)
-#define led1_red_off()    bsp_board_led_off(1)
-#define led1_green_on()    bsp_board_led_on(2)
-#define led1_green_off()   bsp_board_led_off(2)
-#define led1_blue_on()   bsp_board_led_on(3)
-#define led1_blue_off()  bsp_board_led_off(3)
-
-extern uint32_t ser_evt_tx_count;
-
-void blink_green1(int time,int afteroff)
-{
-    led1_green_on();
-    nrf_delay_ms(time);
-    led1_green_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink_green(int time,int afteroff)
-{
-    led2_green_on();
-    nrf_delay_ms(time);
-    led2_green_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink_red(int time,int afteroff)
-{
-    led1_red_on();
-    nrf_delay_ms(time);
-    led1_red_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink_blue(int time,int afteroff)
-{
-    led1_blue_on();
-    nrf_delay_ms(time);
-    led1_blue_off();
-    if(afteroff)
-    {
-        nrf_delay_ms(afteroff);
-    }
-}
-
-void blink()
-{
-    nrf_delay_ms(500);
-    blink_red(200,500);
-    blink_blue(500,500);
-    bsp_board_leds_on();
-}
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
+ * context: from main()->mesh_consume_rx_messages()->mesh_rx_handler()
  * 
  * @param msg message structure with packet parameters and payload
  */
 void rf_mesh_handler(message_t* msg)
 {
+    led1_blue_on();
     bool is_relevant_host = false;
     NRF_LOG_INFO("rf_mesh_handler()");
     if(MESH_IS_BROADCAST(msg->control))
@@ -146,9 +86,12 @@ void rf_mesh_handler(message_t* msg)
         {
             char rf_message[128];
             mesh_parse(msg,rf_message);
-            ser_send(rf_message);
+            nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
+            usb_print(rf_message,strlen(rf_message));
+            nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
         }
     }
+    led1_blue_off();
 }
 
 /**
@@ -161,14 +104,6 @@ void rf_mesh_handler(message_t* msg)
 void app_serial_handler(const char*msg,uint8_t size)
 {
     uart_rx_size+= size;
-    //the input (msg) is really the RX DMA pointer location
-    //and the output (uart_message) is reall the TX DMA pointer location
-    //so have to copy here to avoid overwriting
-    #ifdef UART_MIRROR
-        memcpy(uart_message,msg,size);
-        sprintf(uart_message+size,"\r\n");//Add line ending and NULL terminate it with sprintf
-        ser_send(uart_message);
-    #endif
 
     if(UICR_is_uart_cmd())
     {
@@ -180,6 +115,8 @@ void app_serial_handler(const char*msg,uint8_t size)
  * @brief Callback from after completion of the cmd request
  * Note this is a call back as some undefined latency and events might happen
  * before the response is ready, thus the requests cannot always return immidiatly
+ * context: main()-->rf_mesh_handler()->mesh_execute_cmd()
+ *          app_serial_handler()->mesh_text_request()
  * 
  * @param text 
  * @param length 
@@ -187,8 +124,8 @@ void app_serial_handler(const char*msg,uint8_t size)
 void mesh_cmd_response(const char*text,uint8_t length)
 {
     memcpy(uart_message,text,length);
-    sprintf(uart_message+length,"\r\n");//Add line ending and NULL terminate it with sprintf
-    ser_send(uart_message);
+    length+=sprintf(uart_message+length,"\r\n");//Add line ending and NULL terminate it with sprintf
+    usb_print(uart_message,length);
 }
 
 
@@ -199,14 +136,10 @@ void mesh_cmd_response(const char*text,uint8_t length)
  */
 void app_rtc_handler()
 {
+    led2_green_on();
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
-    
-    NRF_LOG_INFO("id:%d:alive:%lu",get_this_node_id(),alive_count);
-    #ifdef UART_SELF_ALIVE
-        sprintf(rtc_message,"id:%d:alive:%lu;uart_rx:%lu\r\n",get_this_node_id(),alive_count,uart_rx_size);
-        ser_send(rtc_message);
-    #endif
-    UNUSED_VARIABLE(alive_count);
+    usb_printf("id:%d:alive:%lu\r\n",get_this_node_id(),alive_count);
+    led2_green_off();
 }
 
 void usb_rx_handler(char rx)
@@ -263,6 +196,7 @@ int main(void)
     clocks_start();
 
     bsp_board_init(BSP_INIT_LEDS);
+    nrf_gpio_cfg_output(GPIO_CUSTOM_Debug);
 
     blink_red(100,200);
     blink_green(100,200);
@@ -280,20 +214,10 @@ int main(void)
     mesh_tx_reset();
 
     // ------------------------- Start Events ------------------------- 
-    char rf_message[128];
-    int count = 0;
     while(true)
     {
         mesh_consume_rx_messages();
-        blink_green(1,100);
         usb_print_loop();
-        if(count%50 == 0)
-        {
-            sprintf(rf_message,"count:%d;debug:%lu",count,UICR_RF_CHANNEL);
-            mesh_bcast_text(rf_message);
-            usb_printf("count:  %d\r\n", count);
-        }
-        count++;
     }
 }
 /*lint -restore */
