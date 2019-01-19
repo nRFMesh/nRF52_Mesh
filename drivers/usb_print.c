@@ -64,13 +64,46 @@ APP_USBD_CDC_ACM_GLOBAL_DEF(m_app_cdc_acm,
                             APP_USBD_CDC_COMM_PROTOCOL_AT_V250
 );
 
-#define READ_SIZE 1
+usb_rx_handler_t m_usb_rx_handler;
+#define rx_buffer_size 128
+char m_rx_buffer[rx_buffer_size];        //fragmented usb parts of messages
 
-static char m_rx_buffer[READ_SIZE];
-static usb_rx_handler_t m_usb_rx_handler;
+#define g_usb_message_size 256
+char g_usb_message[g_usb_message_size];
 
-static bool g_is_port_open = false;
-static bool g_is_write_buffer_ready = true;
+bool g_is_port_open = false;
+bool g_is_write_buffer_ready = true;
+
+
+void stream_to_message(const char* msg,uint8_t size)
+{
+    static uint8_t usb_msg_count=0;
+    for(int i=0;i<size;i++)
+    {
+        char c = msg[i];
+        if( (c == '\r') || (c == '\n') || (c == 0) )
+        {
+            if(usb_msg_count > 0)
+            {
+                m_usb_rx_handler(g_usb_message,usb_msg_count);
+                usb_msg_count = 0;
+            }
+        }
+        else
+        {
+            if(usb_msg_count < g_usb_message_size)
+            {
+                g_usb_message[usb_msg_count++] = c;
+            }
+            else
+            {
+                usb_msg_count = 0;
+                blink_red(650,200); //signal error - discarded message
+            }
+        }
+    }
+}
+
 
 /**
  * @brief User event handler @ref app_usbd_cdc_acm_user_ev_handler_t (headphones)
@@ -87,9 +120,9 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             //bsp_board_led_on(LED_CDC_ACM_OPEN);
 
             /*Setup first transfer*/
-            ret_code_t ret = app_usbd_cdc_acm_read(&m_app_cdc_acm,
+            ret_code_t ret = app_usbd_cdc_acm_read(p_cdc_acm,
                                                    m_rx_buffer,
-                                                   READ_SIZE);
+                                                   1);
             UNUSED_VARIABLE(ret);
             g_is_port_open = true;
             break;
@@ -110,15 +143,16 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             {
                 /*Get amount of data transfered*/
                 size_t size = app_usbd_cdc_acm_rx_size(p_cdc_acm);
-                UNUSED_VARIABLE(size);
-                NRF_LOG_INFO("RX: size: %lu char: %c", size, m_rx_buffer[0]);
-
+                if(size > rx_buffer_size)
+                {
+                    size = rx_buffer_size;
+                }
                 /* Fetch data until internal buffer is empty */
-                ret = app_usbd_cdc_acm_read(&m_app_cdc_acm,
+                ret = app_usbd_cdc_acm_read(p_cdc_acm,
                                             m_rx_buffer,
-                                            READ_SIZE);
+                                            size);
                 
-                m_usb_rx_handler(m_rx_buffer[0]);
+                stream_to_message(m_rx_buffer,size);
 
             } while (ret == NRF_SUCCESS);
 
@@ -219,7 +253,6 @@ void usb_print(const void * p_buf,size_t length)
     }
     if(!g_is_write_buffer_ready)
     {
-        app_usbd_event_queue_process();
         blink_red(10,10);
         return;
     }

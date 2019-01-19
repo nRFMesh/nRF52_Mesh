@@ -97,11 +97,12 @@ void rf_mesh_handler(message_t* msg)
 /**
  * @brief called only with a full line message coming from UART 
  * ending with '\r', '\n' or '0'
+ * context: cdc_acm_user_ev_handler()
  * @param msg contains a pointer to the DMA buffer, so do not keep it after the call
  * @param size safe managemnt with known size, does not include the ending char '\r' or other
  */
 //#define UART_MIRROR
-void app_serial_handler(const char*msg,uint8_t size)
+void app_usb_rx_handler(const char*msg,uint8_t size)
 {
     uart_rx_size+= size;
 
@@ -116,7 +117,7 @@ void app_serial_handler(const char*msg,uint8_t size)
  * Note this is a call back as some undefined latency and events might happen
  * before the response is ready, thus the requests cannot always return immidiatly
  * context: main()-->rf_mesh_handler()->mesh_execute_cmd()
- *          app_serial_handler()->mesh_text_request()
+ *          cdc_acm_user_ev_handler()->app_usb_rx_handler()->mesh_text_request()
  * 
  * @param text 
  * @param length 
@@ -142,23 +143,6 @@ void app_rtc_handler()
     led2_green_off();
 }
 
-void usb_rx_handler(char rx)
-{
-    blink_blue(10,10);
-
-    switch (rx)
-    {
-        case '0':
-        {
-        }
-        break;
-
-        default:
-            break;
-    }
-    
-}
-
 int main(void)
 {
     //--------------------- Important UICR settings --------------------- 
@@ -177,7 +161,7 @@ int main(void)
 
     // ------------------------- Start Init ------------------------- 
 
-    usb_print_init(usb_rx_handler);
+    usb_print_init(app_usb_rx_handler);
 
     mesh_init(rf_mesh_handler,mesh_cmd_response);
 

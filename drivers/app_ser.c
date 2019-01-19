@@ -83,6 +83,7 @@ void serial_rx_handler(const char* msg,uint8_t size)
         }
         else
         {
+            //TODO buggy overflow with long messages
             uart_cmd[uart_cmd_count++] = c;
         }
     }

@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef void (*usb_rx_handler_t)(const char);
+typedef void (*usb_rx_handler_t)(const char*,uint8_t);
 
 void usb_print_init(usb_rx_handler_t handler);
 void usb_print_loop();
