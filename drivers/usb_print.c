@@ -117,13 +117,8 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
     {
         case APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN:
         {
-            //bsp_board_led_on(LED_CDC_ACM_OPEN);
-
-            /*Setup first transfer*/
-            ret_code_t ret = app_usbd_cdc_acm_read(p_cdc_acm,
-                                                   m_rx_buffer,
-                                                   1);
-            UNUSED_VARIABLE(ret);
+            //This starts listening and notify an event immediatly when 'any' size of data is available
+            app_usbd_cdc_acm_read_any(p_cdc_acm,m_rx_buffer,rx_buffer_size);
             g_is_port_open = true;
             break;
         }
@@ -137,26 +132,14 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             break;
         case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
         {
+            size_t size;
             ret_code_t ret;
-            NRF_LOG_INFO("Bytes waiting: %d", app_usbd_cdc_acm_bytes_stored(p_cdc_acm));
             do
             {
-                /*Get amount of data transfered*/
-                size_t size = app_usbd_cdc_acm_rx_size(p_cdc_acm);
-                if(size > rx_buffer_size)
-                {
-                    size = rx_buffer_size;
-                }
-                /* Fetch data until internal buffer is empty */
-                ret = app_usbd_cdc_acm_read(p_cdc_acm,
-                                            m_rx_buffer,
-                                            size);
-                
-                stream_to_message(m_rx_buffer,size);
-
-            } while (ret == NRF_SUCCESS);
-
-            //bsp_board_led_invert(LED_CDC_ACM_RX);
+                size = app_usbd_cdc_acm_rx_size(p_cdc_acm);     //get the number of bytes waiting in the buffer provided in the previous read call
+                stream_to_message(m_rx_buffer,size);            //provide the data to the next layer
+                ret = app_usbd_cdc_acm_read_any(p_cdc_acm,m_rx_buffer,rx_buffer_size);  //initiate the next listening
+            } while (ret == NRF_SUCCESS);   //if ret is success, then another cycle of checking read data size using it and initiate listening
             break;
         }
         default:
