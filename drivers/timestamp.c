@@ -50,7 +50,7 @@ void timestamp_init()
 //timestamp_get() not efficient as triggers a capture event then ready the capture reg, no direct access to counter
 uint32_t timestamp_get()
 {
-    return nrf_drv_timer_capture(&TIMER_TIMESTAMP, 0);//Capture channel 0 used
+    return nrf_drv_timer_capture(&TIMER_TIMESTAMP, 0);//Capture channel 0
 }
 
 void timestamp_reset()

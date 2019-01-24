@@ -80,7 +80,7 @@
 // <2=> TIMER HW INSTANCE 2
 
 #ifndef TIMESTAMP_TIMER_INSTANCE
-#define TIMESTAMP_TIMER_INSTANCE 1
+#define TIMESTAMP_TIMER_INSTANCE 0
 #endif
 
 // </e>
@@ -97,7 +97,7 @@
 // <1=> TIMER HW INSTANCE 1
 
 #ifndef MESH_TIMER_INSTANCE
-#define MESH_TIMER_INSTANCE 0
+#define MESH_TIMER_INSTANCE 1
 #endif
 
 // </e>
@@ -254,6 +254,21 @@
 //==========================================================
 
 // <h> nRF_Drivers 
+
+//==========================================================
+// <e> NRFX_PPI_ENABLED - nrfx_ppi - PPI peripheral allocator
+//==========================================================
+#ifndef NRFX_PPI_ENABLED
+#define NRFX_PPI_ENABLED 1
+#endif
+// <e> NRFX_PPI_CONFIG_LOG_ENABLED - Enables logging in the module.
+
+// <q> PPI_ENABLED  - nrf_drv_ppi - PPI peripheral driver - legacy layer
+ 
+#ifndef PPI_ENABLED
+#define PPI_ENABLED 1
+#endif
+
 
 //==========================================================
 // <e> GPIOTE_ENABLED - nrf_drv_gpiote - GPIOTE peripheral driver - legacy layer

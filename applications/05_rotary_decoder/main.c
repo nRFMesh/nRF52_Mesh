@@ -26,6 +26,8 @@
 #include "nrf_drv_qdec.h"
 
 #include "nrf_drv_gpiote.h"
+#include "nrf_drv_timer.h"
+#include "nrf_drv_ppi.h"
 
 //for the log
 #include "nrf_log.h"
@@ -74,7 +76,26 @@ static uint32_t g_time_next = 0;
 #define PIN_ENCODER_B 30
 #define PIN_ENCODER_Debug 31
 
+static nrf_ppi_channel_t m_ppi_channel1;
 
+//redeclared here for ppi usage
+const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
+
+void ppi_init()
+{
+
+    nrf_drv_ppi_init();
+
+    nrf_drv_ppi_channel_alloc(&m_ppi_channel1);
+    uint32_t event1 = nrf_drv_gpiote_in_event_addr_get(PIN_ENCODER_A);
+    //!!!!! BUG in SDK !!!!!
+    //uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
+    //task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
+    uint32_t task1  = 0x40008044;//TIMER0_TASKS_CAPTURE1
+    nrf_drv_ppi_channel_assign(m_ppi_channel1, event1, task1);
+
+    nrf_drv_ppi_channel_enable(m_ppi_channel1);
+}
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -255,7 +276,7 @@ void encoder_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 {
     //nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
-    g_capture_time = timestamp_get();
+    g_capture_time = nrf_drv_timer_capture_get(&TIMER_TIMESTAMP_APP, 1);
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_B))
     {
         g_pos_A++;
@@ -273,7 +294,7 @@ void encoder_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 {
     //nrf_drv_gpiote_out_set(PIN_ENCODER_Debug);
     m_capture = true;
-    g_capture_time = timestamp_get();
+    g_capture_time = nrf_drv_timer_capture_get(&TIMER_TIMESTAMP_APP, 2);
     if(nrfx_gpiote_in_is_set(PIN_ENCODER_A))
     {
         g_pos_B--;
@@ -307,7 +328,7 @@ void init_gpio_decoder()
 
     err_code = nrf_drv_gpiote_in_init(PIN_ENCODER_B, &in_B_config, encoder_pin_B_handler);
     APP_ERROR_CHECK(err_code);
-
+    
     nrf_drv_gpiote_in_event_enable(PIN_ENCODER_A, true);
     //will not enable the B events, to leave enough cpu for A events
     //nrf_drv_gpiote_in_event_enable(PIN_ENCODER_B, true);
@@ -354,6 +375,8 @@ int main(void)
 
     //init_decoder();
     init_gpio_decoder();
+
+    ppi_init();
 
     // ------------------------- Start Events ------------------------- 
     g_time_now = timestamp_get();
