@@ -239,6 +239,14 @@ void usb_print(const void * p_buf,size_t length)
         blink_red(10,10);
         return;
     }
+    char * p_char = (char*) p_buf;
+    if(length > 64)
+    {
+        length = 64;
+        p_char[61] = '>';
+        p_char[62] = '\r';
+        p_char[63] = '\n';
+    }
 
     //set the variable before, in case the isr triggers before the retur of the write
     g_is_write_buffer_ready = false;
@@ -249,20 +257,23 @@ void usb_print(const void * p_buf,size_t length)
     }
 }
 
+char usb_print_buffer[256];
+
 void usb_printf(const char *format, ...)
 {
-    char buffer[256];
     va_list args;
     va_start (args, format);
-    size_t length = vsnprintf (buffer,256,format, args);
+    size_t length = vsnprintf(usb_print_buffer,256,format, args);
     va_end (args);
 
     //does not produce length higher than 64 chars
     if(length > 64)
     {
         length = 64;
-        buffer[63] = '>';
+        usb_print_buffer[61] = '>';
+        usb_print_buffer[62] = '\r';
+        usb_print_buffer[63] = '\n';
     }
 
-    usb_print(buffer, length);
+    usb_print(usb_print_buffer, length);
 }
