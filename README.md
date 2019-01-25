@@ -19,7 +19,7 @@ deployed rf dongle from the HW shown below (UART version)
 
 ### 05 rotary decoder
 Rotary encoder 600 pulses per rotation, notification through rf with timestamp
-![PPI interconnect](applications\05_rotary_decoder\ppi.svg)
+![PPI interconnect](applications/05_rotary_decoder/ppi.svg)
 
 ### 06 bldc 52832
 
