@@ -76,25 +76,35 @@ static uint32_t g_time_next = 0;
 #define PIN_ENCODER_B 30
 #define PIN_ENCODER_Debug 31
 
-static nrf_ppi_channel_t m_ppi_channel1;
-
+static nrf_ppi_channel_t ppi_chan_EncoderA_Timestamp;
+static nrf_ppi_group_t ppi_gr_rf_timestamp;
 //redeclared here for ppi usage
 const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
+
+#define PPI_CH27_RADIO_END_TIMER0_CAPTURE2
 
 void ppi_init()
 {
 
     nrf_drv_ppi_init();
 
-    nrf_drv_ppi_channel_alloc(&m_ppi_channel1);
+    nrf_drv_ppi_channel_alloc(&ppi_chan_EncoderA_Timestamp);
     uint32_t event1 = nrf_drv_gpiote_in_event_addr_get(PIN_ENCODER_A);
     //!!!!! BUG in SDK !!!!!
     //uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
     //task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
     uint32_t task1  = 0x40008044;//TIMER0_TASKS_CAPTURE1
-    nrf_drv_ppi_channel_assign(m_ppi_channel1, event1, task1);
+    nrf_drv_ppi_channel_assign(ppi_chan_EncoderA_Timestamp, event1, task1);
+    nrf_drv_ppi_channel_enable(ppi_chan_EncoderA_Timestamp);
 
-    nrf_drv_ppi_channel_enable(m_ppi_channel1);
+
+    //using group for auto-disable after enable once
+    nrf_drv_ppi_group_alloc(&ppi_gr_rf_timestamp);
+    uint32_t task2 = nrf_drv_ppi_task_addr_group_disable_get(ppi_gr_rf_timestamp);
+    nrf_drv_ppi_channel_fork_assign(PPI_CH27_RADIO_END_TIMER0_CAPTURE2, task2);
+    nrf_drv_ppi_channel_include_in_group(PPI_CH27_RADIO_END_TIMER0_CAPTURE2,ppi_gr_rf_timestamp);
+
+    //then need to call nrf_drv_ppi_group_enable(ppi_gr_rf_timestamp);
 }
 
 /**
@@ -104,7 +114,7 @@ void ppi_init()
  */
 void rf_mesh_handler(message_t* msg)
 {
-    if(msg->pid == 0x40)//sync
+    if(msg->pid == 0x40)//sync-prepare
     {
         nrf_gpio_pin_set(PIN_ENCODER_Debug);
         timestamp_reset();

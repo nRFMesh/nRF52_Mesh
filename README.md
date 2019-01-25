@@ -2,6 +2,31 @@
 This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/) with focus on software configuration and protocol implementation details
 
 # The content of [this repository](https://github.com/nRFMesh/nRF52_Mesh)
+
+## ./applications/
+
+### 01 sensor tag
+Firmware of the nRF52 sensor tag HW presented further below
+
+### 02 acell tag
+Experiments with nRF52 and MPU-6050
+
+### 03 buttons
+press buttons mesh notification (experiemntal, low battery life)
+
+### 04 uart dongle
+deployed rf dongle from the HW shown below (UART version)
+
+### 05 rotary decoder
+Rotary encoder 600 pulses per rotation, notification through rf with timestamp
+
+### 06 bldc 52832
+
+### 07 bldc 52840
+
+### 08 usb dongle (nRF52840-dongle)
+
+
 ## ./raspi/
 The server's python scripts running also on a raspberry pi
 * ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
