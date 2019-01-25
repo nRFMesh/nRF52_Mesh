@@ -7,3 +7,7 @@ send a sync message from node 107/0x68
 
 msg:0x804068
 msg:0x804168
+
+
+# PPI : Programmable Peripheral Interface
+![ppi](ppi.svg)
