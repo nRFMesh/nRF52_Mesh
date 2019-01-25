@@ -69,6 +69,9 @@ static volatile bool m_capture = false;
 
 static uint32_t g_time_now = 0;
 static uint32_t g_time_next = 0;
+static uint32_t g_time_log = 0;
+static uint32_t g_loop_count = 0;
+static bool is_expecting_sync = false;
 
 //A - Green - 29 - scl
 #define PIN_ENCODER_A 29
@@ -77,34 +80,44 @@ static uint32_t g_time_next = 0;
 #define PIN_ENCODER_Debug 31
 
 static nrf_ppi_channel_t ppi_chan_EncoderA_Timestamp;
-static nrf_ppi_group_t ppi_gr_rf_timestamp;
+static nrf_ppi_channel_t ppi_chan_RFrx_ClearTimestamp;
 //redeclared here for ppi usage
 const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
 
-#define PPI_CH27_RADIO_END_TIMER0_CAPTURE2
+//!!!!! BUG in SDK !!!!!
+//uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
+//task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
+#define PPI_Task_Timer0_Capture1    0x40008044
+
+#define PPI_Event_RADIO_END         0x4000110C
+#define PPI_Task_Timer0_Clear       0x4000800C
 
 void ppi_init()
 {
 
     nrf_drv_ppi_init();
 
+    //Encoder-A-pio => Timer0_Capture
     nrf_drv_ppi_channel_alloc(&ppi_chan_EncoderA_Timestamp);
     uint32_t event1 = nrf_drv_gpiote_in_event_addr_get(PIN_ENCODER_A);
-    //!!!!! BUG in SDK !!!!!
-    //uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
-    //task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
-    uint32_t task1  = 0x40008044;//TIMER0_TASKS_CAPTURE1
-    nrf_drv_ppi_channel_assign(ppi_chan_EncoderA_Timestamp, event1, task1);
+    nrf_drv_ppi_channel_assign(ppi_chan_EncoderA_Timestamp, event1, PPI_Task_Timer0_Capture1);
     nrf_drv_ppi_channel_enable(ppi_chan_EncoderA_Timestamp);
 
+    //RF-Rx packet => Timer0_Clear
+    nrf_drv_ppi_channel_alloc(&ppi_chan_RFrx_ClearTimestamp);
+    nrf_drv_ppi_channel_assign(ppi_chan_RFrx_ClearTimestamp, PPI_Event_RADIO_END, PPI_Task_Timer0_Clear);
+    //usage : nrf_drv_ppi_channel_enable/disable(ppi_chan_RFrx_ClearTimestamp);
+}
 
-    //using group for auto-disable after enable once
-    nrf_drv_ppi_group_alloc(&ppi_gr_rf_timestamp);
-    uint32_t task2 = nrf_drv_ppi_task_addr_group_disable_get(ppi_gr_rf_timestamp);
-    nrf_drv_ppi_channel_fork_assign(PPI_CH27_RADIO_END_TIMER0_CAPTURE2, task2);
-    nrf_drv_ppi_channel_include_in_group(PPI_CH27_RADIO_END_TIMER0_CAPTURE2,ppi_gr_rf_timestamp);
-
-    //then need to call nrf_drv_ppi_group_enable(ppi_gr_rf_timestamp);
+void rf_mesh_interrupt()
+{
+    if(is_expecting_sync)
+    {
+        g_time_now  = 0;
+        g_time_next = 0;
+        g_time_log  = 0;
+        g_loop_count = 0;
+    }
 }
 
 /**
@@ -116,11 +129,18 @@ void rf_mesh_handler(message_t* msg)
 {
     if(msg->pid == 0x40)//sync-prepare
     {
-        nrf_gpio_pin_set(PIN_ENCODER_Debug);
-        timestamp_reset();
-        g_time_now = timestamp_get();
-        g_time_next = g_time_now;
-        nrf_gpio_pin_clear(PIN_ENCODER_Debug);
+        nrf_drv_ppi_channel_enable(ppi_chan_RFrx_ClearTimestamp);
+        is_expecting_sync = true;
+    }
+    if(msg->pid == 0x41)//sync
+    {
+        if(is_expecting_sync)
+        {
+            nrf_drv_ppi_channel_disable(ppi_chan_RFrx_ClearTimestamp);
+            is_expecting_sync = false;
+            sprintf(rf_message,"sync:ok;ts:%lu",timestamp_get());
+            mesh_bcast_text(rf_message);
+        }
     }
 
     bool is_relevant_host = false;
@@ -372,7 +392,7 @@ int main(void)
     sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1;ts:%lu\r\n",get_this_node_id(),mesh_channel(),timestamp_get());
     ser_send(rtc_message);
 
-    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
+    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response,rf_mesh_interrupt);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done
@@ -391,20 +411,22 @@ int main(void)
     // ------------------------- Start Events ------------------------- 
     g_time_now = timestamp_get();
     g_time_next = g_time_now;
-    int loop_count = 0;
+    g_loop_count = 0;
     while(true)
     {
+        nrf_gpio_pin_set(PIN_ENCODER_Debug);
         mesh_consume_rx_messages();
 
-        uint32_t g_time_log = g_time_next + 1000;
+        g_time_log = g_time_next + 1000;
         g_time_next += 4000;
 
         while(g_time_now < g_time_log)
         {
             g_time_now = timestamp_get();
         }
+        nrf_gpio_pin_clear(PIN_ENCODER_Debug);
         //--------------- log time --------------------------
-        if((loop_count % 1000) == 0)
+        if((g_loop_count % 1000) == 0)
         {
             g_capture_time = timestamp_get();
             m_capture = true;
@@ -414,7 +436,7 @@ int main(void)
             log_steps();
             m_capture = false;
         }
-        loop_count++;
+        g_loop_count++;
 
         while(g_time_now < g_time_next)
         {

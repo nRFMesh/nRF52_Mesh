@@ -85,6 +85,8 @@ static app_mesh_rf_handler_t m_app_rf_handler;
 
 static app_mesh_cmd_handler_t m_app_cmd_handler;
 
+static app_mesh_interrupt_handler_t m_app_int_handler;
+
 //forward internal declarations
 void mesh_tx_message(message_t* msg);
 uint32_t mesh_tx_ack(message_t* msg, uint8_t ttl);
@@ -434,8 +436,7 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
             break;
         case NRF_ESB_EVENT_RX_RECEIVED:
             NRF_LOG_DEBUG("________________ESB RX RECEIVED EVENT________________");
-            //Do nothing, handled in while loop
-            //but return immidiatly so that more rx events are filled in the rx fifo
+            m_app_int_handler();
             break;
         default:
             esb_completed = true;
@@ -447,15 +448,16 @@ void nrf_esb_event_handler(nrf_esb_evt_t const * p_event)
 }
 
 
-uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler)
+uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler,app_mesh_interrupt_handler_t int_handler)
 {
     uint32_t err_code;
     uint8_t base_addr_0[4] = {0xE7, 0xE7, 0xE7, 0xE7};
     uint8_t base_addr_1[4] = {0xC2, 0xC2, 0xC2, 0xC2};
     uint8_t addr_prefix[8] = {0xE7, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8 };
 
-    m_app_rf_handler = rf_handler;
-    m_app_cmd_handler = cmd_handler;
+    m_app_rf_handler    = rf_handler;
+    m_app_cmd_handler   = cmd_handler;
+    m_app_int_handler   = int_handler;
 
     nrf_esb_config.retransmit_count         = 0;
     nrf_esb_config.selective_auto_ack       = true;//false is not supported : payload.noack  decides
