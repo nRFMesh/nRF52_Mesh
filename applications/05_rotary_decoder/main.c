@@ -79,6 +79,7 @@ static bool is_expecting_sync = false;
 
 static nrf_ppi_channel_t ppi_chan_EncoderA_Timestamp;
 static nrf_ppi_channel_t ppi_chan_RFrx_ClearTimestamp;
+static nrf_ppi_channel_t ppi_chan_Timer4Comp5_Clear;
 //redeclared here for ppi usage
 const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
 
@@ -88,9 +89,12 @@ const nrf_drv_timer_t TIMER_COMPARE_APP = NRF_DRV_TIMER_INSTANCE(COMPARE_TIMER_I
 //uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
 //task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
 #define PPI_Task_Timer0_Capture1    0x40008044
-
 #define PPI_Event_RADIO_END         0x4000110C
 #define PPI_Task_Timer0_Clear       0x4000800C
+
+#define PPI_Event_Timer4_Compare5   0x4001B154
+#define PPI_Task_Timer4_Clear       0x4001B00C
+
 
 void ppi_init()
 {
@@ -106,7 +110,16 @@ void ppi_init()
     //RF-Rx packet => Timer0_Clear
     nrf_drv_ppi_channel_alloc(&ppi_chan_RFrx_ClearTimestamp);
     nrf_drv_ppi_channel_assign(ppi_chan_RFrx_ClearTimestamp, PPI_Event_RADIO_END, PPI_Task_Timer0_Clear);
+    nrf_drv_ppi_channel_fork_assign(ppi_chan_RFrx_ClearTimestamp, PPI_Task_Timer4_Clear);
     //usage : nrf_drv_ppi_channel_enable/disable(ppi_chan_RFrx_ClearTimestamp);
+
+    //Timer4_compare5 loops back to 0
+    nrf_drv_ppi_channel_alloc(&ppi_chan_Timer4Comp5_Clear);
+    nrf_drv_ppi_channel_assign(ppi_chan_Timer4Comp5_Clear, PPI_Event_Timer4_Compare5, PPI_Task_Timer4_Clear);
+    nrf_drv_ppi_channel_enable(ppi_chan_Timer4Comp5_Clear);
+
+
+
 }
 
 void rf_mesh_interrupt()
@@ -363,14 +376,13 @@ void init_gpio_decoder()
 
 void apptimer_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
 
-void timestamp_compare1()
+void compare_call0()
 {
     nrf_gpio_pin_set(PIN_ENCODER_Debug);  
 }
 
-void timestamp_compare2()
+void compare_call1()
 {
-    static uint32_t g_loop_count = 0;
     nrf_gpio_pin_clear(PIN_ENCODER_Debug);
 
     if((g_loop_count % 1000) == 0)
@@ -403,16 +415,7 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
-    apptimer_config_t apptimer_cfg = {
-        .cycle          = 4000,
-        .offset1        = 1000,
-        .call1          = (app_compare_handler_t)timestamp_compare1,
-        .offset2        = 2000,
-        .call2          = (app_compare_handler_t)timestamp_compare2
-    };
-
     timestamp_init();
-    compare_init(apptimer_cfg);
 
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
 
@@ -439,7 +442,16 @@ int main(void)
 
     ppi_init();
 
-    // ------------------------- Start Events ------------------------- 
+    apptimer_config_t compare_cfg = {
+        .offset0        = 1,//0 does not trigger due to 1 cycle PPI latency
+        .call0          = (app_compare_handler_t)compare_call0,
+        .offset1        = 1000,
+        .call1          = (app_compare_handler_t)compare_call1,
+        .cycle          = 4000
+    };
+    compare_init(compare_cfg);
+
+    // ------------------------- Start Background loop ------------------------- 
     while(true)
     {
         mesh_consume_rx_messages();

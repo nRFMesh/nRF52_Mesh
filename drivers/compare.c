@@ -30,22 +30,12 @@ void timer_compare_handler(nrf_timer_event_t event_type, void * p_context)
     {
         case NRF_TIMER_EVENT_COMPARE0:
         {
-            m_config.compare0 += m_config.cycle;
-            m_config.compare1 += m_config.cycle;
-            m_config.compare2 += m_config.cycle;
-            nrf_drv_timer_compare(&TIMER_COMPARE,0,m_config.compare0,true);
-            nrf_drv_timer_compare(&TIMER_COMPARE,1,m_config.compare1,true);
-            nrf_drv_timer_compare(&TIMER_COMPARE,2,m_config.compare2,true);
+            m_config.call0();
         }
         break;
         case NRF_TIMER_EVENT_COMPARE1:
         {
             m_config.call1();
-        }
-        break;
-        case NRF_TIMER_EVENT_COMPARE2:
-        {
-            m_config.call2();
         }
         break;
         default:
@@ -69,12 +59,9 @@ void compare_init(apptimer_config_t config)
     APP_ERROR_CHECK(err_code);
 
     m_config = config;
-    m_config.compare0 = m_config.cycle;
-    m_config.compare1 = m_config.offset1;
-    m_config.compare2 = m_config.offset2;
-    nrf_drv_timer_compare(&TIMER_COMPARE,0,m_config.compare0,true);
-    nrf_drv_timer_compare(&TIMER_COMPARE,1,m_config.compare1,true);
-    nrf_drv_timer_compare(&TIMER_COMPARE,2,m_config.compare2,true);
+    nrf_drv_timer_compare(&TIMER_COMPARE,0,m_config.offset0,true);
+    nrf_drv_timer_compare(&TIMER_COMPARE,1,m_config.offset1,true);
+    nrf_drv_timer_compare(&TIMER_COMPARE,5,m_config.cycle,true);
 
     // Enable timer
     nrf_drv_timer_enable(&TIMER_COMPARE);
