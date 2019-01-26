@@ -26,7 +26,9 @@
 
 const nrf_drv_timer_t TIMER_TIMESTAMP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
 
-void timer_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
+void timer_dummy_handler(nrf_timer_event_t event_type, void * p_context)
+{
+}
 
 void timestamp_init()
 {
@@ -44,7 +46,6 @@ void timestamp_init()
 
     // Enable timer
     nrf_drv_timer_enable(&TIMER_TIMESTAMP);
-
 }
 
 //timestamp_get() not efficient as triggers a capture event then ready the capture reg, no direct access to counter

@@ -43,6 +43,7 @@
 #include "mesh.h"
 #include "app_ser.h"
 #include "timestamp.h"
+#include "compare.h"
 #include "utils.h"
 
 
@@ -84,6 +85,8 @@ static nrf_ppi_channel_t ppi_chan_RFrx_ClearTimestamp;
 //redeclared here for ppi usage
 const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
 
+const nrf_drv_timer_t TIMER_COMPARE_APP = NRF_DRV_TIMER_INSTANCE(COMPARE_TIMER_INSTANCE);
+
 //!!!!! BUG in SDK !!!!!
 //uint32_t task1  = nrf_drv_timer_capture_task_address_get(&TIMER_TIMESTAMP_APP,NRF_TIMER_TASK_CAPTURE1);
 //task1 had a value of 0x40008050 referring to capture4 in stead of following 0x40008044 as in datasheet
@@ -113,9 +116,6 @@ void rf_mesh_interrupt()
 {
     if(is_expecting_sync)
     {
-        g_time_now  = 0;
-        g_time_next = 0;
-        g_time_log  = 0;
         g_loop_count = 0;
     }
 }
@@ -364,6 +364,31 @@ void init_gpio_decoder()
     //nrf_drv_gpiote_in_event_enable(PIN_ENCODER_B, true);
 }
 
+void apptimer_dummy_handler(nrf_timer_event_t event_type, void * p_context){}
+
+void timestamp_compare1()
+{
+    nrf_gpio_pin_set(PIN_ENCODER_Debug);  
+}
+
+void timestamp_compare2()
+{
+    static uint32_t g_loop_count = 0;
+    nrf_gpio_pin_clear(PIN_ENCODER_Debug);
+
+    if((g_loop_count % 1000) == 0)
+    {
+        g_capture_time = timestamp_get();
+        m_capture = true;
+    }
+    if(m_capture)
+    {
+        log_steps();
+        m_capture = false;
+    }
+    g_loop_count++;
+}
+
 int main(void)
 {
     uint32_t err_code;
@@ -381,7 +406,16 @@ int main(void)
     clocks_start();
     bsp_board_init(BSP_INIT_LEDS);
 
+    apptimer_config_t apptimer_cfg = {
+        .cycle          = 4000,
+        .offset1        = 1000,
+        .call1          = (app_compare_handler_t)timestamp_compare1,
+        .offset2        = 2000,
+        .call2          = (app_compare_handler_t)timestamp_compare2
+    };
+
     timestamp_init();
+    compare_init(apptimer_cfg);
 
     //nrf_gpio_cfg_output(11); Debug pios 11,12,14,29
 
@@ -409,40 +443,9 @@ int main(void)
     ppi_init();
 
     // ------------------------- Start Events ------------------------- 
-    g_time_now = timestamp_get();
-    g_time_next = g_time_now;
-    g_loop_count = 0;
     while(true)
     {
-        nrf_gpio_pin_set(PIN_ENCODER_Debug);
         mesh_consume_rx_messages();
-
-        g_time_log = g_time_next + 1000;
-        g_time_next += 4000;
-
-        while(g_time_now < g_time_log)
-        {
-            g_time_now = timestamp_get();
-        }
-        nrf_gpio_pin_clear(PIN_ENCODER_Debug);
-        //--------------- log time --------------------------
-        if((g_loop_count % 1000) == 0)
-        {
-            g_capture_time = timestamp_get();
-            m_capture = true;
-        }
-        if(m_capture)
-        {
-            log_steps();
-            m_capture = false;
-        }
-        g_loop_count++;
-
-        while(g_time_now < g_time_next)
-        {
-            g_time_now = timestamp_get();
-        }
-        //--------------- loop time --------------------------
     }
 }
 /*lint -restore */
