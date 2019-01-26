@@ -74,12 +74,10 @@ typedef void (*app_mesh_rf_handler_t)(message_t*);
 
 typedef void (*app_mesh_cmd_handler_t)(const char*,uint8_t);
 
-typedef void (*app_mesh_interrupt_handler_t)();
-
 uint16_t get_this_node_id();
 uint8_t mesh_channel();
 
-uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler,app_mesh_interrupt_handler_t int_handler);
+uint32_t mesh_init(app_mesh_rf_handler_t rf_handler,app_mesh_cmd_handler_t cmd_handler);
 
 void mesh_execute_cmd(uint8_t*data,uint8_t size,bool is_rf_request,uint8_t rf_nodeid);
 

@@ -57,6 +57,8 @@ uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
 
+static bool     g_sync_perform = false;
+
 static volatile bool m_report_ready_flag = false;
 static volatile bool m_first_report_flag = true;
 static volatile uint32_t m_accdblread;
@@ -67,9 +69,6 @@ static volatile int32_t g_pos_B = 1200;
 static volatile int32_t g_pos_H = 1200;
 static volatile uint32_t g_capture_time = 0;
 static volatile bool m_capture = false;
-
-static uint32_t g_loop_count = 0;
-static bool is_expecting_sync = false;
 
 //A - Green - 29 - scl
 #define PIN_ENCODER_A 29
@@ -122,14 +121,6 @@ void ppi_init()
 
 }
 
-void rf_mesh_interrupt()
-{
-    if(is_expecting_sync)
-    {
-        g_loop_count = 0;
-    }
-}
-
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
  * 
@@ -140,17 +131,11 @@ void rf_mesh_handler(message_t* msg)
     if(msg->pid == 0x40)//sync-prepare
     {
         nrf_drv_ppi_channel_enable(ppi_chan_RFrx_ClearTimestamp);
-        is_expecting_sync = true;
     }
     if(msg->pid == 0x41)//sync
     {
-        if(is_expecting_sync)
-        {
-            nrf_drv_ppi_channel_disable(ppi_chan_RFrx_ClearTimestamp);
-            is_expecting_sync = false;
-            sprintf(rf_message,"sync:ok;ts:%lu",timestamp_get());
-            mesh_bcast_text(rf_message);
-        }
+        nrf_drv_ppi_channel_disable(ppi_chan_RFrx_ClearTimestamp);
+        g_sync_perform = true;
     }
 
     bool is_relevant_host = false;
@@ -257,12 +242,6 @@ void app_mesh_broadcast(message_t* msg)
 
 void app_mesh_message(message_t* msg)
 {
-}
-
-void log_count(uint32_t count)
-{
-    sprintf(rf_message,"ts:%lu;loop:%lu",timestamp_get(),count);
-    mesh_bcast_text(rf_message);
 }
 
 void log_steps()
@@ -383,8 +362,14 @@ void compare_call0()
 
 void compare_call1()
 {
-    nrf_gpio_pin_clear(PIN_ENCODER_Debug);
+    static uint32_t g_loop_count = 0;
 
+    nrf_gpio_pin_clear(PIN_ENCODER_Debug);
+    if(g_sync_perform)
+    {
+        g_loop_count = 0;
+        g_sync_perform = false;
+    }
     if((g_loop_count % 1000) == 0)
     {
         g_capture_time = timestamp_get();
@@ -426,7 +411,7 @@ int main(void)
     sprintf(rtc_message,"nodeid:%d;channel:%d;reset:1;ts:%lu\r\n",get_this_node_id(),mesh_channel(),timestamp_get());
     ser_send(rtc_message);
 
-    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response,rf_mesh_interrupt);
+    err_code = mesh_init(rf_mesh_handler,mesh_cmd_response);
     APP_ERROR_CHECK(err_code);
 
     //only allow interrupts to start after init is done

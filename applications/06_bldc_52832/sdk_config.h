@@ -80,7 +80,7 @@
 // <2=> TIMER HW INSTANCE 2
 
 #ifndef TIMESTAMP_TIMER_INSTANCE
-#define TIMESTAMP_TIMER_INSTANCE 1
+#define TIMESTAMP_TIMER_INSTANCE 0
 #endif
 
 // </e>
@@ -97,10 +97,29 @@
 // <1=> TIMER HW INSTANCE 1
 
 #ifndef MESH_TIMER_INSTANCE
-#define MESH_TIMER_INSTANCE 0
+#define MESH_TIMER_INSTANCE 1
 #endif
 
 // </e>
+
+// <e> COMPARE_ENABLED - Application pwm with PPI and Timers
+//==========================================================
+#ifndef COMPARE_ENABLED
+#define COMPARE_ENABLED 1
+#endif
+
+// <o> COMPARE_TIMER_INSTANCE  - Timer instance to be used
+ 
+// <3=> TIMER HW INSTANCE 3
+// <4=> TIMER HW INSTANCE 4
+
+#ifndef COMPARE_TIMER_INSTANCE
+#define COMPARE_TIMER_INSTANCE 4
+#endif
+
+// </e>
+
+
 
 // <e> APP_SERIAL_ENABLED - Application serial port activation
 //==========================================================
@@ -254,6 +273,21 @@
 //==========================================================
 
 // <h> nRF_Drivers 
+
+//==========================================================
+// <e> NRFX_PPI_ENABLED - nrfx_ppi - PPI peripheral allocator
+//==========================================================
+#ifndef NRFX_PPI_ENABLED
+#define NRFX_PPI_ENABLED 1
+#endif
+// <e> NRFX_PPI_CONFIG_LOG_ENABLED - Enables logging in the module.
+
+// <q> PPI_ENABLED  - nrf_drv_ppi - PPI peripheral driver - legacy layer
+ 
+#ifndef PPI_ENABLED
+#define PPI_ENABLED 1
+#endif
+
 
 //==========================================================
 // <e> GPIOTE_ENABLED - nrf_drv_gpiote - GPIOTE peripheral driver - legacy layer
@@ -664,25 +698,25 @@
 #ifndef NRFX_TIMER_ENABLED
 #define NRFX_TIMER_ENABLED 1
 #endif
-// <q> NRFX_TIMER0_ENABLED  - Enable TIMER0 instance
- 
 
+// <q> NRFX_TIMER0_ENABLED  - Enable TIMER0 instance
 #ifndef NRFX_TIMER0_ENABLED
 #define NRFX_TIMER0_ENABLED 1
 #endif
 
 // <q> NRFX_TIMER1_ENABLED  - Enable TIMER1 instance
- 
-
 #ifndef NRFX_TIMER1_ENABLED
 #define NRFX_TIMER1_ENABLED 1
 #endif
 
 // <q> NRFX_TIMER2_ENABLED  - Enable TIMER2 instance
- 
-
 #ifndef NRFX_TIMER2_ENABLED
 #define NRFX_TIMER2_ENABLED 0
+#endif
+
+// <q> NRFX_TIMER4_ENABLED  - Enable TIMER2 instance
+#ifndef NRFX_TIMER4_ENABLED
+#define NRFX_TIMER4_ENABLED 1
 #endif
 
 // <o> NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY  - Timer frequency if in Timer mode
@@ -807,8 +841,6 @@
 #endif
 
 // <q> TIMER0_ENABLED  - Enable TIMER0 instance
- 
-
 #ifndef TIMER0_ENABLED
 #define TIMER0_ENABLED 1
 #endif

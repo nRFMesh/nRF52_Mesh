@@ -23,6 +23,8 @@
 #include "boards.h"
 #include "app_util.h"
 
+#include "nrf_drv_timer.h"
+#include "nrf_drv_ppi.h"
 //for the log
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -38,6 +40,7 @@
 #include "bldc.h"
 #include "app_ser.h"
 #include "timestamp.h"
+#include "compare.h"
 #include "utils.h"
 
 
@@ -53,10 +56,40 @@ uint32_t uart_rx_size=0;
 
 extern uint32_t ser_evt_tx_count;
 
-static uint32_t g_time_now = 0;
-static uint32_t g_time_next = 0;
+static bool     g_sync_perform = false;
 
 #define GPIO_Sync_Controller 12
+
+static nrf_ppi_channel_t ppi_chan_RFrx_ClearTimestamp;
+static nrf_ppi_channel_t ppi_chan_Timer4Comp5_Clear;
+//redeclared here for ppi usage
+const nrf_drv_timer_t TIMER_TIMESTAMP_APP = NRF_DRV_TIMER_INSTANCE(TIMESTAMP_TIMER_INSTANCE);
+const nrf_drv_timer_t TIMER_COMPARE_APP = NRF_DRV_TIMER_INSTANCE(COMPARE_TIMER_INSTANCE);
+
+#define PPI_Event_RADIO_END         0x4000110C
+#define PPI_Task_Timer0_Clear       0x4000800C
+
+#define PPI_Event_Timer4_Compare5   0x4001B154
+#define PPI_Task_Timer4_Clear       0x4001B00C
+
+
+void ppi_init()
+{
+
+    nrf_drv_ppi_init();
+
+    //RF-Rx packet => Timer0_Clear
+    nrf_drv_ppi_channel_alloc(&ppi_chan_RFrx_ClearTimestamp);
+    nrf_drv_ppi_channel_assign(ppi_chan_RFrx_ClearTimestamp, PPI_Event_RADIO_END, PPI_Task_Timer0_Clear);
+    nrf_drv_ppi_channel_fork_assign(ppi_chan_RFrx_ClearTimestamp, PPI_Task_Timer4_Clear);
+    //usage : nrf_drv_ppi_channel_enable/disable(ppi_chan_RFrx_ClearTimestamp);
+
+    //Timer4_compare5 loops back to 0
+    nrf_drv_ppi_channel_alloc(&ppi_chan_Timer4Comp5_Clear);
+    nrf_drv_ppi_channel_assign(ppi_chan_Timer4Comp5_Clear, PPI_Event_Timer4_Compare5, PPI_Task_Timer4_Clear);
+    nrf_drv_ppi_channel_enable(ppi_chan_Timer4Comp5_Clear);
+
+}
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -65,13 +98,14 @@ static uint32_t g_time_next = 0;
  */
 void rf_mesh_handler(message_t* msg)
 {
-    if(msg->pid == 0x40)//sync
+    if(msg->pid == 0x40)//sync-prepare
     {
-        nrf_gpio_pin_set(GPIO_Sync_Controller);
-        timestamp_reset();
-        g_time_now = timestamp_get();
-        g_time_next = g_time_now;
-        nrf_gpio_pin_clear(GPIO_Sync_Controller);
+        nrf_drv_ppi_channel_enable(ppi_chan_RFrx_ClearTimestamp);
+    }
+    if(msg->pid == 0x41)//sync
+    {
+        nrf_drv_ppi_channel_disable(ppi_chan_RFrx_ClearTimestamp);
+        g_sync_perform = true;
     }
 
     bool is_relevant_host = false;
@@ -208,7 +242,7 @@ void log_bldc_pwm()
 {
     uint16_t pwm1,pwm2,pwm3;
     bldc_pwm_get(&pwm1,&pwm2,&pwm3);
-    sprintf(rf_message,"ts:%lu;tp:controller;p1:%u;p2:%u;p3:%u",timestamp_get(),pwm1,pwm2,pwm3);
+    sprintf(rf_message,"ts:%lu;tp:bldc;p1:%u",timestamp_get(),pwm1);
     mesh_bcast_text(rf_message);
 }
 //This function handles commands coming from either serial or rf
@@ -221,9 +255,31 @@ void rov_handle_raw(uint8_t *payload,uint8_t length)
         bldc_set(alpha,norm);
         //sprintf(uart_message,"len:%u;alpha:%u;norm:%0.2f\r\n",length,alpha,norm);
         //ser_send(uart_message);
-        sprintf(rf_message,"ts:%lu;tp:controller;alpha:%u",timestamp_get(),alpha);
+        sprintf(rf_message,"ts:%lu;tp:bldc;alpha:%u",timestamp_get(),alpha);
         mesh_bcast_text(rf_message);
     }
+}
+void compare_call0()
+{
+    nrf_gpio_pin_set(GPIO_Sync_Controller);  
+
+}
+
+void compare_call1()
+{
+    static uint32_t g_loop_count = 0;
+
+    nrf_gpio_pin_clear(GPIO_Sync_Controller);
+    if(g_sync_perform)
+    {
+        g_loop_count = 0;
+        g_sync_perform = false;
+    }
+    if((g_loop_count % 1000) == 0)
+    {
+        log_bldc_pwm();
+    }
+    g_loop_count++;
 }
 
 int main(void)
@@ -267,35 +323,21 @@ int main(void)
     nrf_delay_ms(200);
 
     // ------------------------- Start Events ------------------------- 
-    g_time_now = timestamp_get();
-    g_time_next = g_time_now;
-    int loop_count = 0;
+    ppi_init();
+
+    apptimer_config_t compare_cfg = {
+        .offset0        = 1,//0 does not trigger due to 1 cycle PPI latency
+        .call0          = (app_compare_handler_t)compare_call0,
+        .offset1        = 1500,
+        .call1          = (app_compare_handler_t)compare_call1,
+        .cycle          = 4000
+    };
+    compare_init(compare_cfg);
+
+    // ------------------------- Start Background loop ------------------------- 
     while(true)
     {
         mesh_consume_rx_messages();
-
-        uint32_t g_time_log = g_time_next + 1500;
-        g_time_next += 4000;
-
-        //TODO required delay as the serial_write does not execute with two close consecutive calls
-        while(g_time_now < g_time_log)
-        {
-            g_time_now = timestamp_get();
-        }
-        //--------------- log time --------------------------
-        if((loop_count % 500) == 0)
-        {
-            //log_count(loop_count);
-            log_bldc_pwm();
-        }
-        loop_count++;
-
-
-        while(g_time_now < g_time_next)
-        {
-            g_time_now = timestamp_get();
-        }
-        //--------------- loop time --------------------------
     }
 }
 /*lint -restore */
