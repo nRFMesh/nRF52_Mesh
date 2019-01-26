@@ -252,7 +252,9 @@ void rov_handle_raw(uint8_t *payload,uint8_t length)
     if(length == 2)
     {
         float norm = (float)payload[1] / 255.0;
-        bldc_set(alpha,norm);
+        nrf_gpio_pin_set(GPIO_Sync_Controller);
+        bldc_set_pole(alpha,norm);
+        nrf_gpio_pin_clear(GPIO_Sync_Controller);
         //sprintf(uart_message,"len:%u;alpha:%u;norm:%0.2f\r\n",length,alpha,norm);
         //ser_send(uart_message);
         sprintf(rf_message,"ts:%lu;tp:bldc;alpha:%u",timestamp_get(),alpha);
@@ -261,7 +263,6 @@ void rov_handle_raw(uint8_t *payload,uint8_t length)
 }
 void compare_call0()
 {
-    nrf_gpio_pin_set(GPIO_Sync_Controller);  
 
 }
 
@@ -334,6 +335,10 @@ int main(void)
     };
     compare_init(compare_cfg);
 
+
+    bldc_set_target(256*7);//half turn
+    bldc_set_norm(0.2);//half turn
+    bldc_set_speed(0.73 / 14);
     // ------------------------- Start Background loop ------------------------- 
     while(true)
     {

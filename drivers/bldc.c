@@ -1,6 +1,7 @@
 
 #include "bldc.h"
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
@@ -32,12 +33,49 @@ static nrf_pwm_sequence_t const    pwm_playback =
     .end_delay           = 0
 };
 
-#define M_PI 3.14159265358979323846
+#define M_PI    3.14159265358979323846
+#define M_2xPI  6.28318530717958647692
 
 uint16_t sin_Table[256];
 
-static void pwm_dummy_handler(nrf_drv_pwm_evt_type_t event_type)
+typedef struct{
+    //bool is_enabled;
+    float   norm;
+    float   rot_per_sec,steps_per_100_us;
+    int     nb_poles;
+    float absolute_steps;
+    float absolute_target;
+    bool  is_tracking;
+}bldc_status_t;
+
+bldc_status_t motor;
+
+//called every 25 us
+static void pwm_position_handler(nrf_drv_pwm_evt_type_t event_type)
 {
+    static uint32_t count = 0;
+    if(motor.is_tracking)
+    {
+        //executes every 100 us
+        if(count%4 == 0)
+        {
+            float diff = motor.absolute_target - motor.absolute_steps;
+            if(abs(diff)>0.01)
+            {
+                if(motor.absolute_steps < motor.absolute_target)
+                {
+                    motor.absolute_steps += motor.steps_per_100_us;
+                }
+                else
+                {
+                    motor.absolute_steps -= motor.steps_per_100_us;
+                }
+                // ~ 3 us
+                bldc_set_pole(motor.absolute_steps, motor.norm);
+            }
+        }
+        count++;
+    }
 }
 
 void bldc_init()
@@ -58,7 +96,7 @@ void bldc_init()
         .load_mode    = NRF_PWM_LOAD_INDIVIDUAL,
         .step_mode    = NRF_PWM_STEP_AUTO
     };
-    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_dummy_handler));
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_position_handler));
 
     (void)nrf_drv_pwm_simple_playback(&m_pwm0, &pwm_playback, 1,NRF_DRV_PWM_FLAG_LOOP);
 
@@ -70,10 +108,36 @@ void bldc_init()
 
     nrf_gpio_cfg_output(GPIO_M_EN);
     nrf_gpio_pin_set(GPIO_M_EN);
-    bldc_set(0, 0.0);
+
+    motor.nb_poles = 14;
+    motor.is_tracking = false;
+    motor.absolute_steps = 0;
+    motor.absolute_target   = 0;
+    motor.norm = 0;
+    motor.rot_per_sec = 0;
+    motor.steps_per_100_us = 0;
+
+    bldc_set_pole(motor.absolute_steps, motor.norm);
 }
 
-void bldc_set(int angle, float norm)
+void bldc_set_target(int32_t absolute_steps)
+{
+    motor.absolute_target = absolute_steps;
+    motor.is_tracking = true;
+}
+
+void bldc_set_speed(float v_rot_per_sec)
+{
+    motor.rot_per_sec = v_rot_per_sec;
+    motor.steps_per_100_us = motor.nb_poles * motor.rot_per_sec * (256.0/10000.0);
+}
+
+void bldc_set_norm(float norm)
+{
+    motor.norm = norm;
+}
+
+void bldc_set_pole(int angle, float norm)
 {
     int a1 = angle % 256;
     uint16_t pwm1_buf = norm * sin_Table[a1];
