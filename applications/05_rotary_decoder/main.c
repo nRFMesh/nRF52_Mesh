@@ -68,9 +68,6 @@ static volatile int32_t g_pos_H = 1200;
 static volatile uint32_t g_capture_time = 0;
 static volatile bool m_capture = false;
 
-static uint32_t g_time_now = 0;
-static uint32_t g_time_next = 0;
-static uint32_t g_time_log = 0;
 static uint32_t g_loop_count = 0;
 static bool is_expecting_sync = false;
 
