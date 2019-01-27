@@ -336,9 +336,9 @@ int main(void)
     compare_init(compare_cfg);
 
 
-    bldc_set_target(256*7);//half turn
-    bldc_set_norm(0.2);//half turn
-    bldc_set_speed(0.73 / 14);
+    bldc_set_target(2*256*14);//half turn
+    bldc_set_norm(0.5);//half turn
+    bldc_set_speed(7.0 / 14);
     // ------------------------- Start Background loop ------------------------- 
     while(true)
     {

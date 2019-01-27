@@ -22,6 +22,7 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 
 <img src="images/motion_tag.png" width="300">
 
+* Status : experimental, low battery life
 * nRF52832 module
 * MPU-6050 module
 * interrupt pio from MPU-6050
@@ -80,6 +81,8 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 * previous application "03 bldc 52832" ported to the nRF52840-dongle
 
 ## 08 usb dongle (nRF52840-dongle)
+    application/08_usb_dongle> make flash
+
 <img src="images/nRF52840-dongle-debug.png" width="300">
 
 * buy : "nRF52832 dongle"
@@ -143,7 +146,8 @@ The repo contais a directory for boards declaration "boards/" and a directory fo
 
 ## PPI automation
 The programmable peripheral interconnect is used for "real" real-time operations rf time synch,...
-![PPI interconnect](applications/05_rotary_decoder/ppi.svg)
+
+<img src="applications/05_rotary_decoder/ppi.svg" width="600">
 
 # nRF52 Sensor Tag
 This board is based on modules, it is very simple to solder and allows selection of any other I²C sensor modules.
@@ -406,4 +410,10 @@ The server's python scripts running also on a raspberry pi
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
     
+
+# Home Smart Mesh detailed design
+
+Functions call graph. Fifos dataflow between interrupts and main loop.
+
+<img src="images/nrf_mesh.svg" width="600">
 
