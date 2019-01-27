@@ -64,6 +64,9 @@ def entrance_light(payload):
             b.set_light("Entrance White 1", {'on' : True, 'bri' : 255})
             b.set_light("Entrance White 2", {'on' : True, 'bri' : 255})
             log.debug("entrance_light> on")
+    elif("contact" in jval and jval["contact"] == False):
+        #TODO check brightness here - and diff between coming or going away
+        log.debug("entrance_door>open")
     else:
         log.debug("entrance_light>no click")
     return
@@ -143,9 +146,6 @@ def dining_switch(payload):
         if(lights["Living 1 Table E27"].on):
             lights["Living 1 Table E27"].on = False
             lights["Living 2 Table E27"].on = False
-            lights["Entrance White 1"].on = False
-            lights["Entrance White 2"].on = False
-            b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 125})
             log.debug("dining_switch> Dining room and Entrence lights off")
         else:
             #command so that it does not go to previous level before adjusting the brightness
@@ -216,7 +216,7 @@ def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
         name = topic_parts[1]
-        if(name == "entrance light"):
+        if(name == "entrance light") or (name == "entrance door"):
             entrance_light(msg.payload)
         elif(name == "sunrise"):
             bedroom_sunrise(msg.payload)
