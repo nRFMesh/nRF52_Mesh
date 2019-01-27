@@ -15,7 +15,7 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 * nRF52832 module
 * Temperature, Humidity, Pressure : BME280
 * Light : MAX44009
-* Cyclic broadcast
+* Smooth graphana logs with cyclic broadcast ~ 30 sec => battery life ~ 6 month on CR2032
 
 ## 02 acell tag
     application/02_accell_tag> make flash
@@ -26,7 +26,6 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 * nRF52832 module
 * MPU-6050 module
 * interrupt pio from MPU-6050
-* Cyclic/event broadcast
 
 ## 03 buttons
     application/03_buttons> make flash
