@@ -1,3 +1,6 @@
 [submodule "nRF5_SDK_15.0.0_prf"]
 	path = nRF5_SDK_15.0.0_prf
 	url = https://github.com/nRFMesh/nRF5_SDK_15.0.0_prf.git
+[submodule "nRF5_SDK_for_Thread_and_Zigbee_2.0.0_29775ac_min"]
+	path = nRF5_SDK_for_Thread_and_Zigbee_2.0.0_29775ac_min
+	url = https://github.com/nRFMesh/nRF5_SDK_for_Thread_and_Zigbee_2.0.0_29775ac_min
