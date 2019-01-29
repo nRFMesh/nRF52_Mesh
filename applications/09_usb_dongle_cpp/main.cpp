@@ -142,7 +142,7 @@ void app_rtc_handler()
 {
     led2_green_on();
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
-    usb_printf("id:%d:alive:%lu\r\n",get_this_node_id(),alive_count);
+    usb_printf("id:%d;alive:%lu\r\n",get_this_node_id(),alive_count);
     led2_green_off();
 }
 
