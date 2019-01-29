@@ -6,7 +6,7 @@ USED_BOARD := BOARD_PCA10059
 #USED_BOARD := BOARD_NRF52_SENSOR_TAG
 
 SDK_ESB := ../../nRF5_SDK_15.0.0_prf
-SDK_ROOT := ../../nRF5_SDK_for_Thread_and_Zigbee_2.0.0_29775ac
+SDK_ROOT := ../../nRF5_SDK_for_Thread_and_Zigbee_2.0.0_29775ac_min
 
 PROJ_DIR := ../..
 
@@ -23,11 +23,12 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/app_ser.c \
   $(PROJ_DIR)/drivers/utils.c \
   $(PROJ_DIR)/drivers/usb_print.c \
-  $(SDK_ROOT)/components\boards\boards.c \
+  $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c \
   $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
+  $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
   $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
   $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
