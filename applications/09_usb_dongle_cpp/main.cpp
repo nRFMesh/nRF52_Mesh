@@ -43,10 +43,9 @@ extern "C"
 #include "mesh.h"
 
 #include "nrf_mtx.h"
-
-#include "usb_print.h"
-
 }
+
+#include "usb_print.hpp"
 
 char rtc_message[64];
 char uart_message[64];
@@ -54,6 +53,9 @@ uint32_t uart_rx_size=0;
 
 #define GPIO_CUSTOM_Debug 10
 
+void app_usb_rx_handler(const char*msg,uint8_t size);
+
+usb_c usb(app_usb_rx_handler);
 
 /**
  * @brief callback from the RF Mesh stack on valid packet received for this node
@@ -90,7 +92,7 @@ void rf_mesh_handler(message_t* msg)
             char rf_message[128];
             mesh_parse(msg,rf_message);
             nrf_gpio_pin_set(GPIO_CUSTOM_Debug);
-            usb_print(rf_message,strlen(rf_message));
+            usb.printf(rf_message,strlen(rf_message));
             nrf_gpio_pin_clear(GPIO_CUSTOM_Debug);
         }
     }
@@ -129,7 +131,7 @@ void mesh_cmd_response(const char*text,uint8_t length)
 {
     memcpy(uart_message,text,length);
     length+=sprintf(uart_message+length,"\r\n");//Add line ending and NULL terminate it with sprintf
-    usb_print(uart_message,length);
+    usb.printf(uart_message,length);
 }
 
 
@@ -142,7 +144,7 @@ void app_rtc_handler()
 {
     led2_green_on();
     uint32_t alive_count = mesh_tx_alive();//returns an incrementing counter
-    usb_printf("id:%d;alive:%lu\r\n",get_this_node_id(),alive_count);
+    usb.printf("id:%d;alive:%lu\r\n",get_this_node_id(),alive_count);
     led2_green_off();
 }
 
@@ -163,9 +165,6 @@ int main(void)
 
 
     // ------------------------- Start Init ------------------------- 
-
-    usb_print_init(app_usb_rx_handler);
-
     mesh_init(rf_mesh_handler,mesh_cmd_response);
 
     rtc_config(app_rtc_handler);
@@ -177,7 +176,7 @@ int main(void)
     {
         //not optimal, should rather consume one rf message, then process one usb event
         mesh_consume_rx_messages();
-        usb_print_loop();
+        usb.loop();
     }
 }
 /*lint -restore */

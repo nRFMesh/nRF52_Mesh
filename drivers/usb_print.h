@@ -3,7 +3,7 @@
 
 
 #include <stddef.h>
-#include <stdbool.h>
+#include <stdint.h>
 
 typedef void (*usb_rx_handler_t)(const char*,uint8_t);
 

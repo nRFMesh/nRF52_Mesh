@@ -23,6 +23,7 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/app_ser.c \
   $(PROJ_DIR)/drivers/utils.c \
   $(PROJ_DIR)/drivers/usb_print.c \
+  $(PROJ_DIR)/drivers/usb_print.cpp \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
