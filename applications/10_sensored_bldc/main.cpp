@@ -43,7 +43,7 @@ extern "C"
     #include "utils.h"
 }
 
-//#include "strmap.hpp"
+#include "strmap.hpp"
 #include "usb_print.hpp"
 #include "bldc.hpp"
 
@@ -64,23 +64,24 @@ usb_c usb(app_usb_rx_handler);
 
 void app_usb_rx_handler(const char*msg,uint8_t size)
 {
-    if(strbegins(msg,"motor;"))
+    strmap_c params(msg,size);
+    if(params.topic.compare("motor") == 0)
     {
-        /*if(params.hasgot("norm"))
+        if(params.has("norm"))
         {
-            //float norm = std::stof(params.dict["norm"]);
-            motor.set_norm(0);
+            float norm = std::stof(params["norm"]);
+            motor.set_norm(norm);
         }
-        if(params.hasgot("target"))
+        if(params.has("target"))
         {
-            //float target = std::stof(params.dict["target"]);
-            motor.set_target(0);
+            float target = std::stof(params["target"]);
+            motor.set_target(target);
         }
-        if(params.hasgot("speed"))
+        if(params.has("speed"))
         {
-            //float speed = std::stof(params.dict["speed"]);
-            motor.set_norm(0);
-        }*/
+            float speed = std::stof(params["speed"]);
+            motor.set_speed(speed);
+        }
         usb.printf("motor;norm:%0.2f;target:%0.2f;speed:%0.2f;\r\n",
                         motor.norm,
                         motor.absolute_target,
@@ -101,7 +102,6 @@ void app_rtc_handler()
     usb.printf("app:bldc;id:%lu;alive:%lu\r\n",get_this_node_id(),alive_count++);
     led2_green_off();
 }
-
 
 int main(void)
 {
