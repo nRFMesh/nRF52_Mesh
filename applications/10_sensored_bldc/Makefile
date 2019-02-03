@@ -121,6 +121,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components \
 
   
+#VERBOSE = 1
 
 
 # Libraries common to all targets
@@ -151,6 +152,7 @@ CFLAGS += -fno-builtin -fshort-enums
 
 # C++ flags common to all targets
 CXXFLAGS += $(OPT)
+CXXFLAGS += -std=c++11
 
 # Assembler flags common to all targets
 ASMFLAGS += -g3
@@ -181,7 +183,7 @@ nrf52840_xxaa: ASMFLAGS += -D__STACK_SIZE=8192
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
-LIB_FILES += -lc -lnosys -lm
+LIB_FILES += -lc -lnosys -lm -lstdc++
 
 
 .PHONY: default help

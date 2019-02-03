@@ -1,1 +1,0 @@
-_build/nrf52840_xxaa/main.cpp.o _build/nrf52840_xxaa/gcc_startup_nrf52840.S.o _build/nrf52840_xxaa/system_nrf52840.c.o  -lc -lnosys -lm
