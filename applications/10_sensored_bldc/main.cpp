@@ -43,10 +43,7 @@ extern "C"
 }
 
 #include "usb_print.hpp"
-
-char rtc_message[64];
-uint32_t uart_rx_size=0;
-
+#include "bldc.hpp"
 
 void app_usb_rx_handler(const char*msg,uint8_t size);
 
@@ -67,9 +64,14 @@ void app_rtc_handler()
 {
     static uint32_t alive_count = 0;
     led2_green_on();
-    usb.printf("bldc;alive:%lu\r\n",alive_count++);
+    usb.printf("app:bldc;id:%lu;alive:%lu\r\n",get_this_node_id(),alive_count++);
     led2_green_off();
 }
+
+#define GPIO_M_P1 NRF_GPIO_PIN_MAP(0,10)
+#define GPIO_M_P2 NRF_GPIO_PIN_MAP(0,9)
+#define GPIO_M_P3 NRF_GPIO_PIN_MAP(1,0)
+#define GPIO_M_EN NRF_GPIO_PIN_MAP(0,24)
 
 int main(void)
 {
@@ -85,9 +87,12 @@ int main(void)
     blink_green(1000,200);
     blink_blue(1000,200);
 
+    bldc_init(0,GPIO_M_P1,GPIO_M_P2,GPIO_M_P3);
+    nrf_gpio_cfg_output(GPIO_M_EN);
+    nrf_gpio_pin_set(GPIO_M_EN);
 
     // ------------------------- Start Init ------------------------- 
-    usb.printf("bldc;reset:1\r\n");
+    usb.printf("bldc;reset:1\r\n");//will be lost if port is closed
     rtc_config(app_rtc_handler);
 
     // ------------------------- Start Events ------------------------- 
