@@ -45,6 +45,14 @@ extern "C"
 #include "usb_print.hpp"
 #include "bldc.hpp"
 
+#define PWM_INSTANCE 0
+#define GPIO_M_P1 NRF_GPIO_PIN_MAP(0,10)
+#define GPIO_M_P2 NRF_GPIO_PIN_MAP(0,9)
+#define GPIO_M_P3 NRF_GPIO_PIN_MAP(1,0)
+#define GPIO_M_EN NRF_GPIO_PIN_MAP(0,24)
+
+bldc_c motor(PWM_INSTANCE,GPIO_M_P1,GPIO_M_P2,GPIO_M_P3);
+
 void app_usb_rx_handler(const char*msg,uint8_t size);
 
 usb_c usb(app_usb_rx_handler);
@@ -68,10 +76,6 @@ void app_rtc_handler()
     led2_green_off();
 }
 
-#define GPIO_M_P1 NRF_GPIO_PIN_MAP(0,10)
-#define GPIO_M_P2 NRF_GPIO_PIN_MAP(0,9)
-#define GPIO_M_P3 NRF_GPIO_PIN_MAP(1,0)
-#define GPIO_M_EN NRF_GPIO_PIN_MAP(0,24)
 
 int main(void)
 {
@@ -87,7 +91,6 @@ int main(void)
     blink_green(1000,200);
     blink_blue(1000,200);
 
-    bldc_init(0,GPIO_M_P1,GPIO_M_P2,GPIO_M_P3);
     nrf_gpio_cfg_output(GPIO_M_EN);
     nrf_gpio_pin_set(GPIO_M_EN);
 

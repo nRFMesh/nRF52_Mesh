@@ -17,59 +17,54 @@
 #include "nrfx_pwm.h"
 
 
-static uint16_t const              pwm_top_period  = 400;//25 us for 16 MHz clock
-static nrf_pwm_values_individual_t pwm_values;
-nrf_pwm_sequence_t pwm_playback;
+
+NRF_PWM_Type* pwm_base_addresses[4]={(NRF_PWM_Type*)NRF_PWM0_BASE, (NRF_PWM_Type*)NRF_PWM1_BASE, (NRF_PWM_Type*)NRF_PWM2_BASE, (NRF_PWM_Type*)NRF_PWM3_BASE};
 
 #define M_PI    3.14159265358979323846
 #define M_2xPI  6.28318530717958647692
 
 uint16_t sin_Table[256];
 
-typedef struct{
-    //bool is_enabled;
-    float   norm;
-    float   rot_per_sec,steps_per_100_us;
-    int     nb_poles;
-    float absolute_steps;
-    float absolute_target;
-    bool  is_tracking;
-}bldc_status_t;
-
-bldc_status_t motor;
+bldc_c *p_motor = NULL;
 
 //called every 25 us
 static void pwm_position_handler(nrfx_pwm_evt_type_t event_type)
 {
+    if(p_motor == NULL)
+    {
+        return;
+    }
     static uint32_t count = 0;
-    if(motor.is_tracking)
+    if(p_motor->is_tracking)
     {
         //executes every 100 us
         if(count%4 == 0)
         {
-            float diff = motor.absolute_target - motor.absolute_steps;
+            float diff = p_motor->absolute_target - p_motor->absolute_steps;
             if(abs(diff)>0.01)
             {
-                if(motor.absolute_steps < motor.absolute_target)
+                if(p_motor->absolute_steps < p_motor->absolute_target)
                 {
-                    motor.absolute_steps += motor.steps_per_100_us;
+                    p_motor->absolute_steps += p_motor->steps_per_100_us;
                 }
                 else
                 {
-                    motor.absolute_steps -= motor.steps_per_100_us;
+                    p_motor->absolute_steps -= p_motor->steps_per_100_us;
                 }
                 // ~ 3 us
-                bldc_set_pole(motor.absolute_steps, motor.norm);
+                p_motor->set_pole(p_motor->absolute_steps, p_motor->norm);
             }
         }
         count++;
     }
 }
 
-NRF_PWM_Type* pwm_base_addresses[4]={(NRF_PWM_Type*)NRF_PWM0_BASE, (NRF_PWM_Type*)NRF_PWM1_BASE, (NRF_PWM_Type*)NRF_PWM2_BASE, (NRF_PWM_Type*)NRF_PWM3_BASE};
-
-void bldc_init(uint8_t pwm,uint8_t p1, uint8_t p2, uint8_t p3)
+bldc_c::bldc_c(uint8_t pwm,uint8_t p1, uint8_t p2, uint8_t p3)
 {
+    nrf_pwm_sequence_t pwm_playback;
+    uint16_t const pwm_top_period  = 400;//25 us for 16 MHz clock
+    p_motor = this;
+
     nrfx_pwm_t pwm_instance = {pwm_base_addresses[pwm], pwm};//{p_registers,drv_inst_idx}
 
     nrfx_pwm_config_t const config0 =
@@ -107,35 +102,35 @@ void bldc_init(uint8_t pwm,uint8_t p1, uint8_t p2, uint8_t p3)
     }
 
 
-    motor.nb_poles = 14;
-    motor.is_tracking = false;
-    motor.absolute_steps = 0;
-    motor.absolute_target   = 0;
-    motor.norm = 0;
-    motor.rot_per_sec = 0;
-    motor.steps_per_100_us = 0;
+    nb_poles = 14;
+    is_tracking = false;
+    absolute_steps = 0;
+    absolute_target   = 0;
+    norm = 0;
+    rot_per_sec = 0;
+    steps_per_100_us = 0;
 
-    bldc_set_pole(motor.absolute_steps, motor.norm);
+    set_pole(absolute_steps, norm);
 }
 
-void bldc_set_target(int32_t absolute_steps)
+void bldc_c::set_target(int32_t absolute_steps)
 {
-    motor.absolute_target = absolute_steps;
-    motor.is_tracking = true;
+    absolute_target = absolute_steps;
+    is_tracking = true;
 }
 
-void bldc_set_speed(float v_rot_per_sec)
+void bldc_c::set_speed(float v_rot_per_sec)
 {
-    motor.rot_per_sec = v_rot_per_sec;
-    motor.steps_per_100_us = motor.nb_poles * motor.rot_per_sec * (256.0/10000.0);
+    rot_per_sec = v_rot_per_sec;
+    steps_per_100_us = nb_poles * rot_per_sec * (256.0/10000.0);
 }
 
-void bldc_set_norm(float norm)
+void bldc_c::set_norm(float v_norm)
 {
-    motor.norm = norm;
+    norm = v_norm;
 }
 
-void bldc_set_pole(int angle, float norm)
+void bldc_c::set_pole(int angle, float norm)
 {
     int a1 = angle % 256;
     uint16_t pwm1_buf = norm * sin_Table[a1];
@@ -151,7 +146,7 @@ void bldc_set_pole(int angle, float norm)
     pwm_values.channel_2 = pwm3_buf | 0x8000;
 }
 
-void bldc_pwm_get(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3)
+void bldc_c::pwm_get(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3)
 {
     *pwm1 = pwm_values.channel_0 & ~0x8000;
     *pwm2 = pwm_values.channel_1 & ~0x8000;
