@@ -13,37 +13,42 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <string>
+
 extern "C"
 {
-#include "sdk_config.h"
+    #include "sdk_config.h"
 
-//#include "nrf.h"
-//#include "nrf_error.h"
-#include "nrf_delay.h"
-#include "nrf_gpio.h"
-#include "boards.h"
-#include "app_util.h"
+    //#include "nrf.h"
+    //#include "nrf_error.h"
+    #include "nrf_delay.h"
+    #include "nrf_gpio.h"
+    #include "boards.h"
+    #include "app_util.h"
 
-#include "bsp.h"
+    #include "bsp.h"
 
 
-//for the log
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
+    //for the log
+    #include "nrf_log.h"
+    #include "nrf_log_ctrl.h"
+    #include "nrf_log_default_backends.h"
 
-// --------------------- inputs from sdk_config --------------------- 
-// ---> TWI0_ENABLED ---> TWI1_ENABLED
-#include "uicr_user_defines.h"
-//drivers
-//apps
-#include "clocks.h"
-#include "utils.h"
+    // --------------------- inputs from sdk_config --------------------- 
+    // ---> TWI0_ENABLED ---> TWI1_ENABLED
+    #include "uicr_user_defines.h"
+    //drivers
+    //apps
+    #include "clocks.h"
+    #include "utils.h"
 }
 
+//#include "strmap.hpp"
 #include "usb_print.hpp"
 #include "bldc.hpp"
+
+
+
 
 #define PWM_INSTANCE 0
 #define GPIO_M_P1 NRF_GPIO_PIN_MAP(0,10)
@@ -59,12 +64,27 @@ usb_c usb(app_usb_rx_handler);
 
 void app_usb_rx_handler(const char*msg,uint8_t size)
 {
-    if(msg[0] == 't')
+    if(strbegins(msg,"motor;"))
     {
-        motor.set_target(2*256*14);//half turn
-        motor.set_norm(0.5);
-        motor.set_speed(7.0 / 14);
-        usb.printf("motor parameters set\r\n");
+        /*if(params.hasgot("norm"))
+        {
+            //float norm = std::stof(params.dict["norm"]);
+            motor.set_norm(0);
+        }
+        if(params.hasgot("target"))
+        {
+            //float target = std::stof(params.dict["target"]);
+            motor.set_target(0);
+        }
+        if(params.hasgot("speed"))
+        {
+            //float speed = std::stof(params.dict["speed"]);
+            motor.set_norm(0);
+        }*/
+        usb.printf("motor;norm:%0.2f;target:%0.2f;speed:%0.2f;\r\n",
+                        motor.norm,
+                        motor.absolute_target,
+                        motor.rot_per_sec);
     }
 }
 
