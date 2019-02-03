@@ -52,7 +52,7 @@ static void pwm_position_handler(nrfx_pwm_evt_type_t event_type)
                     p_motor->absolute_steps -= p_motor->steps_per_100_us;
                 }
                 // ~ 3 us
-                p_motor->set_pole(p_motor->absolute_steps, p_motor->norm);
+                p_motor->set_pole(p_motor->absolute_steps);
             }
         }
         count++;
@@ -106,16 +106,16 @@ bldc_c::bldc_c(uint8_t pwm,uint8_t p1, uint8_t p2, uint8_t p3)
     is_tracking = false;
     absolute_steps = 0;
     absolute_target   = 0;
-    norm = 0;
     rot_per_sec = 0;
     steps_per_100_us = 0;
 
-    set_pole(absolute_steps, norm);
+    set_norm(0);
+    set_pole(absolute_steps);
 }
 
-void bldc_c::set_target(int32_t absolute_steps)
+void bldc_c::set_target(int32_t v_absolute_steps)
 {
-    absolute_target = absolute_steps;
+    absolute_target = v_absolute_steps;
     is_tracking = true;
 }
 
@@ -130,9 +130,9 @@ void bldc_c::set_norm(float v_norm)
     norm = v_norm;
 }
 
-void bldc_c::set_pole(int angle, float norm)
+void bldc_c::set_pole(int v_angle)
 {
-    int a1 = angle % 256;
+    int a1 = v_angle % 256;
     uint16_t pwm1_buf = norm * sin_Table[a1];
     int a2 = a1 + 85;
     if(a2>=256)a2-=256;
@@ -146,7 +146,7 @@ void bldc_c::set_pole(int angle, float norm)
     pwm_values.channel_2 = pwm3_buf | 0x8000;
 }
 
-void bldc_c::pwm_get(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3)
+void bldc_c::get_pwm(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3)
 {
     *pwm1 = pwm_values.channel_0 & ~0x8000;
     *pwm2 = pwm_values.channel_1 & ~0x8000;

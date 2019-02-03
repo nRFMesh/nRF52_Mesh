@@ -59,7 +59,13 @@ usb_c usb(app_usb_rx_handler);
 
 void app_usb_rx_handler(const char*msg,uint8_t size)
 {
-
+    if(msg[0] == 't')
+    {
+        motor.set_target(2*256*14);//half turn
+        motor.set_norm(0.5);
+        motor.set_speed(7.0 / 14);
+        usb.printf("motor parameters set\r\n");
+    }
 }
 
 
@@ -98,10 +104,18 @@ int main(void)
     usb.printf("bldc;reset:1\r\n");//will be lost if port is closed
     rtc_config(app_rtc_handler);
 
+
     // ------------------------- Start Events ------------------------- 
+    uint32_t count = 0;
     while(true)
     {
         usb.loop();
+        nrf_delay_us(1000);
+        if((count % 500) == 0)
+        {
+            usb.printf("motor.absolute_steps:%0.3f\r\n",motor.absolute_steps);
+        }
+        count++;
     }
 }
 /*lint -restore */

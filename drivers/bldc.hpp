@@ -12,8 +12,8 @@ class bldc_c
         void set_target(int32_t absolute_steps);
         void set_speed(float v_rot_per_sec);
         void set_norm(float norm);
-        void set_pole(int angle, float norm);
-        void pwm_get(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3);
+        void set_pole(int angle);
+        void get_pwm(uint16_t *pwm1,uint16_t *pwm2,uint16_t *pwm3);
 
     public:
         float   norm;
