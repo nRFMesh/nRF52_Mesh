@@ -13,6 +13,15 @@
 #include "boards.h"
 #include "nrf_delay.h"
 
+#include "uicr_user_defines.h"
+
+
+uint16_t get_this_node_id()
+{
+    return UICR_NODE_ID;
+}
+
+
 /**
  * @brief prints a buffer in hex string
  * 

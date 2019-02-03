@@ -19,6 +19,8 @@
 #define APP_DEBUG_PIN_CLR(a)    (NRF_GPIO->OUTCLR = (1 << (a))) //!< Used internally to clear debug pins.
 
 
+uint16_t get_this_node_id();
+
 int sprint_buf(char*str,const char*msg,uint8_t size);
 
 uint8_t strbegins (const char * s1, const char * s2);
