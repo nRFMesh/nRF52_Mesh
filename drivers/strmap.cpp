@@ -24,7 +24,7 @@ strmap_c::strmap_c(const char*msg,uint8_t size)
 {
 	int max = 0;
 	std::string str(msg,size);
-    topic = TakeParseTo(str,';');
+    topic = TakeParseTo(str,'>');
 	while((!str.empty()) && (max < 20))
 	{
 		std::string arg_name = TakeParseTo(str,':');

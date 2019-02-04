@@ -62,10 +62,13 @@ void app_usb_rx_handler(const char*msg,uint8_t size);
 
 usb_c usb(app_usb_rx_handler);
 
+uint8_t id = get_this_node_id();
+std::string motor_topic(std::to_string(id) + "/motor_ctl");
+
 void app_usb_rx_handler(const char*msg,uint8_t size)
 {
     strmap_c params(msg,size);
-    if(params.topic.compare("motor") == 0)
+    if(params.topic.compare(motor_topic) == 0)
     {
         if(params.has("norm"))
         {
@@ -82,7 +85,8 @@ void app_usb_rx_handler(const char*msg,uint8_t size)
             float speed = std::stof(params["speed"]);
             motor.set_speed(speed);
         }
-        usb.printf("motor;norm:%0.2f;target:%0.2f;speed:%0.2f;\r\n",
+        usb.printf("%u/motor>norm:%0.2f;target:%0.2f;speed:%0.2f;\r\n",
+                        id,
                         motor.norm,
                         motor.absolute_target,
                         motor.rot_per_sec);
@@ -99,7 +103,7 @@ void app_rtc_handler()
 {
     static uint32_t alive_count = 0;
     led2_green_on();
-    usb.printf("app:bldc;id:%lu;alive:%lu\r\n",get_this_node_id(),alive_count++);
+    usb.printf("%u/alive>%lu\r\n",id,alive_count++);
     led2_green_off();
 }
 
@@ -121,7 +125,7 @@ int main(void)
     nrf_gpio_pin_set(GPIO_M_EN);
 
     // ------------------------- Start Init ------------------------- 
-    usb.printf("bldc;reset:1\r\n");//will be lost if port is closed
+    usb.printf("%u/reset>1\r\n");//will be lost if port is closed
     rtc_config(app_rtc_handler);
 
 
@@ -133,7 +137,7 @@ int main(void)
         nrf_delay_us(1000);
         if((count % 500) == 0)
         {
-            usb.printf("motor.absolute_steps:%0.3f\r\n",motor.absolute_steps);
+            usb.printf("%u/motor>absolute_steps:%0.3f\r\n",id,motor.absolute_steps);
         }
         count++;
     }
