@@ -252,11 +252,6 @@ bool window_check_retransmit()
 //------------------------- Mesh Core -------------------------
 //-------------------------------------------------------------
 
-uint16_t get_this_node_id()
-{
-    return UICR_NODE_ID;
-}
-
 uint8_t mesh_channel()
 {
     return UICR_RF_CHANNEL;

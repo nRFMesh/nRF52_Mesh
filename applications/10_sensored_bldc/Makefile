@@ -1,4 +1,4 @@
-PROJECT_NAME     := nRF52_RoverArm
+PROJECT_NAME     := Sensored_bldc
 TARGETS          := nrf52840_xxaa
 OUTPUT_DIRECTORY := _build
 
@@ -17,17 +17,21 @@ $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
 
 # Source files common to all targets
 SRC_FILES += \
-  ./main.c \
+  ./main.cpp \
+  $(PROJ_DIR)/drivers/bldc.cpp \
   $(PROJ_DIR)/drivers/clocks.c \
   $(PROJ_DIR)/drivers/mesh.c \
   $(PROJ_DIR)/drivers/app_ser.c \
   $(PROJ_DIR)/drivers/utils.c \
   $(PROJ_DIR)/drivers/usb_print.c \
+  $(PROJ_DIR)/drivers/usb_print.cpp \
+  $(PROJ_DIR)/drivers/strmap.cpp \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c \
   $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
+  $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
   $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
   $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -66,6 +70,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
 
 # Include folders common to all targets
@@ -117,6 +122,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components \
 
   
+#VERBOSE = 1
 
 
 # Libraries common to all targets
@@ -147,6 +153,7 @@ CFLAGS += -fno-builtin -fshort-enums
 
 # C++ flags common to all targets
 CXXFLAGS += $(OPT)
+CXXFLAGS += -std=c++11
 
 # Assembler flags common to all targets
 ASMFLAGS += -g3
@@ -177,7 +184,7 @@ nrf52840_xxaa: ASMFLAGS += -D__STACK_SIZE=8192
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
-LIB_FILES += -lc -lnosys -lm
+LIB_FILES += -lc -lnosys -lm -lstdc++
 
 
 .PHONY: default help

@@ -3,7 +3,12 @@ import pylink
 import cfg
 import sys
 
-nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
+import inspect, os
+
+currdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+#nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
+nodes = cfg.get_json(currdir+"\\..\\applications\\nodes.json")
+
 
 #  command example
 #  python uicr.py "../applications/uicr_map.json"
@@ -20,7 +25,7 @@ if(len(sys.argv) > 2):
 else:
     mode = "-x"
 
-uicr = cfg.get_local_nodes(uicr_cfongi_file)
+uicr = cfg.get_json(uicr_cfongi_file)
 jlink = pylink.JLink()
 jlink.open(os.environ['SEG_JLEDU'])
 node_id = 0

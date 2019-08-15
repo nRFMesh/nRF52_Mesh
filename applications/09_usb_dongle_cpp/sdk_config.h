@@ -89,26 +89,6 @@
 
 // </e>
 
-// <e> CLOCKS_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef CLOCKS_CONFIG_LOG_ENABLED
-#define CLOCKS_CONFIG_LOG_ENABLED 1
-#endif
-// <o> CLOCKS_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef CLOCKS_CONFIG_LOG_LEVEL
-#define CLOCKS_CONFIG_LOG_LEVEL 2
-#endif
-
-// </e>
-
-
 // <e> BME_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef BME_CONFIG_LOG_ENABLED
@@ -201,102 +181,207 @@
 //==========================================================
 
 // <h> nRF_Drivers 
+
+// <e> NRFX_CLOCK_ENABLED - nrfx_clock - CLOCK peripheral driver
 //==========================================================
-// <e> CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver
-//==========================================================
-#ifndef CLOCK_ENABLED
-#define CLOCK_ENABLED 1
+#ifndef NRFX_CLOCK_ENABLED
+#define NRFX_CLOCK_ENABLED 1
 #endif
-#if  CLOCK_ENABLED
-    // <o> CLOCK_CONFIG_XTAL_FREQ  - HF XTAL Frequency
-    
-    // <0=> Default (64 MHz) 
+// <o> NRFX_CLOCK_CONFIG_LF_SRC  - LF Clock Source
+ 
+// <0=> RC 
+// <1=> XTAL 
+// <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
 
-    #ifndef CLOCK_CONFIG_XTAL_FREQ
-    #define CLOCK_CONFIG_XTAL_FREQ 0
-    #endif
+#ifndef NRFX_CLOCK_CONFIG_LF_SRC
+#define NRFX_CLOCK_CONFIG_LF_SRC 1
+#endif
 
-    // <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
-    
-    // <0=> RC 
-    // <1=> XTAL 
-    // <2=> Synth 
+// <o> NRFX_CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
 
-    #ifndef CLOCK_CONFIG_LF_SRC
-    #define CLOCK_CONFIG_LF_SRC 1
-    #endif
+#ifndef NRFX_CLOCK_CONFIG_IRQ_PRIORITY
+#define NRFX_CLOCK_CONFIG_IRQ_PRIORITY 6
+#endif
 
-    // <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
-    
+// <e> NRFX_CLOCK_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NRFX_CLOCK_CONFIG_LOG_ENABLED
+#define NRFX_CLOCK_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRFX_CLOCK_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
 
-    // <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-    // <0=> 0 (highest) 
-    // <1=> 1 
-    // <2=> 2 
-    // <3=> 3 
-    // <4=> 4 
-    // <5=> 5 
-    // <6=> 6 
-    // <7=> 7 
+#ifndef NRFX_CLOCK_CONFIG_LOG_LEVEL
+#define NRFX_CLOCK_CONFIG_LOG_LEVEL 3
+#endif
 
-    #ifndef CLOCK_CONFIG_IRQ_PRIORITY
-    #define CLOCK_CONFIG_IRQ_PRIORITY 0
-    #endif
+// <o> NRFX_CLOCK_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
 
-    // <e> CLOCK_CONFIG_LOG_ENABLED - Enables logging in the module.
-    //==========================================================
-    #ifndef CLOCK_CONFIG_LOG_ENABLED
-    #define CLOCK_CONFIG_LOG_ENABLED 0
-    #endif
-    #if  CLOCK_CONFIG_LOG_ENABLED
-        // <o> CLOCK_CONFIG_LOG_LEVEL  - Default Severity level
-        
-        // <0=> Off 
-        // <1=> Error 
-        // <2=> Warning 
-        // <3=> Info 
-        // <4=> Debug 
+#ifndef NRFX_CLOCK_CONFIG_INFO_COLOR
+#define NRFX_CLOCK_CONFIG_INFO_COLOR 0
+#endif
 
-        #ifndef CLOCK_CONFIG_LOG_LEVEL
-        #define CLOCK_CONFIG_LOG_LEVEL 3
-        #endif
+// <o> NRFX_CLOCK_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
 
-        // <o> CLOCK_CONFIG_INFO_COLOR  - ANSI escape code prefix.
-        
-        // <0=> Default 
-        // <1=> Black 
-        // <2=> Red 
-        // <3=> Green 
-        // <4=> Yellow 
-        // <5=> Blue 
-        // <6=> Magenta 
-        // <7=> Cyan 
-        // <8=> White 
+#ifndef NRFX_CLOCK_CONFIG_DEBUG_COLOR
+#define NRFX_CLOCK_CONFIG_DEBUG_COLOR 0
+#endif
 
-        #ifndef CLOCK_CONFIG_INFO_COLOR
-        #define CLOCK_CONFIG_INFO_COLOR 0
-        #endif
+// </e>
 
-        // <o> CLOCK_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
-        
-        // <0=> Default 
-        // <1=> Black 
-        // <2=> Red 
-        // <3=> Green 
-        // <4=> Yellow 
-        // <5=> Blue 
-        // <6=> Magenta 
-        // <7=> Cyan 
-        // <8=> White 
+// </e>
 
-        #ifndef CLOCK_CONFIG_DEBUG_COLOR
-        #define CLOCK_CONFIG_DEBUG_COLOR 0
-        #endif
+// <e> NRFX_POWER_ENABLED - nrfx_power - POWER peripheral driver
+//==========================================================
+#ifndef NRFX_POWER_ENABLED
+#define NRFX_POWER_ENABLED 1
+#endif
+// <o> NRFX_POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
 
-    #endif //CLOCK_CONFIG_LOG_ENABLED
-    // </e>
+#ifndef NRFX_POWER_CONFIG_IRQ_PRIORITY
+#define NRFX_POWER_CONFIG_IRQ_PRIORITY 6
+#endif
 
-#endif //CLOCK_ENABLED
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCEN
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCEN 0
+#endif
+
+// <q> NRFX_POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef NRFX_POWER_CONFIG_DEFAULT_DCDCENHV
+#define NRFX_POWER_CONFIG_DEFAULT_DCDCENHV 0
+#endif
+
+// </e>
+// <e> NRF_CLOCK_ENABLED - nrf_drv_clock - CLOCK peripheral driver - legacy layer
+//==========================================================
+#ifndef NRF_CLOCK_ENABLED
+#define NRF_CLOCK_ENABLED 1
+#endif
+// <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
+ 
+// <0=> RC 
+// <1=> XTAL 
+// <2=> Synth 
+// <131073=> External Low Swing 
+// <196609=> External Full Swing 
+
+#ifndef CLOCK_CONFIG_LF_SRC
+#define CLOCK_CONFIG_LF_SRC 1
+#endif
+
+// <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef CLOCK_CONFIG_IRQ_PRIORITY
+#define CLOCK_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// </e>
+
+// <e> POWER_ENABLED - nrf_drv_power - POWER peripheral driver - legacy layer
+//==========================================================
+#ifndef POWER_ENABLED
+#define POWER_ENABLED 1
+#endif
+// <o> POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef POWER_CONFIG_IRQ_PRIORITY
+#define POWER_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <q> POWER_CONFIG_DEFAULT_DCDCEN  - The default configuration of main DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef POWER_CONFIG_DEFAULT_DCDCEN
+#define POWER_CONFIG_DEFAULT_DCDCEN 0
+#endif
+
+// <q> POWER_CONFIG_DEFAULT_DCDCENHV  - The default configuration of High Voltage DCDC regulator
+ 
+
+// <i> This settings means only that components for DCDC regulator are installed and it can be enabled.
+
+#ifndef POWER_CONFIG_DEFAULT_DCDCENHV
+#define POWER_CONFIG_DEFAULT_DCDCENHV 0
+#endif
+
 // </e>
 
 // <e> RTC_ENABLED - nrf_drv_rtc - RTC peripheral driver
@@ -384,65 +469,67 @@
 #ifndef NRFX_TIMER_ENABLED
 #define NRFX_TIMER_ENABLED 1
 #endif
-// <q> NRFX_TIMER0_ENABLED  - Enable TIMER0 instance
- 
 
-#ifndef NRFX_TIMER0_ENABLED
-#define NRFX_TIMER0_ENABLED 0
+#if NRFX_TIMER_ENABLED
+    // <q> NRFX_TIMER0_ENABLED  - Enable TIMER0 instance
+    
+
+    #ifndef NRFX_TIMER0_ENABLED
+    #define NRFX_TIMER0_ENABLED 0
+    #endif
+
+    // <o> NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY  - Timer frequency if in Timer mode
+    
+    // <0=> 16 MHz 
+    // <1=> 8 MHz 
+    // <2=> 4 MHz 
+    // <3=> 2 MHz 
+    // <4=> 1 MHz 
+    // <5=> 500 kHz 
+    // <6=> 250 kHz 
+    // <7=> 125 kHz 
+    // <8=> 62.5 kHz 
+    // <9=> 31.25 kHz 
+
+    #ifndef NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY
+    #define NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY 0
+    #endif
+
+    // <o> NRFX_TIMER_DEFAULT_CONFIG_MODE  - Timer mode or operation
+    
+    // <0=> Timer 
+    // <1=> Counter 
+
+    #ifndef NRFX_TIMER_DEFAULT_CONFIG_MODE
+    #define NRFX_TIMER_DEFAULT_CONFIG_MODE 0
+    #endif
+
+    // <o> NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH  - Timer counter bit width
+    
+    // <0=> 16 bit 
+    // <1=> 8 bit 
+    // <2=> 24 bit 
+    // <3=> 32 bit 
+
+    #ifndef NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH
+    #define NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH 0
+    #endif
+
+    // <o> NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
+    
+    // <0=> 0 (highest) 
+    // <1=> 1 
+    // <2=> 2 
+    // <3=> 3 
+    // <4=> 4 
+    // <5=> 5 
+    // <6=> 6 
+    // <7=> 7 
+
+    #ifndef NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY
+    #define NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY 7
+    #endif
 #endif
-
-// <o> NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY  - Timer frequency if in Timer mode
- 
-// <0=> 16 MHz 
-// <1=> 8 MHz 
-// <2=> 4 MHz 
-// <3=> 2 MHz 
-// <4=> 1 MHz 
-// <5=> 500 kHz 
-// <6=> 250 kHz 
-// <7=> 125 kHz 
-// <8=> 62.5 kHz 
-// <9=> 31.25 kHz 
-
-#ifndef NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY
-#define NRFX_TIMER_DEFAULT_CONFIG_FREQUENCY 0
-#endif
-
-// <o> NRFX_TIMER_DEFAULT_CONFIG_MODE  - Timer mode or operation
- 
-// <0=> Timer 
-// <1=> Counter 
-
-#ifndef NRFX_TIMER_DEFAULT_CONFIG_MODE
-#define NRFX_TIMER_DEFAULT_CONFIG_MODE 0
-#endif
-
-// <o> NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH  - Timer counter bit width
- 
-// <0=> 16 bit 
-// <1=> 8 bit 
-// <2=> 24 bit 
-// <3=> 32 bit 
-
-#ifndef NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH
-#define NRFX_TIMER_DEFAULT_CONFIG_BIT_WIDTH 0
-#endif
-
-// <o> NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
- 
-// <0=> 0 (highest) 
-// <1=> 1 
-// <2=> 2 
-// <3=> 3 
-// <4=> 4 
-// <5=> 5 
-// <6=> 6 
-// <7=> 7 
-
-#ifndef NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY
-#define NRFX_TIMER_DEFAULT_CONFIG_IRQ_PRIORITY 7
-#endif
-
 // </e>
 
 // <e> TIMER_ENABLED - nrf_drv_timer - TIMER periperal driver - legacy layer
@@ -1076,6 +1163,63 @@
 
 // </e>
 
+
+// <e> USBD_ENABLED - nrf_drv_usbd - USB driver
+//==========================================================
+#ifndef USBD_ENABLED
+#define USBD_ENABLED 1
+#endif
+// <o> USBD_CONFIG_IRQ_PRIORITY  - Interrupt priority
+ 
+
+// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
+// <0=> 0 (highest) 
+// <1=> 1 
+// <2=> 2 
+// <3=> 3 
+// <4=> 4 
+// <5=> 5 
+// <6=> 6 
+// <7=> 7 
+
+#ifndef USBD_CONFIG_IRQ_PRIORITY
+#define USBD_CONFIG_IRQ_PRIORITY 6
+#endif
+
+// <o> USBD_CONFIG_DMASCHEDULER_MODE  - USBD SMA scheduler working scheme
+ 
+// <0=> Prioritized access 
+// <1=> Round Robin 
+
+#ifndef USBD_CONFIG_DMASCHEDULER_MODE
+#define USBD_CONFIG_DMASCHEDULER_MODE 0
+#endif
+
+// <q> USBD_CONFIG_DMASCHEDULER_ISO_BOOST  - Give priority to isochronous transfers
+ 
+
+// <i> This option gives priority to isochronous transfers.
+// <i> Enabling it assures that isochronous transfers are always processed,
+// <i> even if multiple other transfers are pending.
+// <i> Isochronous endpoints are prioritized before the usbd_dma_scheduler_algorithm
+// <i> function is called, so the option is independent of the algorithm chosen.
+
+#ifndef USBD_CONFIG_DMASCHEDULER_ISO_BOOST
+#define USBD_CONFIG_DMASCHEDULER_ISO_BOOST 1
+#endif
+
+// <q> USBD_CONFIG_ISO_IN_ZLP  - Respond to an IN token on ISO IN endpoint with ZLP when no data is ready
+ 
+
+// <i> If set, ISO IN endpoint will respond to an IN token with ZLP when no data is ready to be sent.
+// <i> Else, there will be no response.
+
+#ifndef USBD_CONFIG_ISO_IN_ZLP
+#define USBD_CONFIG_ISO_IN_ZLP 0
+#endif
+
+// </e>
+
 // </h> 
 //==========================================================
 
@@ -1281,6 +1425,292 @@
 #ifndef NRF_STRERROR_ENABLED
 #define NRF_STRERROR_ENABLED 1
 #endif
+
+
+// <e> APP_USBD_ENABLED - app_usbd - USB Device library
+//==========================================================
+#ifndef APP_USBD_ENABLED
+#define APP_USBD_ENABLED 1
+#endif
+// <s> APP_USBD_VID - Vendor ID.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Vendor ID ordered from USB IF: http://www.usb.org/developers/vendor/
+#ifndef APP_USBD_VID
+#define APP_USBD_VID 0x1915
+#endif
+
+// <s> APP_USBD_PID - Product ID.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Selected Product ID
+#ifndef APP_USBD_PID
+#define APP_USBD_PID 0x520F
+#endif
+
+// <o> APP_USBD_DEVICE_VER_MAJOR - Device version, major part.  <0-99> 
+
+
+// <i> Device version, will be converted automatically to BCD notation. Use just decimal values.
+
+#ifndef APP_USBD_DEVICE_VER_MAJOR
+#define APP_USBD_DEVICE_VER_MAJOR 1
+#endif
+
+// <o> APP_USBD_DEVICE_VER_MINOR - Device version, minor part.  <0-99> 
+
+
+// <i> Device version, will be converted automatically to BCD notation. Use just decimal values.
+
+#ifndef APP_USBD_DEVICE_VER_MINOR
+#define APP_USBD_DEVICE_VER_MINOR 0
+#endif
+
+// <q> APP_USBD_CONFIG_SELF_POWERED  - Self-powered device, as opposed to bus-powered.
+ 
+
+#ifndef APP_USBD_CONFIG_SELF_POWERED
+#define APP_USBD_CONFIG_SELF_POWERED 1
+#endif
+
+// <o> APP_USBD_CONFIG_MAX_POWER - MaxPower field in configuration descriptor in milliamps.  <0-500> 
+
+
+#ifndef APP_USBD_CONFIG_MAX_POWER
+#define APP_USBD_CONFIG_MAX_POWER 500
+#endif
+
+// <q> APP_USBD_CONFIG_POWER_EVENTS_PROCESS  - Process power events.
+ 
+
+// <i> Enable processing power events in USB event handler.
+
+#ifndef APP_USBD_CONFIG_POWER_EVENTS_PROCESS
+#define APP_USBD_CONFIG_POWER_EVENTS_PROCESS 1
+#endif
+
+// <e> APP_USBD_CONFIG_EVENT_QUEUE_ENABLE - Enable event queue.
+
+// <i> This is the default configuration when all the events are placed into internal queue.
+// <i> Disable it when an external queue is used like app_scheduler or if you wish to process all events inside interrupts.
+// <i> Processing all events from the interrupt level adds requirement not to call any functions that modifies the USBD library state from the context higher than USB interrupt context.
+// <i> Functions that modify USBD state are functions for sleep, wakeup, start, stop, enable, and disable.
+//==========================================================
+#ifndef APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
+#define APP_USBD_CONFIG_EVENT_QUEUE_ENABLE 1
+#endif
+// <o> APP_USBD_CONFIG_EVENT_QUEUE_SIZE - The size of the event queue.  <16-64> 
+
+
+// <i> The size of the queue for the events that would be processed in the main loop.
+
+#ifndef APP_USBD_CONFIG_EVENT_QUEUE_SIZE
+#define APP_USBD_CONFIG_EVENT_QUEUE_SIZE 32
+#endif
+
+// <o> APP_USBD_CONFIG_SOF_HANDLING_MODE  - Change SOF events handling mode.
+ 
+
+// <i> Normal queue   - SOF events are pushed normally into the event queue.
+// <i> Compress queue - SOF events are counted and binded with other events or executed when the queue is empty.
+// <i>                  This prevents the queue from filling up with SOF events.
+// <i> Interrupt      - SOF events are processed in interrupt.
+// <0=> Normal queue 
+// <1=> Compress queue 
+// <2=> Interrupt 
+
+#ifndef APP_USBD_CONFIG_SOF_HANDLING_MODE
+#define APP_USBD_CONFIG_SOF_HANDLING_MODE 1
+#endif
+
+// </e>
+
+// <q> APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE  - Provide a function that generates timestamps for logs based on the current SOF.
+ 
+
+// <i> The function app_usbd_sof_timestamp_get is implemented if the logger is enabled. 
+// <i> Use it when initializing the logger. 
+// <i> SOF processing is always enabled when this configuration parameter is active. 
+// <i> Note: This option is configured outside of APP_USBD_CONFIG_LOG_ENABLED. 
+// <i> This means that it works even if the logging in this very module is disabled. 
+
+#ifndef APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE
+#define APP_USBD_CONFIG_SOF_TIMESTAMP_PROVIDE 0
+#endif
+
+// <o> APP_USBD_CONFIG_DESC_STRING_SIZE - Maximum size of the NULL-terminated string of the string descriptor.  <31-254> 
+
+
+// <i> 31 characters can be stored in the internal USB buffer used for transfers.
+// <i> Any value higher than 31 creates an additional buffer just for descriptor strings.
+
+#ifndef APP_USBD_CONFIG_DESC_STRING_SIZE
+#define APP_USBD_CONFIG_DESC_STRING_SIZE 31
+#endif
+
+// <q> APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED  - Enable UTF8 conversion.
+ 
+
+// <i> Enable UTF8-encoded characters. In normal processing, only ASCII characters are available.
+
+#ifndef APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED
+#define APP_USBD_CONFIG_DESC_STRING_UTF_ENABLED 0
+#endif
+
+// <s> APP_USBD_STRINGS_LANGIDS - Supported languages identifiers.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Comma-separated list of supported languages.
+#ifndef APP_USBD_STRINGS_LANGIDS
+#define APP_USBD_STRINGS_LANGIDS APP_USBD_LANG_AND_SUBLANG(APP_USBD_LANG_ENGLISH, APP_USBD_SUBLANG_ENGLISH_US)
+#endif
+
+// <e> APP_USBD_STRING_ID_MANUFACTURER - Define manufacturer string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_MANUFACTURER
+#define APP_USBD_STRING_ID_MANUFACTURER 1
+#endif
+// <q> APP_USBD_STRINGS_MANUFACTURER_EXTERN  - Define whether @ref APP_USBD_STRINGS_MANUFACTURER is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRINGS_MANUFACTURER_EXTERN
+#define APP_USBD_STRINGS_MANUFACTURER_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_MANUFACTURER - String descriptor for the manufacturer name.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Comma-separated list of manufacturer names for each defined language.
+// <i> Use @ref APP_USBD_STRING_DESC macro to create string descriptor from a NULL-terminated string.
+// <i> Use @ref APP_USBD_STRING_RAW8_DESC macro to create string descriptor from comma-separated uint8_t values.
+// <i> Use @ref APP_USBD_STRING_RAW16_DESC macro to create string descriptor from comma-separated uint16_t values.
+// <i> Alternatively, configure the macro to point to any internal variable pointer that already contains the descriptor.
+// <i> Setting string to NULL disables that string.
+// <i> The order of manufacturer names must be the same like in @ref APP_USBD_STRINGS_LANGIDS.
+#ifndef APP_USBD_STRINGS_MANUFACTURER
+#define APP_USBD_STRINGS_MANUFACTURER APP_USBD_STRING_DESC("Nordic Semiconductor")
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_PRODUCT - Define product string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_PRODUCT
+#define APP_USBD_STRING_ID_PRODUCT 2
+#endif
+// <q> APP_USBD_STRINGS_PRODUCT_EXTERN  - Define whether @ref APP_USBD_STRINGS_PRODUCT is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRINGS_PRODUCT_EXTERN
+#define APP_USBD_STRINGS_PRODUCT_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_PRODUCT - String descriptor for the product name.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> List of product names that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRINGS_PRODUCT
+#define APP_USBD_STRINGS_PRODUCT APP_USBD_STRING_DESC("nRF52 USB CDC Demo")
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_SERIAL - Define serial number string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_SERIAL
+#define APP_USBD_STRING_ID_SERIAL 3
+#endif
+// <q> APP_USBD_STRING_SERIAL_EXTERN  - Define whether @ref APP_USBD_STRING_SERIAL is created by macro or declared as a global variable.
+ 
+
+#ifndef APP_USBD_STRING_SERIAL_EXTERN
+#define APP_USBD_STRING_SERIAL_EXTERN 1
+#endif
+
+// <s> APP_USBD_STRING_SERIAL - String descriptor for the serial number.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Serial number that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRING_SERIAL
+#define APP_USBD_STRING_SERIAL g_extern_serial_number
+#endif
+
+// </e>
+
+// <e> APP_USBD_STRING_ID_CONFIGURATION - Define configuration string ID.
+
+// <i> Setting ID to 0 disables the string.
+//==========================================================
+#ifndef APP_USBD_STRING_ID_CONFIGURATION
+#define APP_USBD_STRING_ID_CONFIGURATION 4
+#endif
+// <q> APP_USBD_STRING_CONFIGURATION_EXTERN  - Define whether @ref APP_USBD_STRINGS_CONFIGURATION is created by macro or declared as global variable.
+ 
+
+#ifndef APP_USBD_STRING_CONFIGURATION_EXTERN
+#define APP_USBD_STRING_CONFIGURATION_EXTERN 0
+#endif
+
+// <s> APP_USBD_STRINGS_CONFIGURATION - String descriptor for the device configuration.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> Configuration string that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
+#ifndef APP_USBD_STRINGS_CONFIGURATION
+#define APP_USBD_STRINGS_CONFIGURATION APP_USBD_STRING_DESC("Default configuration")
+#endif
+
+// </e>
+
+// <s> APP_USBD_STRINGS_USER - Default values for user strings.
+
+// <i> Note: This value is not editable in Configuration Wizard.
+// <i> This value stores all application specific user strings with the default initialization.
+// <i> The setup is done by X-macros.
+// <i> Expected macro parameters:
+// <i> @code
+// <i> X(mnemonic, [=str_idx], ...)
+// <i> @endcode
+// <i> - @c mnemonic: Mnemonic of the string descriptor that would be added to
+// <i>                @ref app_usbd_string_desc_idx_t enumerator.
+// <i> - @c str_idx : String index value, can be set or left empty.
+// <i>                For example, WinUSB driver requires descriptor to be present on 0xEE index.
+// <i>                Then use X(USBD_STRING_WINUSB, =0xEE, (APP_USBD_STRING_DESC(...)))
+// <i> - @c ...     : List of string descriptors for each defined language.
+#ifndef APP_USBD_STRINGS_USER
+#define APP_USBD_STRINGS_USER X(APP_USER_1, , APP_USBD_STRING_DESC("User 1"))
+#endif
+
+// </e>
+
+
+
+// <h> app_usbd_cdc_acm - USB CDC ACM class
+
+//==========================================================
+// <q> APP_USBD_CDC_ACM_ENABLED  - Enabling USBD CDC ACM Class library
+ 
+
+#ifndef APP_USBD_CDC_ACM_ENABLED
+#define APP_USBD_CDC_ACM_ENABLED 1
+#endif
+
+// <q> APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE  - Send ZLP on write with same size as endpoint
+ 
+
+// <i> If enabled, CDC ACM class will automatically send a zero length packet after transfer which has the same size as endpoint.
+// <i> This may limit throughput if a lot of binary data is sent, but in terminal mode operation it makes sure that the data is always displayed right after it is sent.
+
+#ifndef APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE
+#define APP_USBD_CDC_ACM_ZLP_ON_EPSIZE_WRITE 1
+#endif
+
+// </h> 
 
 // </h> 
 //==========================================================
@@ -2802,6 +3232,57 @@
 
 #ifndef APP_USBD_CDC_ACM_CONFIG_DEBUG_COLOR
 #define APP_USBD_CDC_ACM_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <e> APP_USBD_CONFIG_LOG_ENABLED - Enable logging in the module.
+//==========================================================
+#ifndef APP_USBD_CONFIG_LOG_ENABLED
+#define APP_USBD_CONFIG_LOG_ENABLED 0
+#endif
+// <o> APP_USBD_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef APP_USBD_CONFIG_LOG_LEVEL
+#define APP_USBD_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> APP_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef APP_USBD_CONFIG_INFO_COLOR
+#define APP_USBD_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> APP_USBD_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef APP_USBD_CONFIG_DEBUG_COLOR
+#define APP_USBD_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>

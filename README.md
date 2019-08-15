@@ -1,92 +1,100 @@
 # Presentation and Documentation on [Home Smart Mesh](https://www.homesmartmesh.com/)
 This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/) with focus on software configuration and protocol implementation details
 
-# The content of [this repository](https://github.com/nRFMesh/nRF52_Mesh)
+Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 
-## ./applications/
+# nRF52 Applications
+    cd ./applications/
 
-### 01 sensor tag
-Firmware of the nRF52 sensor tag HW presented further below
+## 01 sensor tag
+    application/01_sensortag> make flash
 
-### 02 acell tag
-Experiments with nRF52 and MPU-6050
+<img src="images/nRF52832_sensortag.png" width="300">
 
-### 03 buttons
-press buttons mesh notification (experiemntal, low battery life)
+* Status : deployed > 1 year
+* nRF52832 module
+* Temperature, Humidity, Pressure : BME280
+* Light : MAX44009
+* Smooth graphana logs with cyclic broadcast ~ 30 sec => battery life ~ 6 month on CR2032
 
-### 04 uart dongle
-deployed rf dongle from the HW shown below (UART version)
+## 02 acell tag
+    application/02_accell_tag> make flash
 
-### 05 rotary decoder
-Rotary encoder 600 pulses per rotation, notification through rf with timestamp
-![PPI interconnect](applications/05_rotary_decoder/ppi.svg)
+<img src="images/motion_tag.png" width="300">
 
-### 06 bldc 52832
+* Status : experimental, low battery life
+* nRF52832 module
+* MPU-6050 module
+* interrupt pio from MPU-6050
 
-### 07 bldc 52840
+## 03 buttons
+    application/03_buttons> make flash
 
-### 08 usb dongle (nRF52840-dongle)
+<img src="images/buttons.png" width="300">
+
+* Status : experiemntal, low battery life
+* nRF52832 module
+* x6 buttons
+
+## 04 uart dongle
+    application/04_uart_dongle> make flash
+
+<img src="boards/nrf52_dongle/images/dongle.png" width="200">
+
+* Status : deployed > 1 year
+* buy : "nRF52832 BLE USB UART dongle"
+* custom firmware and pogo-pins jtag adapter see below
+* RF Mesh repeater + RF Mesh to Host interface
+
+## 05 rotary decoder
+    application/05_rotary_decoder> make flash
+
+<img src="images/rf_encoder.png" width="400">
+
+* buy : "600 pulses Optical Rotary encoder"
+* custom wiring +5V, encoder pullups to +3.3 V
+* rf timestamp synchronisation
+* HW capture of timestamp
+* RF Mesh log of modulo 600 position with timestamp
+* 4 ms status on change, otherwise 4 s reminder
 
 
-## ./raspi/
-The server's python scripts running also on a raspberry pi
-* ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
-* ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
-* ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
-* ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
-* ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
-* ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
-* ./raspi/grafana : [Grafana](https://grafana.com/grafana) is used as a dashboard, it is a webserver interface that is installed on the raspberry pi (or on the docker image). Some dashboards examples are provided in this directory, where the queries are matching the way how the influx client has recorded the sensors data. 
-* ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
-* ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
-* Data collection into a time series database 
+## 06 bldc 52832
+    application/06_bldc_52832> make flash
 
-## ConBee Zigbee to MQTT example
+<img src="images/bldc_control.png" width="400">
 
-    jNodes/96/button {"event": "flip", "from": 4, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 4}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 6}
-    jNodes/96/button {"event": "push", "face": 6}
-    jNodes/96/button {"event": "flip", "from": 6, "to": 3}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 3}
-    jNodes/96/button {"rotation": -1377}
-    jNodes/96/button {"rotation": 8140}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 4}
-    jNodes/96/button {"event": "wakeup"}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 1}
-    jNodes/96/button {"event": "flip", "from": 5, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 5}
-    jNodes/96/button {"rotation": 6288}
-    jNodes/96/button {"rotation": -4747}
+* Status : RF magnetic angle control OK, rest is in development
+* nRF52832 sensor tag board used
+* buy : "L6234d breakout"
+* custom wiring power supply 9.6 V / nRF powered with 3.3 V separately
+* RF bldc control : magnetic angle, voltage ratio, speed, absolute angle
 
-## rf_stm32
 
-    mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
-    mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
+## 07 bldc 52840
+    application/07_usb_dongle> make flash
 
-## hue test vector
+<img src="images/nRF52840-usb-dongle.png" width="300">
 
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"light": 24}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
-    
+* Status : preparation
+* previous application "03 bldc 52832" ported to the nRF52840-dongle
 
-## ./boards/
+## 08 usb dongle (nRF52840-dongle)
+    application/08_usb_dongle> make flash
+
+<img src="images/nRF52840-dongle-debug.png" width="300">
+
+* buy : "nRF52832 dongle"
+* custom firmware for RF mesh
+* pogo-pins jtag adapter 3dprint : [Fusion360 CAD model](https://a360.co/2CDqeTA)
+* RF Mesh repeater + RF Mesh to Host interface
+* TODO : add fifo to buffer USB CDC Tx packets (to prevents drops and go > 64 bytes)
+
+
+## Printed Circuit Boards
+    cd ./boards/
+
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware
-
-## ./applications/
-The nRF52 firmware grouped in project directories each containing the "main.c", "Makefile" and other project configuration files
-* ./applications/nrf52_sensortag/ : Low power Custom Sensor application with BME280 and MAX44009 (currently @22 uA)
-* ./applications/nrf52_dongle/ : Reprogrammed USB dongle from the market
-* ./applications/nrf52_accel/ : Motion detection Tag
 
 ## ./drivers/
 Contains the specific drivers for this project from which the "mesh.c" a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
@@ -135,13 +143,11 @@ The repo contais a directory for boards declaration "boards/" and a directory fo
 
     USED_BOARD := BOARD_NRF52_SENSOR_TAG
 
-# Doxygen Documentation
-* install [Doxygen](www.doxygen.org/)
-* run
+## PPI automation
+The programmable peripheral interconnect is used for "real" real-time operations rf time synch,...
 
-    gen_doc.bat
+<img src="applications/05_rotary_decoder/ppi.svg" width="600">
 
-Yes this is only wrapping ```doxygen Doxyfile``` but just take it as a workspace local alias
 # nRF52 Sensor Tag
 This board is based on modules, it is very simple to solder and allows selection of any other I²C sensor modules.
 
@@ -348,3 +354,65 @@ Ping node 74
 Aknowledge
 
     Nodes/79/ack 1
+
+# Raspberry Python scripts
+
+    cd ./raspi/
+
+## Overview
+The server's python scripts running also on a raspberry pi
+* ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
+* ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
+* ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
+* ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
+* ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
+* ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
+* ./raspi/grafana : [Grafana](https://grafana.com/grafana) is used as a dashboard, it is a webserver interface that is installed on the raspberry pi (or on the docker image). Some dashboards examples are provided in this directory, where the queries are matching the way how the influx client has recorded the sensors data. 
+* ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
+* ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
+* Data collection into a time series database 
+
+## ConBee Zigbee to MQTT example
+
+    jNodes/96/button {"event": "flip", "from": 4, "to": 2}
+    jNodes/96/button {"event": "flip", "from": 2, "to": 4}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 6}
+    jNodes/96/button {"event": "push", "face": 6}
+    jNodes/96/button {"event": "flip", "from": 6, "to": 3}
+    jNodes/96/button {"event": "shake"}
+    jNodes/96/button {"event": "double_tap", "face": 3}
+    jNodes/96/button {"rotation": -1377}
+    jNodes/96/button {"rotation": 8140}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 2}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 6}
+    jNodes/96/button {"event": "flip", "from": 2, "to": 6}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 4}
+    jNodes/96/button {"event": "wakeup"}
+    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
+    jNodes/96/button {"event": "shake"}
+    jNodes/96/button {"event": "double_tap", "face": 1}
+    jNodes/96/button {"event": "flip", "from": 5, "to": 1}
+    jNodes/96/button {"event": "flip", "from": 1, "to": 5}
+    jNodes/96/button {"rotation": 6288}
+    jNodes/96/button {"rotation": -4747}
+
+## rf_stm32
+
+    mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
+    mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
+
+## hue test vector
+
+    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"presence": true}'
+    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"light": 24}'
+    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
+    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
+    
+
+# Home Smart Mesh detailed design
+
+Functions call graph. Fifos dataflow between interrupts and main loop.
+
+<img src="images/nrf_mesh.svg" width="600">
+

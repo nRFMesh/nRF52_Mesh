@@ -21,7 +21,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
-  File.Open ("D:/Dev/nRF52_Mesh/applications/nrf52840_rovarm/_build/nrf52840_xxaa.out");
+  File.Open ("D:/Dev/nRF52_Mesh/applications/10_sensored_bldc/_build/nrf52840_xxaa.out");
 }
 
 /*********************************************************************

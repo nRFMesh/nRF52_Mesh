@@ -22,6 +22,7 @@
 
 #include "utils.h"
 #include "nrf_delay.h"
+#include "nrf_ringbuf.h"
 
 #define LED_USB_RESUME      (BSP_BOARD_LED_0)
 #define LED_RED             (BSP_BOARD_LED_1)
@@ -74,6 +75,9 @@ char g_usb_message[g_usb_message_size];
 bool g_is_port_open = false;
 bool g_is_write_buffer_ready = true;
 
+void usb_tx_from_buffer();
+
+NRF_RINGBUF_DEF(usb_tx_ring_buf, 1024);
 
 void stream_to_message(const char* msg,uint8_t size)
 {
@@ -123,12 +127,11 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             break;
         }
         case APP_USBD_CDC_ACM_USER_EVT_PORT_CLOSE:
-            //bsp_board_led_off(LED_CDC_ACM_OPEN);
             g_is_port_open = false;
             break;
         case APP_USBD_CDC_ACM_USER_EVT_TX_DONE:
             g_is_write_buffer_ready = true;
-            //bsp_board_led_invert(LED_CDC_ACM_TX);
+            usb_tx_from_buffer();
             break;
         case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
         {
@@ -217,6 +220,8 @@ void usb_print_init(usb_rx_handler_t handler)
         app_usbd_enable();
         app_usbd_start();
     }
+
+     nrf_ringbuf_init(&usb_tx_ring_buf);
 }
 
 void usb_print_loop()
@@ -227,6 +232,24 @@ void usb_print_loop()
     }
 }
 
+void usb_tx_from_buffer()
+{
+    if(g_is_write_buffer_ready)
+    {
+        g_is_write_buffer_ready = false;
+
+        uint8_t packet[64];
+        size_t length_read = 64;
+        ret_code_t err_code = nrf_ringbuf_cpy_get(&usb_tx_ring_buf, packet, &length_read);
+
+        ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, packet, length_read);
+        if( (err_code != NRF_SUCCESS) && (ret == NRF_ERROR_INVALID_STATE) )
+        {
+            blink_red(1000,200);
+        }
+    }
+}
+
 void usb_print(const void * p_buf,size_t length)
 {
     if(!g_is_port_open)
@@ -234,27 +257,19 @@ void usb_print(const void * p_buf,size_t length)
         blink_red(10,10);
         return;
     }
-    if(!g_is_write_buffer_ready)
+
+    size_t length_written = length;
+    ret_code_t err_code = nrf_ringbuf_cpy_put(&usb_tx_ring_buf, p_buf, &length_written);
+    if( (length_written == length) || (err_code == NRF_SUCCESS) )
     {
-        blink_red(10,10);
+        usb_tx_from_buffer();
+    }
+    else
+    {
+        blink_red(100,10);
         return;
     }
-    char * p_char = (char*) p_buf;
-    if(length > 64)
-    {
-        length = 64;
-        p_char[61] = '>';
-        p_char[62] = '\r';
-        p_char[63] = '\n';
-    }
 
-    //set the variable before, in case the isr triggers before the retur of the write
-    g_is_write_buffer_ready = false;
-    ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm, p_buf, length);
-    if(ret == NRF_ERROR_INVALID_STATE)
-    {
-        blink_red(1000,200);
-    }
 }
 
 char usb_print_buffer[256];
@@ -265,15 +280,6 @@ void usb_printf(const char *format, ...)
     va_start (args, format);
     size_t length = vsnprintf(usb_print_buffer,256,format, args);
     va_end (args);
-
-    //does not produce length higher than 64 chars
-    if(length > 64)
-    {
-        length = 64;
-        usb_print_buffer[61] = '>';
-        usb_print_buffer[62] = '\r';
-        usb_print_buffer[63] = '\n';
-    }
 
     usb_print(usb_print_buffer, length);
 }

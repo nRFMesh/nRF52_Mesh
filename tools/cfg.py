@@ -26,6 +26,6 @@ def get_local_json():
     return config
 
 # -------------------- config -------------------- 
-def get_local_nodes(nodes_file):
+def get_json(nodes_file):
     nodes = json.load(open(nodes_file),object_pairs_hook=OrderedDict)
     return nodes

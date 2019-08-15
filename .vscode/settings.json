@@ -6,7 +6,8 @@
         "sdk_config.h": "c",
         "boards.h": "c",
         "pca10059.h": "c",
-        "nrf.h": "c"
+        "nrf.h": "c",
+        "nrfx.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
