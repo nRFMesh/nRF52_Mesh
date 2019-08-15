@@ -33,10 +33,10 @@
     "influxdb":{
         "host":"localhost",
         "port":8086,
-        "db":"meshNodes"
+        "db":"meshNet"
     },
     "log":{
-        "logfile":"/home/pi/share/influx_client_4.log",
+        "logfile":"/home/pi/share/influx_client_6.log",
         "level":"Info"
     }
 }
