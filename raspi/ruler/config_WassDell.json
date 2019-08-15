@@ -1,9 +1,9 @@
 {
     "mqtt":{
-        "host":"10.0.0.12",
+        "host":"10.0.0.42",
         "port":1883,
         "keepalive":60,
-        "client_id":"py_ruler"
+        "client_id":"py_ruler_wd"
     },
     "log":{
         "logfile":"./log_ruler.log",
@@ -26,7 +26,7 @@
             "input":"zig/kitchen move",
             "output":"zig/printer light/set",
             "description":"low light for night hungers",
-            "enable" : true
+            "enable" : false
         }
     }
 }

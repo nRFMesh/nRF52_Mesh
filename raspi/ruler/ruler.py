@@ -16,7 +16,17 @@ def on_connect(lclient, userdata, flags, rc):
             log.info("Subscription for rule:%s %s -> %s",rule_name,rule["input"],rule["output"])
             lclient.subscribe(rule["input"])
     #Here custom subscriptions can be added
-    #lclient.subscribe("jNodes/+/alive")
+    lclient.subscribe("jNodes/+/alive")
+
+def get_min_rssi(j_payload):
+    res = None
+    for key, value in j_payload.items():
+        if key.startswith('rx'):
+            if 'rssi' in value:
+                rssi = int(value["rssi"])
+                if(res is None) or (res > rssi):
+                    res = rssi
+    return res
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -29,7 +39,13 @@ def on_message(client, userdata, msg):
                 if(payload != None):
                     clientMQTT.publish(rule["output"],payload)
     #Here Custom Rules can be run
-    #if (len(topic_parts)==3) and (topic_parts[0] == "jNodes") and (topic_parts[2]=="alive"):
+    if (len(topic_parts)==3) and (topic_parts[0] == "jNodes") and (topic_parts[2]=="alive"):
+        j_payload = json.loads(msg.payload)
+        min_rssi = get_min_rssi(j_payload)
+        min_rssi_text = json.dumps(min_rssi)
+        if(min_rssi_text != None):
+            topic = "Nodes/"+topic_parts[1]+"/rssi"
+            clientMQTT.publish(topic,min_rssi_text)
 
 
 def ruler_loop_forever():
