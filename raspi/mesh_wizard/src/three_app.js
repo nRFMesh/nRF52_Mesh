@@ -9,7 +9,7 @@ var nodes_config;
 
 
 import {NodesTable} from './nodes_table.js';
-
+import { STLLoader } from '../js/STLLoader.js';
 
 $.getJSON("nodes.json", function(json) {
 	nodes_config = json;
@@ -27,7 +27,7 @@ function swap_yz(pos){
 class Node{
 	constructor(id){
 		this.id = id;
-		var size = 0.2;
+		var size = 20;
 		var nb_sections = 64;
 		var geometry = new THREE.SphereGeometry( size, nb_sections,nb_sections );
 		//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
@@ -139,6 +139,57 @@ class Plane{
 	}
 }
 
+function center_mesh(mesh){
+	var box = new THREE.Box3().setFromObject( mesh );
+	//console.log( "boudning box : ",box.min, box.max, box.getSize() );
+	var box_center = box.getCenter();
+	mesh.position.set( -box_center.x, 0, -box_center.z );
+	//console.log("tx : ",-box_center.x, " ty : ", -box_center.z );
+}
+
+class STLModel{
+	static init() {
+		var material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
+
+		var loader = new STLLoader();
+		loader.load( '../models/Valery_Open.stl', function ( geometry ) {
+			var mesh = new THREE.Mesh( geometry, material );
+			center_mesh(mesh);
+			mesh.castShadow = true;
+			mesh.receiveShadow = true;
+			scene.add( mesh );
+
+		} );
+	}
+}
+
+class RoomName{
+	static init(name) {
+		var loader = new THREE.FontLoader();
+
+		loader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+		
+			var material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
+			var geometry = new THREE.TextGeometry( 'Hello three.js!', {
+				font: font,
+				size: 80,
+				height: 5,
+				curveSegments: 12,
+				bevelEnabled: true,
+				bevelThickness: 10,
+				bevelSize: 8,
+				bevelOffset: 0,
+				bevelSegments: 5
+			} );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.castShadow = true;
+			mesh.receiveShadow = true;
+			scene.add( mesh );
+		} );
+	}
+}
+
+
 function add_controls(){
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 
@@ -149,8 +200,8 @@ function add_controls(){
 
 	controls.screenSpacePanning = false;
 
-	controls.minDistance = 1;
-	controls.maxDistance = 30;
+	controls.minDistance = 100;
+	controls.maxDistance = 10000;
 
 	controls.minPolarAngle =  10 * Math.PI / 180;
 	controls.maxPolarAngle =  80 * Math.PI / 180;
@@ -173,24 +224,28 @@ function onWindowResize() {
 
 function init() {
 
+	console.log("===> inside init()");
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 	container = document.getElementById('viewer');
 	var w = container.clientWidth;
 	var h = container.clientHeight;
 	
-	camera = new THREE.PerspectiveCamera( 45, w / h, 0.1, 50 );
-	camera.position.z = 10;
-	camera.position.y = 3;
+	camera = new THREE.PerspectiveCamera( 45, w / h, 10, 2000 );
+	camera.position.z = 1000;
+	camera.position.y = 300;
 
 	scene = new THREE.Scene();
 
 	//geometries();
 	//as only one place is needed, no need to create a variable
-	Plane.init(6,6);
+	//Plane.init(6,6);
+
+	STLModel.init();
+	//RoomName.init();
 
 	MyHome = new Home([]);
-	//MyHome.add_node(78);
+	MyHome.add_node(78);
 
 	lights();
 
@@ -217,5 +272,5 @@ function animate() {
 
 }
 
-
 export {MyHome};
+//export{init}
