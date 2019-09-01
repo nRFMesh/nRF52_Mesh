@@ -6,6 +6,7 @@ var container,controls;
 
 var MyHome;
 var nodes_config;
+var house;
 
 
 import {NodesTable} from './nodes_table.js';
@@ -13,11 +14,15 @@ import { STLLoader } from '../js/STLLoader.js';
 
 $.getJSON("nodes.json", function(json) {
 	nodes_config = json;
-    console.log("loaded json file");
-	init();
-	animate();
-
-
+	console.log("loaded sensors config");
+	$.getJSON("house.json", function(house_json) {
+		house = house_json;
+		console.log("loaded house config");
+		init();
+		animate();
+	
+	
+	});
 });
 
 function swap_yz(pos){
@@ -99,20 +104,13 @@ class Home {
 
 }
 
-
-function lights(){
-	var lights = [];
-	lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-	lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-	lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-
-	lights[ 0 ].position.set( 0, 200, 0 );
-	lights[ 1 ].position.set( 100, 200, 100 );
-	lights[ 2 ].position.set( - 100, - 200, - 100 );
-
-	scene.add( lights[ 0 ] );
-	scene.add( lights[ 1 ] );
-	scene.add( lights[ 2 ] );
+function lights(model){
+	for (const [room_name,room] of Object.entries(model.Rooms)) {
+		var light = new THREE.PointLight( 0xffffff, 1, 800, 2 );
+		light.position.set( room.center.x, 200, room.center.y );
+		console.log("light set in ",room_name," at ",room.center.x,",",room.center.y);
+		scene.add( light );
+	}
 }
 
 class Plane{
@@ -149,7 +147,7 @@ function center_mesh(mesh){
 
 class STLModel{
 	static init() {
-		var material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
+		var material = new THREE.MeshPhongMaterial( { color: 0xFFFFFF, specular: 0x111111, shininess: 10 } );
 
 		var loader = new STLLoader();
 		loader.load( '../models/Valery_Open.stl', function ( geometry ) {
@@ -164,26 +162,30 @@ class STLModel{
 }
 
 class RoomName{
-	static init(name) {
+	static add(name, pos_x,pos_z) {
 		var loader = new THREE.FontLoader();
 
 		loader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
 		
-			var material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
-			var geometry = new THREE.TextGeometry( 'Hello three.js!', {
+			var material = new THREE.MeshPhongMaterial( { color: 0xAAAAEA, specular: 0x111171, shininess: 200 } );
+			var geometry = new THREE.TextGeometry( name, {
 				font: font,
-				size: 80,
+				size: 40,
 				height: 5,
 				curveSegments: 12,
 				bevelEnabled: true,
-				bevelThickness: 10,
-				bevelSize: 8,
+				bevelThickness: 8,
+				bevelSize: 4,
 				bevelOffset: 0,
 				bevelSegments: 5
 			} );
 			var mesh = new THREE.Mesh( geometry, material );
 			mesh.castShadow = true;
 			mesh.receiveShadow = true;
+			//mesh.rotation.set(new THREE.Vector3(Math.PI / 2, 0, Math.PI));
+			mesh.rotation.x = -Math.PI / 2;
+			//mesh.rotation.z = Math.PI;
+			mesh.position.set(pos_x, 20, pos_z );
 			scene.add( mesh );
 		} );
 	}
@@ -237,17 +239,16 @@ function init() {
 
 	scene = new THREE.Scene();
 
-	//geometries();
-	//as only one place is needed, no need to create a variable
-	//Plane.init(6,6);
-
 	STLModel.init();
-	//RoomName.init();
-
 	MyHome = new Home([]);
-	MyHome.add_node(78);
-
-	lights();
+	for (const [room_name,room] of Object.entries(house.Rooms)) {
+		console.log("Added Room name : ",room_name);
+		RoomName.add(room_name,room.center.x,room.center.y);
+	}
+	for(var i=0;i< house.Sensors.length;i++){
+			MyHome.add_node(house.Sensors[i]);
+	}
+	lights(house);
 
 
 	renderer = new THREE.WebGLRenderer( { antialias: true,alpha:true } );

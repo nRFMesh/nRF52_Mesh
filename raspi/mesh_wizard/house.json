@@ -1,0 +1,36 @@
+{
+    "Rooms":{
+        "Living Room":{
+            "center":{
+                "x":-500,
+                "y":150
+            }
+        },
+        "Kitchen":{
+            "center":{
+            "x":-520,
+            "y":-200}
+        },
+        "Office":{
+            "center":{
+            "x":360,
+            "y":200}
+        },
+        "Bedroom":{
+            "center":{
+            "x":320,
+            "y":-200}
+        },
+        "Bathroom":{
+            "center":{
+            "x":-35,
+            "y":240}
+        },
+        "Balcony":{
+            "center":{
+            "x":-820,
+            "y":240}
+        }
+    },
+    "Sensors":[76,77,78,79,91,92]
+}
