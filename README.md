@@ -409,6 +409,18 @@ The server's python scripts running also on a raspberry pi
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
     
+## Eurotronic heat
+zig/living heat {
+    "current_heating_setpoint":17,
+    "eurotronic_system_mode":1,
+    "local_temperature":18.49,
+    "occupied_heating_setpoint":21,
+    "unoccupied_heating_setpoint":16,
+    "eurotronic_error_status":0,
+    "pi_heating_demand":0,
+    "battery":100,
+    "linkquality":44
+}
 
 # Home Smart Mesh detailed design
 
