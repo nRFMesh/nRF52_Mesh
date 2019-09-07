@@ -8,6 +8,7 @@ from phue import Bridge
 #just to get host name
 import socket 
 from time import sleep
+import time
 from math import ceil
 import logging as log
 import sys,os
@@ -23,16 +24,40 @@ def aqara_cube(payload):
             lights["Stairs Up Left"].on = not lights["Stairs Up Left"].on
     return
 
-def night_leds_button(payload):
-    sensor = json.loads(payload)
-    if("click" in sensor and sensor["click"] == "single"):
-        if(lights["Bed Leds Cupboard"].on):
-            lights["Bed Leds Cupboard"].on = False
-            log.debug("aqara_button> set light off")
-        else:
-            #command so that it does not go to previous level before adjusting the brightness
-            b.set_light("Bed Leds Cupboard", {'on' : True, 'bri' : 1, 'hue':8101, 'sat':194})
-            log.debug("aqara_button> set light to 1")
+def debounce(in_time):
+    current_time = time.time()
+    delta = current_time - in_time
+    return (delta > 2),current_time
+
+debounce_1_prev = 0
+def debounce_1():
+    global debounce_1_prev
+    res,debounce_1_prev = debounce(debounce_1_prev)
+    return res
+
+def bed_light_button(payload):
+    if(debounce_1()):
+        log.debug("bed_light_button> taken")
+        sensor = json.loads(payload)
+        if("click" in sensor and sensor["click"] == "single"):
+            if(lights["Bedroom Nic Malm"].on):
+                lights["Bedroom Nic Night"].on = False
+                lights["Bedroom Nic Malm"].on = False
+                lights["Bedroom Was Malm"].on = False
+                log.debug("bed_light_button> set light off")
+            else:
+                #switch on and brightness command together so that it does not go to previous level before adjusting the brightness
+                b.set_light("Bedroom Nic Malm", {'on' : True, 'bri' : 254})
+                b.set_light("Bedroom Nic Night", {'on' : True, 'bri' : 254})
+                b.set_light("Bedroom Was Malm", {'on' : True, 'bri' : 254})
+                log.debug("bed_light_button> set light to MAX")
+        elif("action" in sensor and sensor["action"] == "hold"):
+            b.set_light("Bedroom Nic Malm", {'on' : True, 'bri' : 1})
+            lights["Bedroom Nic Night"].on = False
+            lights["Bedroom Was Malm"].on = False
+            log.debug("bed_light_button> set light to MAX")
+    #else:
+        #log.debug("bed_light_button> debounced")
     return
 
 def aqara_button_sequence(name):
@@ -213,28 +238,31 @@ def stairs_down_move(payload):
     return
 
 def mqtt_on_message(client, userdata, msg):
-    topic_parts = msg.topic.split('/')
-    if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
-        name = topic_parts[1]
-        if(name == "entrance light") or (name == "entrance door"):
-            entrance_light(msg.payload)
-        elif(name == "sunrise"):
-            bedroom_sunrise(msg.payload)
-        elif(name == "kitchen move"):
-            night_hunger(msg.payload)
-        elif(name == "stairs up move"):
-            stairs_up_move(msg.payload)
-        elif(name == "stairs down move"):
-            stairs_down_move(msg.payload)
-        elif(name == "dining switch"):
-            dining_switch(msg.payload)
-        elif(name == "cube"):
-            aqara_cube(msg.payload)
-        elif(name == "night leds button"):
-            night_leds_button(msg.payload)
-    else:
-        log.error("topic: "+msg.topic + "size not matching")
-        
+    try:
+        topic_parts = msg.topic.split('/')
+        if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
+            name = topic_parts[1]
+            if(name == "entrance light") or (name == "entrance door"):
+                entrance_light(msg.payload)
+            elif(name == "sunrise"):
+                bedroom_sunrise(msg.payload)
+            elif(name == "kitchen move"):
+                night_hunger(msg.payload)
+            elif(name == "stairs up move"):
+                stairs_up_move(msg.payload)
+            elif(name == "stairs down move"):
+                stairs_down_move(msg.payload)
+            elif(name == "dining switch"):
+                dining_switch(msg.payload)
+            elif(name == "cube"):
+                aqara_cube(msg.payload)
+            elif(name == "bed light button"):
+                bed_light_button(msg.payload)
+        else:
+            log.error("topic: "+msg.topic + "size not matching")
+    except Exception as e:
+        log.error("mqtt_on_message> Exception :%s"%e)
+    return
 
 # -------------------- main -------------------- 
 config = cfg.configure_log(__file__)

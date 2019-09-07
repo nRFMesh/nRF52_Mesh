@@ -17,7 +17,7 @@
         "subscriptions":[   "zig/stairs up move",
                             "zig/stairs down move",
                             "zig/dining switch",
-                            "zig/night leds button",
+                            "zig/bed light button",
                             "zig/cube",
                             "zig/kitchen move",
                             "zig/entrance light",
@@ -33,6 +33,6 @@
     },
     "log":{
         "logfile":"/home/pi/share/hue.log",
-        "level":"Info"
+        "level":"Debug"
     }
 }
