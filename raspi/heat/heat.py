@@ -76,9 +76,9 @@ config = cfg.configure_log(__file__)
 clientMQTT = mqtt_start(config,mqtt_on_message,True)
 
 apertures = {
-    "balcony door":{"contact":False},
-    "balcony window left":{"contact":False},
-    "balcony window right":{"contact":False}
+    "balcony door":{"contact":True},
+    "balcony window left":{"contact":True},
+    "balcony window right":{"contact":True}
     }
 
 state = {
