@@ -33,7 +33,7 @@ def check_all_contacts(apertures):
     for name,aperture in apertures.items():
         if(aperture["contact"] == False):
             res = False
-    print(f"res={res} for {apertures}")
+    #print(f"res={res} for {apertures}")
     return res
 
 def window_open(name,payload):
