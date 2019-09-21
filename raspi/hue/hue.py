@@ -35,6 +35,12 @@ def debounce_1():
     res,debounce_1_prev = debounce(debounce_1_prev)
     return res
 
+debounce_2_prev = 0
+def debounce_2():
+    global debounce_2_prev
+    res,debounce_2_prev = debounce(debounce_2_prev)
+    return res
+
 def bed_light_button(payload):
     if(debounce_1()):
         log.debug("bed_light_button> taken")
@@ -55,9 +61,45 @@ def bed_light_button(payload):
             b.set_light("Bedroom Nic Malm", {'on' : True, 'bri' : 1})
             lights["Bedroom Nic Night"].on = False
             lights["Bedroom Was Malm"].on = False
-            log.debug("bed_light_button> set light to MAX")
+            log.debug("bed_light_button> set light to min")
     #else:
         #log.debug("bed_light_button> debounced")
+    return
+
+def bathroom_light_button(payload):
+    if(debounce_2()):
+        log.debug("bathroom light> taken")
+        sensor = json.loads(payload)
+        if("click" in sensor and sensor["click"] == "single"):
+            if(lights["Bathroom main"].on):
+                lights["Bathroom main"].on = False
+                log.debug("bathroom light> set light off")
+            else:
+                #switch on and brightness command together so that it does not go to previous level before adjusting the brightness
+                b.set_light("Bathroom main", {'on' : True, 'bri' : 254})
+                log.debug("bathroom light> set light to MAX")
+        elif("action" in sensor and sensor["action"] == "hold"):
+            b.set_light("Bathroom main", {'on' : True, 'bri' : 1})
+            log.debug("bathroom light> set light to min")
+    #else:
+        #log.debug("bathroom light> debounced")
+    return
+
+def office_switch(payload):
+    switch = json.loads(payload)
+    if("click" in switch and switch["click"] == "single"):
+        if(lights["Office main"].on):
+            lights["Office main"].on = False
+            log.debug("office_light> off")
+        else:
+            #command so that it does not go to previous level before adjusting the brightness
+            b.set_light("Office main", {'on' : True, 'bri' : 255})
+            log.debug("office_light> on")
+    elif("action" in switch and switch["action"] == "hold"):
+            b.set_light("Office main", {'on' : True, 'bri' : 1})
+            log.debug("office_light> low")
+    #else:
+    #    log.debug("office_light>no click")
     return
 
 def aqara_button_sequence(name):
@@ -242,22 +284,12 @@ def mqtt_on_message(client, userdata, msg):
         topic_parts = msg.topic.split('/')
         if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
             name = topic_parts[1]
-            if(name == "entrance light") or (name == "entrance door"):
-                entrance_light(msg.payload)
-            elif(name == "sunrise"):
-                bedroom_sunrise(msg.payload)
-            elif(name == "kitchen move"):
-                night_hunger(msg.payload)
-            elif(name == "stairs up move"):
-                stairs_up_move(msg.payload)
-            elif(name == "stairs down move"):
-                stairs_down_move(msg.payload)
-            elif(name == "dining switch"):
-                dining_switch(msg.payload)
-            elif(name == "cube"):
-                aqara_cube(msg.payload)
-            elif(name == "bed light button"):
+            if(name == "bed light button"):
                 bed_light_button(msg.payload)
+            elif(name == "office switch"):
+                office_switch(msg.payload)
+            elif(name == "sunrise button"):
+                bathroom_light_button(msg.payload)
         else:
             log.error("topic: "+msg.topic + "size not matching")
     except Exception as e:

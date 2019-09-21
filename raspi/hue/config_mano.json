@@ -22,7 +22,9 @@
                             "zig/kitchen move",
                             "zig/entrance light",
                             "zig/sunrise",
-                            "zig/entrance door"
+                            "zig/entrance door",
+                            "zig/office switch",
+                            "zig/sunrise button"
                         ],
         "actions"   :[],
         "publish" :true,
