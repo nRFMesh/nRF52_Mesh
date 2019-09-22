@@ -41,6 +41,8 @@ def mqtt_on_message(client, userdata, msg):
                 fields["temperature"] = float(fields["temperature"]) #force temperature to float
             if("battery" in fields):
                 fields["battery"] = int(fields["battery"]) #force battery to int
+            if("last_seen" in fields):
+                del fields["last_seen"]
             post = [
                 {
                     "measurement": sensor,
