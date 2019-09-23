@@ -9,7 +9,15 @@ from time import sleep
 import socket
 import json
 from mqtt import mqtt_start
+import dateutil.parser
 
+def last_seen_fresh(last_seen_text):
+    last_seen_time = dateutil.parser.parse(last_seen_text).replace(tzinfo=None)
+    diff = datetime.datetime.now() - last_seen_time
+    if(diff.total_seconds() > 2):
+        return False
+    else:
+        return True
 # -------------------- mqtt events -------------------- 
 def mqtt_on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -39,17 +47,26 @@ def mqtt_on_message(client, userdata, msg):
                 fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
             if("temperature" in fields):
                 fields["temperature"] = float(fields["temperature"]) #force temperature to float
+            if("humidity" in fields):
+                fields["humidity"] = float(fields["humidity"]) #force humidity to float
             if("battery" in fields):
                 fields["battery"] = int(fields["battery"]) #force battery to int
+            is_last_seen_relevant = False
             if("last_seen" in fields):
+                is_last_seen_relevant = True
+                last_seen = fields["last_seen"]
                 del fields["last_seen"]
-            post = [
-                {
-                    "measurement": sensor,
-                    "time": datetime.datetime.utcnow(),
-                    "fields": fields
-                }
-            ]
+                is_last_seen_fresh = last_seen_fresh(last_seen)
+            if(is_last_seen_relevant) and (not is_last_seen_fresh):
+                log.info("postdiscarded from "+sensor+" last seen at "+last_seen)
+            else:
+                post = [
+                    {
+                        "measurement": sensor,
+                        "time": datetime.datetime.utcnow(),
+                        "fields": fields
+                    }
+                ]
         if(post != None):
             try:
                 clientDB.write_points(post)

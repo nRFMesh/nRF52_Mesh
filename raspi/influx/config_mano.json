@@ -6,25 +6,27 @@
         "client_id":"py_influx",
         "subscriptions":[   "Nodes/#",
                             "zig/bed heater",
-                            "zig/entrance light",
                             "zig/sunrise button",
                             "zig/entrance door",
-                            "zig/bed weather",
-                            "zig/balcony weather",
+                            "zig/entrance light",
                             "zig/floody",
-                            "zig/desk motion",
-                            "zig/desk weather",
-                            "zig/office switch",
                             "zig/dining switch",
                             "zig/cube",
                             "zig/bed light button",
                             "zig/living heat",
                             "zig/kitchen heat",
+                            "zig/bed weather",
                             "zig/bedroom heat",
+                            "zig/bedroom window",
+                            "zig/desk motion",
+                            "zig/office weather",
+                            "zig/office switch",
                             "zig/office heat",
                             "zig/bathroom heat",
+                            "zig/balcony weather",
                             "zig/balcony window left",
-                            "zig/balcony window right"
+                            "zig/balcony window right",
+                            "zig/balcony door"
                                     ],
         "publish" :false,
         "subscribe" :true
@@ -36,7 +38,7 @@
         "db":"meshNet"
     },
     "log":{
-        "logfile":"/home/pi/share/influx_client_6.log",
+        "logfile":"/home/pi/share/influx_client_7.log",
         "level":"Info"
     }
 }
