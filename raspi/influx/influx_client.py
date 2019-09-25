@@ -51,6 +51,10 @@ def mqtt_on_message(client, userdata, msg):
                 fields["humidity"] = float(fields["humidity"]) #force humidity to float
             if("battery" in fields):
                 fields["battery"] = int(fields["battery"]) #force battery to int
+            if("moisture" in fields):
+                fields["moisture"] = int(fields["moisture"]) #force moisture to int
+            if("conductivity" in fields):
+                fields["conductivity"] = int(fields["conductivity"]) #force conductivity to int
             is_last_seen_relevant = False
             if("last_seen" in fields):
                 is_last_seen_relevant = True

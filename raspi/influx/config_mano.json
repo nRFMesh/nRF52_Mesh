@@ -25,7 +25,8 @@
                             "zig/balcony weather",
                             "zig/balcony window left",
                             "zig/balcony window right",
-                            "zig/balcony door"
+                            "zig/balcony door",
+                            "miflora/Flora1"
                                     ],
         "publish" :false,
         "subscribe" :true
