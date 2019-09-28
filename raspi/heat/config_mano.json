@@ -4,9 +4,9 @@
         "port":1883,
         "keepalive":60,
         "client_id":"heat_client",
-        "subscriptions":[   "zig/balcony door",
-                            "zig/balcony window right",
-                            "zig/balcony window left"
+        "subscriptions":[   "+/balcony door",
+                            "+/balcony window right",
+                            "+/balcony window left"
                         ],
         "actions"   :[],
         "publish" :true,

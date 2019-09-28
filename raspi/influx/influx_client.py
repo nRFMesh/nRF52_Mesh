@@ -11,6 +11,19 @@ import json
 from mqtt import mqtt_start
 import dateutil.parser
 
+def set_type(fields,param,set_type):
+    if(param in fields):
+        if(set_type == "float"):
+            fields[param] = float(fields[param])
+        elif(set_type == "int"):
+            fields[param] = int(fields[param])
+    return
+
+def check_all_types(fields):
+    for type_name,type_val in config["mqtt"]["types"].items():
+        set_type(fields,type_name,type_val)
+    return
+
 def last_seen_fresh(last_seen_text):
     last_seen_time = dateutil.parser.parse(last_seen_text).replace(tzinfo=None)
     diff = datetime.datetime.now() - last_seen_time
@@ -41,20 +54,10 @@ def mqtt_on_message(client, userdata, msg):
             sensor = topic_parts[1]
             fields = json.loads(msg.payload)
             
-            if("pressure" in fields):
-                fields["pressure"] = int(fields["pressure"]) #force pressure to int
             if("voltage" in fields):
                 fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
-            if("temperature" in fields):
-                fields["temperature"] = float(fields["temperature"]) #force temperature to float
-            if("humidity" in fields):
-                fields["humidity"] = float(fields["humidity"]) #force humidity to float
-            if("battery" in fields):
-                fields["battery"] = int(fields["battery"]) #force battery to int
-            if("moisture" in fields):
-                fields["moisture"] = int(fields["moisture"]) #force moisture to int
-            if("conductivity" in fields):
-                fields["conductivity"] = int(fields["conductivity"]) #force conductivity to int
+            check_all_types(fields)
+                
             is_last_seen_relevant = False
             if("last_seen" in fields):
                 is_last_seen_relevant = True

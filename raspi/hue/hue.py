@@ -41,6 +41,12 @@ def debounce_2():
     res,debounce_2_prev = debounce(debounce_2_prev)
     return res
 
+debounce_3_prev = 0
+def debounce_3():
+    global debounce_3_prev
+    res,debounce_3_prev = debounce(debounce_3_prev)
+    return res
+
 def bed_light_button(payload):
     if(debounce_1()):
         log.debug("bed_light_button> taken")
@@ -81,9 +87,38 @@ def bathroom_light_button(payload):
         elif("action" in sensor and sensor["action"] == "hold"):
             b.set_light("Bathroom main", {'on' : True, 'bri' : 1})
             log.debug("bathroom light> set light to min")
-    #else:
-        #log.debug("bathroom light> debounced")
     return
+
+def livroom_light_button(payload):
+    if(debounce_3()):
+        log.debug("living room light> taken")
+        sensor = json.loads(payload)
+        if("click" in sensor and sensor["click"] == "single"):
+            if(lights["LivRoom Spot 5 Innr"].on):
+                lights["LivRoom Spot 1 Innr"].on = False
+                lights["LivRoom Spot 2 Innr"].on = False
+                lights["LivRoom Spot 3 Innr"].on = False
+                lights["LivRoom Spot 4 Innr"].on = False
+                lights["LivRoom Spot 5 Innr"].on = False
+                log.debug("living room light> set light off")
+            else:
+                #switch on and brightness command together so that it does not go to previous level before adjusting the brightness
+                b.set_light("LivRoom Spot 1 Innr", {'on' : True, 'bri' : 254})
+                b.set_light("LivRoom Spot 2 Innr", {'on' : True, 'bri' : 254})
+                b.set_light("LivRoom Spot 3 Innr", {'on' : True, 'bri' : 254})
+                b.set_light("LivRoom Spot 4 Innr", {'on' : True, 'bri' : 254})
+                b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 254})
+                log.debug("living room light> set light to MAX")
+        elif("action" in sensor and sensor["action"] == "hold"):
+            b.set_light("LivRoom Spot 1 Innr", {'on' : True, 'bri' : 1})
+            b.set_light("LivRoom Spot 2 Innr", {'on' : True, 'bri' : 1})
+            b.set_light("LivRoom Spot 3 Innr", {'on' : True, 'bri' : 1})
+            b.set_light("LivRoom Spot 4 Innr", {'on' : True, 'bri' : 1})
+            b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 1})
+            log.debug("living room light> set light to min")
+    return
+
+
 
 def office_switch(payload):
     switch = json.loads(payload)
@@ -230,7 +265,6 @@ def stairs_off_callback():
 g_stairs_up_light = 0.0
 g_stairs_down_light = 0.0
 
-#new zig on mano
 def stairs_up_move(payload):
     global g_stairs_up_light
     global g_stairs_down_light
@@ -282,14 +316,16 @@ def stairs_down_move(payload):
 def mqtt_on_message(client, userdata, msg):
     try:
         topic_parts = msg.topic.split('/')
-        if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
+        if(len(topic_parts) == 2):
             name = topic_parts[1]
-            if(name == "bed light button"):
+            if(name == "bed light button") or (name == "but bed nic"):
                 bed_light_button(msg.payload)
             elif(name == "office switch"):
                 office_switch(msg.payload)
             elif(name == "sunrise button"):
                 bathroom_light_button(msg.payload)
+            elif(name == "but liv light 1") or (name == "but liv light 2"):
+                livroom_light_button(msg.payload)
         else:
             log.error("topic: "+msg.topic + "size not matching")
     except Exception as e:
