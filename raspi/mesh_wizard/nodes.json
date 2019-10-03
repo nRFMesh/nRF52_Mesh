@@ -734,6 +734,20 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "109":   {   "name"          :"nrf dongle 3",
+        "board"         :"nRF52840-dongle",
+        "program"       :"08_usb_dongle",
+        "uid"           :"0xEC B3 94 94 DD C2 AC 6C",
+        "channel"       : "2",
+        "sleep"         : "60",
+        "is_listening"  : "0xBABA",
+        "is_router"     : "0",
+        "is_uart_cmd"   : "0xBABA",
+        "is_rf_cmd"     : "0xBABA",
+        "is_rf2uart"    : "0xBABA",
+        "is_testmode"   : "0",
+        "rtx_timeout"   : "5",
+        "rtx_count"     : "3"
     }
-    
 }
