@@ -67,7 +67,7 @@
         "board"         :"nRF52840-dongle on bread board",
         "program"       :"10_sensored_bldc",
         "uid"           :"0x3B 7D 4A 78 E4 2A E8 EC",
-        "channel"       : "10",
+        "channel"       : "2",
         "sleep"         : "10"
     },
     "73":   {   "name"          :"nRF52 Module_Tester",

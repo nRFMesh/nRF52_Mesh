@@ -27,7 +27,7 @@ extern const char * const pid_name[];
 #define Mesh_Pid_Reset 0x04
 #define Mesh_Pid_Button 0x06
 
-//light was 16bit redefined u32 bit
+//light u32 bit (lux x 1000)
 #define Mesh_Pid_Light 0x07
 #define Mesh_Pid_Temperature 0x08
 //bme280 no more with uncalibrated params

@@ -7,13 +7,14 @@ on_line_function = None
 def run():
     res = None
     try:
-        line = ser.readline().decode("utf-8")
+        line = ser.readline().decode("utf-8", errors='ignore')
         if(len(line)):
             line = line.replace('\r','')
             line = line.replace('\n','')
             on_line_function(line)
     except OSError as e:
         print("Handled exception: %s",str(e))
+    #TODO handle UnicodeDecodeError error
     return res
 
 def send(data):
