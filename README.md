@@ -218,7 +218,7 @@ It is possible to reconfigure the Node on runtime and manage manage a mesh netwo
 
 | Command id | Function | Parameters |
 --- | --- | --- |
-| 0x01 | Set Node Id | Mode Mesh Short Identifier|
+| 0x01 | Set Node Id | Node Mesh Short Identifier|
 | 0x02 | Get Node Id | |
 | 0x03 | Set RF Channel | 0:2400 MHz - 100:2500 MHz|
 | 0x04 | Get RF Channel | |

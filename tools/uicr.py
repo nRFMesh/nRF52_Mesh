@@ -6,8 +6,7 @@ import sys
 import inspect, os
 
 currdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-#nodes = cfg.get_local_nodes(os.environ['NODES_CONFIG'])
-nodes = cfg.get_json(currdir+"\\..\\applications\\nodes.json")
+nodes = cfg.get_json(os.environ['NODES_CONFIG'])
 
 
 #  command example
@@ -73,7 +72,7 @@ def write_uicr_customer(reg_name,val):
 
 def start():
     jlink.set_tif(pylink.enums.JLinkInterfaces.SWD)
-    jlink.connect('NRF52832_XXAA', verbose=True)
+    jlink.connect('NRF52840_XXAA', verbose=True)
     print('ARM Id: %d' % jlink.core_id())
     print('CPU Id: %d' % jlink.core_cpu())
     print('Core Name: %s' % jlink.core_name())

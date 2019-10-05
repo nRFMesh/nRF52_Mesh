@@ -950,11 +950,17 @@ int rx_temperature(char * p_msg,uint8_t*data,uint8_t size)
     }
     else
     {
-        uint32_t    temperature  = data[3] << 24;
-                    temperature |= data[2] << 16;
-                    temperature |= data[1] <<  8;
-                    temperature |= data[0];
-        return sprintf(p_msg,"deprecated_temp:%lu",temperature);
+        int32_t temp  = data[3] << 24;
+                temp |= data[2] << 16;
+                temp |= data[1] <<  8;
+                temp |= data[0];
+        int32_t mst = temp / 100;
+        int32_t lst = temp % 100;
+        if(lst<0)
+        {
+            lst*=-1;
+        }
+        return sprintf(p_msg,"temp:%ld.%02ld",mst,lst);
     }
 }
 
