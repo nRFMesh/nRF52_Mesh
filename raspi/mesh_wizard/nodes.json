@@ -267,9 +267,10 @@
             "channel"       : "2",
             "sleep"         : "10"
                 },
-    "70":   {   "name"          :"nRF51 SensorTag_7",
+    "70":   {   "name"          :"squary too",
         "board"         :"nRF51_Sensors",
-        "program"       :"nRF51_Sensors",
+        "program"       :"sensors_project",
+        "commit"        :"f99b9fbd955fd70a884c67790347c5e766f8e139",
         "uid"           :"0x57 17 B7 11 B7 14 CE C6",
         "data"          : ["acceleration"],
         "channel"       : "2",
