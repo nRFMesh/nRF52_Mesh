@@ -322,7 +322,7 @@ def mqtt_on_message(client, userdata, msg):
                 bed_light_button(msg.payload)
             elif(name == "office switch"):
                 office_switch(msg.payload)
-            elif(name == "sunrise button"):
+            elif(name == "tree button"):
                 bathroom_light_button(msg.payload)
             elif(name == "but liv light 1") or (name == "but liv light 2"):
                 livroom_light_button(msg.payload)
