@@ -318,7 +318,7 @@ def mqtt_on_message(client, userdata, msg):
         topic_parts = msg.topic.split('/')
         if(len(topic_parts) == 2):
             name = topic_parts[1]
-            if(name == "bed light button") or (name == "but bed nic"):
+            if(name == "bed light button") or (name == "bed nic button"):
                 bed_light_button(msg.payload)
             elif(name == "office switch"):
                 office_switch(msg.payload)
