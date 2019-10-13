@@ -20,7 +20,7 @@ eurotronic_system_mode = {
 
 def heater_notify(name,message):
 
-    topic = "zig/living heat/set"
+    topic = "lzig/living heat/set"
     json_msg = {"eurotronic_system_mode":2**(eurotronic_system_mode[message])}
     text_msg = json.dumps(json_msg)
     clientMQTT.publish(topic,text_msg)
@@ -58,7 +58,7 @@ def window_open(name,payload):
 def mqtt_on_message(client, userdata, msg):
     try:
         topic_parts = msg.topic.split('/')
-        if(len(topic_parts) == 2 and topic_parts[0] == "zig"):
+        if(len(topic_parts) == 2 and topic_parts[0] == "mzig"):
             name = topic_parts[1]
             if(name == "balcony door") or (name == "balcony window left") or (name == "balcony window right"):
                 window_open(name,msg.payload)

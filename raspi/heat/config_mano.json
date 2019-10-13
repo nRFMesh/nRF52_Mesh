@@ -14,7 +14,7 @@
     },
     "heatings":{
         "living heat":{
-            "topic":"zig/living heat/set",
+            "topic":"lzig/living heat/set",
             "Apertures":[
                 "balcony door",
                 "balcony window right",
