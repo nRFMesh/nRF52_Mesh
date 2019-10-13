@@ -18,6 +18,7 @@
                             "+/bedroom weather",
                             "+/bedroom heat",
                             "+/bedroom window",
+                            "+/kitchen window",
                             "+/office weather",
                             "+/office switch",
                             "+/office heat",
@@ -25,6 +26,8 @@
                             "+/balcony weather",
                             "+/balcony window left",
                             "+/balcony window right",
+                            "+/office window left",
+                            "+/office window right",
                             "+/balcony door",
                             "miflora/Flora1"
                                     ],
