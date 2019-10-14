@@ -21,8 +21,8 @@
                             "mzig/tree button",
                             "+/office switch",
                             "+/sunrise button",
-                            "lzig/but liv light 1",
-                            "lzig/but liv light 2"
+                            "lzig/liv light 1 button",
+                            "lzig/liv light 2 button"
                         ],
         "actions"   :[],
         "publish" :true,
