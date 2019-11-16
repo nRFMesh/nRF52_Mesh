@@ -365,7 +365,7 @@
         "channel"       : "2",
         "sleep"         : "20"
             },
-    "78":   {   "name"          :"Balcony",
+    "78":   {   "name"          :"Hallway tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x09 32 46 24 12 92 4F 8C",
@@ -754,5 +754,14 @@
         "is_testmode"   : "0",
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
+    },
+    "110":   {   "name"          :"Kitchen tag",
+        "board"         :"nRF52_Sensors",
+        "program"       :"01_sensortag",
+        "uid"           :"0x38 4F B4 36 0F 40 06 CE",
+        "position"      :{ "x":"-2","y":"0.2","z":"2.3"},
+        "data"          : ["temperature","hunidity","pressure","light"],
+        "channel"       : "2",
+        "sleep"         : "20"
     }
 }
