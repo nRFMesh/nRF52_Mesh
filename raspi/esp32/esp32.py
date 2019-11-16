@@ -58,7 +58,8 @@ def esp_status(topic,payload):
 
 
 def bed_temperature(payload):
-    temp = float(payload)
+    sensor = json.loads(payload)
+    temp = float(sensor["temperature"])
     if(temp < 17):
         ratio = 0
     elif(temp > 30):
@@ -109,7 +110,7 @@ def mqtt_on_message(client, userdata, msg):
     topics = msg.topic.split('/')
     #"Nodes/98/temperature"
     if(len(topics) == 3):
-        if(msg.topic == "Nodes/98/temperature"):
+        if(msg.topic == "mzig/bed weather"):
             bed_temperature(msg.payload)
         elif((topics[0] == "esp") and (topics[1] == "bed heater")):
             esp_bed_heater(topics[2],msg.payload)

@@ -6,8 +6,8 @@
         "client_id":"esp32_py",
         "subscriptions":[
             "status/#",
-            "Nodes/98/temperature",
-            "zig/bed heater",
+            "mzig/bed weather",
+            "mzig/bed heat button",
             "esp/bed heater/#"
         ],
         "publish" :true,
