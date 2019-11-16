@@ -117,9 +117,9 @@ def mqtt_on_message(client, userdata, msg):
     elif(len(topics) == 2):
         if(topics[0] == "status"):
             esp_status(topics[1],msg.payload)
-        elif(topics[0] == "zig"):
+        elif(topics[0] == "mzig"):
             name = topics[1]
-            if(name == "bed heater"):
+            if(name == "bed heat button"):
                 bed_heater_switch(msg.payload)
     return
 
