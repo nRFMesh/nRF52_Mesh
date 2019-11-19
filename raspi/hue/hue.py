@@ -123,15 +123,15 @@ def livroom_light_button(payload):
 def office_switch(payload):
     switch = json.loads(payload)
     if("click" in switch and switch["click"] == "single"):
-        if(lights["Office main"].on):
-            lights["Office main"].on = False
+        if(lights["Office"].on):
+            lights["Office"].on = False
             log.debug("office_light> off")
         else:
             #command so that it does not go to previous level before adjusting the brightness
-            b.set_light("Office main", {'on' : True, 'bri' : 255})
+            b.set_light("Office", {'on' : True, 'bri' : 255})
             log.debug("office_light> on")
     elif("action" in switch and switch["action"] == "hold"):
-            b.set_light("Office main", {'on' : True, 'bri' : 1})
+            b.set_light("Office", {'on' : True, 'bri' : 1})
             log.debug("office_light> low")
     #else:
     #    log.debug("office_light>no click")
