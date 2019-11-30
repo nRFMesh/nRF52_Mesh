@@ -26,13 +26,14 @@ def light_active_5_min():
 
 def activate_switch():
     #start timer
-    threading.Timer(60*5, light_active_5_min).start()
+    delay_min = int(config["start_fan_delay_min"])
+    threading.Timer(60*delay_min, light_active_5_min).start()
     log.debug(f"activate switch  state:({state})")
     return
 
 def deactivate_switch():
     #check humidity and stop
-    if(state["humidity"] < 62):
+    if(state["humidity"] < config["humidity"]["stop_fan_on_light_off"]):
         set_fan("off")
     log.debug(f"deactivate switch state:({state})")
     return
@@ -50,13 +51,16 @@ def bathroom_switch(payload):
 
 def bathroom_humidity(payload):
     humidity_level = float(payload)
-    if(state["humidity"] >= 60) and (humidity_level < 60):
+    stop = config["humidity"]["stop_fan"]
+    start = config["humidity"]["start_fan"]
+    if(state["humidity"] >= stop) and (humidity_level < stop):
         if(state["light"] == False):
             log.debug(f"humidity_act> off")
             set_fan("off")
-    elif(state["humidity"] <= 70) and (humidity_level > 70):
+    elif(state["humidity"] <= start) and (humidity_level > start):
         set_fan("on")
         log.debug(f"humidity_act> on")
+    state["humidity"] = humidity_level
     return
 
 def mqtt_on_message(client, userdata, msg):

@@ -12,6 +12,12 @@
         "publish" :true,
         "subscribe" :true
     },
+    "humidity":{
+        "start_fan":65,
+        "stop_fan":60,
+        "stop_fan_on_light_off":62
+    },
+    "start_fan_delay_min":5,
     "log":{
         "logfile":"/home/pi/share/bathroom.log",
         "level":"Debug"
