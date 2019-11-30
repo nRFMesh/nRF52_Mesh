@@ -5,10 +5,9 @@
         "keepalive":60,
         "client_id":"bath_client",
         "subscriptions":[   "shellies/shellyswitch25-B8A4EE/input/0",
-                            "Nodes/82/humidity",
-                            "nrf/Bathroom tag"
+                            "Nodes/82/humidity"
                         ],
-        "publications"  :[  "shellies/shellyswitch25-B8A4EE/relay/0/command"
+        "publications"  :[  "shellies/shellyswitch25-B8A4EE/relay/1/command"
                         ],
         "publish" :true,
         "subscribe" :true

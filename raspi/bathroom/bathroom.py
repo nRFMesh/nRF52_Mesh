@@ -13,7 +13,7 @@ import threading
 
 
 def set_fan(fan_val):
-    topic = "shellies/shellyswitch25-B8A4EE/relay/0/command"
+    topic = "shellies/shellyswitch25-B8A4EE/relay/1/command"
     clientMQTT.publish(topic,fan_val)
     log.debug(f"fan set to {fan_val} state: ({state})")
     return
