@@ -32,7 +32,7 @@ def activate_switch():
 
 def deactivate_switch():
     #check humidity and stop
-    if(state["humidity"] < 60):
+    if(state["humidity"] < 62):
         set_fan("off")
     log.debug(f"deactivate switch state:({state})")
     return
