@@ -1,0 +1,30 @@
+{  
+    "mqtt":{
+        "host":"10.0.0.42",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"heat_client",
+        "subscriptions":[   "zig/balcony door",
+                            "zig/balcony window right",
+                            "zig/balcony window left"
+                        ],
+        "actions"   :[],
+        "publish" :true,
+        "subscribe" :true
+    },
+    "heatings":{
+        "living heat":{
+            "topic":"zig/living heat/set",
+            "Apertures":[
+                "balcony door",
+                "balcony window right",
+                "balcony window left"
+            ]
+        }
+    }
+    ,
+    "log":{
+        "logfile":"./heat.log",
+        "level":"Info"
+    }
+}

@@ -10,10 +10,10 @@
         "level":"Info"
     },
     "rules":{
-        "Bathroom_Window":{
-            "input":"jNodes/64/acceleration",
-            "output":"Nodes/64/angle",
-            "description":"captures the x3 accis of acceleration and turn it into an angle",
+        "Bathroom_Fan":{
+            "input":"shellies/shellyswitch25-B8A4EE/input/0",
+            "output":"shellies/shellyswitch25-B8A4EE/relay/0/command",
+            "description":"delay the light to control the bathroom fan",
             "enable" : false
         },
         "Bathroom_Heating":{
@@ -32,13 +32,19 @@
             "input":"zig/desk motion",
             "output":"heating/upstairs",
             "description":"from heat handle angle to the heating value",
-            "enable" : true
+            "enable" : false
         },
         "Bedroom_Heat_1":{
             "input":"zig/motion 1_6",
             "output":"heating/bedroom_1",
             "description":"from heat handle angle to the heating value",
-            "enable" : true
+            "enable" : false
+        },
+        "Bathroom_Window":{
+            "input":"jNodes/64/acceleration",
+            "output":"Nodes/64/angle",
+            "description":"captures the x3 accis of acceleration and turn it into an angle",
+            "enable" : false
         }
         
     }
