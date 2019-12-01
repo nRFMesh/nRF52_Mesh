@@ -324,7 +324,7 @@ def mqtt_on_message(client, userdata, msg):
                 office_switch(msg.payload)
             elif(name == "tree button"):
                 bathroom_light_button(msg.payload)
-            elif(name == "liv light 1 button") or (name == "liv light 2 button"):
+            elif(name == "liv light 1 button"):
                 livroom_light_button(msg.payload)
         else:
             log.error("topic: "+msg.topic + "size not matching")
