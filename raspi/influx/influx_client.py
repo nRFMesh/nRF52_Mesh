@@ -74,6 +74,26 @@ def mqtt_on_message(client, userdata, msg):
                         "fields": fields
                     }
                 ]
+        elif( (len(topic_parts) == 5) and (topic_parts[0] == "shellies") ):
+            if(topic_parts[1] == "shellyswitch25-B8A4EE"):
+                measurement = "shelly bathroom"
+                if(topic_parts[3] == "0"):
+                    measurement = measurement + " light"
+                else:
+                    measurement = measurement + " fan"
+            else:
+                measurement = topic_parts[1] + " relay " + topic_parts[3]
+            sensor = topic_parts[4]
+            value = float(str(msg.payload))
+            post = [
+                {
+                    "measurement": measurement,
+                    "time": datetime.datetime.utcnow(),
+                    "fields": {
+                        sensor: value
+                    }
+                }
+            ]
         if(post != None):
             try:
                 clientDB.write_points(post)

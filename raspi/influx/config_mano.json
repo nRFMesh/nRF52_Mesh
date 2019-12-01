@@ -29,12 +29,14 @@
                             "+/office window left",
                             "+/office window right",
                             "+/balcony door",
-                            "miflora/Flora1"
+                            "miflora/Flora1",
+                            "shellies/shellyswitch25-B8A4EE/relay/0/power",
+                            "shellies/shellyswitch25-B8A4EE/relay/1/power"
                                     ],
         "publish" :false,
         "subscribe" :true,
         "types":{
-            "pressure"      :"int",
+            "pressure"      :"float",
             "temperature"   :"float",
             "humidity"      :"float",
             "battery"       :"int",
