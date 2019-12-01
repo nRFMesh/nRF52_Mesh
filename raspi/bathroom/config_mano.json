@@ -21,7 +21,8 @@
         "stop_fan_on_condition":62
     },
     "input_to_fan_delay_min":5,
-    "button_fan_duration_min":10,
+    "button_fan_short_min":10,
+    "button_fan_long_min":30,
     "humidity_sensor_timeout_min":12,
     "log":{
         "logfile":"/home/pi/share/bathroom.log",

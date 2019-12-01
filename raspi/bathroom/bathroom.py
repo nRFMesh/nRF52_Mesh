@@ -142,11 +142,16 @@ def button_fan(payload):
             log.debug("button_fan> single click")
             if(state["fan_relay"] == False):
                 set_fan_relay("on")
-                state["button_fan_timer_min"] = config["button_fan_duration_min"]
+                state["button_fan_timer_min"] = config["button_fan_short_min"]
                 button_timer_trigger()
             else:
                 #user force stopping the fan on all conditions
                 set_fan_relay("off")
+        elif("action" in sensor and sensor["action"] == "hold"):
+            log.debug("button_fan> long press")
+            set_fan_relay("on")
+            state["button_fan_timer_min"] = config["button_fan_long_min"]
+            button_timer_trigger()
     return
 
 def mqtt_on_message(client, userdata, msg):
