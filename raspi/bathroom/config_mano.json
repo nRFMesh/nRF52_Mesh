@@ -26,6 +26,6 @@
     "humidity_sensor_timeout_min":12,
     "log":{
         "logfile":"/home/pi/share/bathroom.log",
-        "level":"Debug"
+        "level":"Info"
     }
 }
