@@ -5,6 +5,7 @@
 import paho.mqtt.client as mqtt
 import json
 from time import sleep
+import time
 import logging as log
 import sys,os
 import cfg
@@ -26,22 +27,22 @@ def debounce_1():
 def set_fan_relay(fan_val):
     topic = "shellies/shellyswitch25-B8A4EE/relay/1/command"
     clientMQTT.publish(topic,fan_val)
-    log.debug(f"set_fan_relay> to {fan_val} state: ({state})")
+    log.debug(f"set_fan_relay> to {fan_val}. state = {state}")
     return
 
 def stop_fan_relay_on_conditions():
-    log.debug(f"stop_fan_relay_on_conditions> state:({state})")
+    log.debug(f"stop_fan_relay_on_conditions> state = {state}")
     if(state["button_fan_timer_min"] != 0):
-        log.info(f"stop_fan_relay_on_conditions> stop rejected, user timer running. state:({state})")
+        log.info(f"stop_fan_relay_on_conditions> stop rejected, user timer running. state = {state}")
         return
     if(state["humidity_sensor_alive"]):
         if(state["humidity"] > config["humidity"]["stop_fan_on_condition"]):
-            log.info(f"stop_fan_relay_on_conditions> stop rejected, humidity too high. state:({state})")
+            log.info(f"stop_fan_relay_on_conditions> stop rejected, humidity too high. state = {state}")
         else:
-            log.debug(f"stop_fan_relay_on_conditions> stop accepted, not humid. state:({state})")
+            log.debug(f"stop_fan_relay_on_conditions> stop accepted, not humid. state = {state}")
             set_fan_relay("off")
     else:
-        log.debug(f"stop_fan_relay_on_conditions> stop accepted as humidity unavailable. state:({state})")
+        log.debug(f"stop_fan_relay_on_conditions> stop accepted as humidity unavailable. state = {state}")
         set_fan_relay("off")
     return
 
@@ -54,7 +55,7 @@ def input_timer_trigger():
 
 def button_timer_trigger():
     global state
-    log.debug(f"button_timer_trigger> trigger")
+    log.debug(f"button_timer_trigger> trigger. state = {state}")
     if(state["button_fan_timer_min"] > 0):
         state["button_fan_timer_min"] = state["button_fan_timer_min"] - 1
         threading.Timer(60, button_timer_trigger).start()
@@ -76,36 +77,44 @@ def start_input_timer():
     #start timer
     delay_min = int(config["input_to_fan_delay_min"])
     threading.Timer(60*delay_min, input_timer_trigger).start()
-    log.debug(f"activate switch  state:({state})")
+    log.debug(f"start_input_timer> state = {state}")
     return
 
 def shelly_input(payload):
     global state
     input_state = int(payload)
     if(input_state == 1) and (state["input"] == False):
+        log.info(f"shelly_input> =>1. state = {state}")
         state["input"] = True
         start_input_timer()
     elif(input_state == 0) and (state["input"] == True):
+        log.info(f"shelly_input> =>0. state = {state}")
         state["input"] = False
         stop_fan_relay_on_conditions()
     return
 
 def shelly_light_relay(payload):
     global state
-    relay_state = payload
+    relay_state = payload.decode()
+    log.debug(f"shelly_light_relay> relay_state = {relay_state}. state = {state}")
     if(relay_state == "on") and (state["light_relay"] == False):
         state["light_relay"] = True
+        log.info(f"shelly_light_relay> =>on. state = {state}")
     elif(relay_state == "off") and (state["light_relay"] == True):
         state["light_relay"] = False
+        log.info(f"shelly_light_relay> =>off. state = {state}")
     return
 
 def shelly_fan_relay(payload):
     global state
-    relay_state = payload
+    relay_state = payload.decode()
+    log.debug(f"shelly_fan_relay> relay_state = {relay_state}. state = {state}")
     if(relay_state == "on") and (state["fan_relay"] == False):
         state["fan_relay"] = True
+        log.info(f"shelly_fan_relay> =>on. state = {state}")
     elif(relay_state == "off") and (state["fan_relay"] == True):
         state["fan_relay"] = False
+        log.info(f"shelly_fan_relay> =>off. state = {state}")
     return
 
 def sensor_humidity(payload):
@@ -115,11 +124,11 @@ def sensor_humidity(payload):
     start = config["humidity"]["start_fan"]
     if(state["humidity"] >= stop) and (humidity_level < stop):
         if(state["input"] == False):
-            log.debug(f"humidity_act> off")
+            log.debug(f"sensor_humidity> humidity down")
             stop_fan_relay_on_conditions()
     elif(state["humidity"] <= start) and (humidity_level > start):
         set_fan_relay("on")
-        log.debug(f"humidity_act> on")
+        log.debug(f"sensor_humidity> humidity up")
     state["humidity"] = humidity_level
     state["humidity_sensor_alive"] = True
     state["humidity_sensor_timer_min"] = config["humidity_sensor_timeout_min"]
@@ -134,7 +143,7 @@ def button_fan(payload):
             if(state["fan_relay"] == False):
                 set_fan_relay("on")
                 state["button_fan_timer_min"] = config["button_fan_duration_min"]
-                threading.Timer(60, button_timer_trigger).start()
+                button_timer_trigger()
             else:
                 #user force stopping the fan on all conditions
                 set_fan_relay("off")
@@ -146,7 +155,7 @@ def mqtt_on_message(client, userdata, msg):
         if(msg.topic == "shellies/shellyswitch25-B8A4EE/input/0"):
             shelly_input(msg.payload)
         elif(msg.topic == "shellies/shellyswitch25-B8A4EE/relay/0"):
-            shelly_light_relay(msg.payload)
+            shelly_fan_relay(msg.payload)
         elif(msg.topic == "shellies/shellyswitch25-B8A4EE/relay/1"):
             shelly_fan_relay(msg.payload)
         elif(msg.topic == "Nodes/82/humidity"):
@@ -172,11 +181,11 @@ state = {
     "light_relay":False,
     "humidity":50.0,
     "humidity_sensor_alive":True,
-    "humidity_sensor_timer_min":True,
+    "humidity_sensor_timer_min":config["humidity_sensor_timeout_min"],
     "button_fan_timer_min":0
     }
 
-threading.Timer(60, humidity_sensor_timer).start()
+humidity_sensor_timer()
 
 while(True):
     sleep(0.2)
