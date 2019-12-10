@@ -94,27 +94,27 @@ def livroom_light_button(payload):
         log.debug("living room light> taken")
         sensor = json.loads(payload)
         if("click" in sensor and sensor["click"] == "single"):
-            if(lights["LivRoom Spot 5 Innr"].on):
-                lights["LivRoom Spot 1 Innr"].on = False
-                lights["LivRoom Spot 2 Innr"].on = False
-                lights["LivRoom Spot 3 Innr"].on = False
-                lights["LivRoom Spot 4 Innr"].on = False
-                lights["LivRoom Spot 5 Innr"].on = False
+            if(lights["Living Top 5"].on):
+                lights["Living Top 1"].on = False
+                lights["Living Top 2"].on = False
+                lights["Living Top 3"].on = False
+                lights["Living Top 4"].on = False
+                lights["Living Top 5"].on = False
                 log.debug("living room light> set light off")
             else:
                 #switch on and brightness command together so that it does not go to previous level before adjusting the brightness
-                b.set_light("LivRoom Spot 1 Innr", {'on' : True, 'bri' : 254})
-                b.set_light("LivRoom Spot 2 Innr", {'on' : True, 'bri' : 254})
-                b.set_light("LivRoom Spot 3 Innr", {'on' : True, 'bri' : 254})
-                b.set_light("LivRoom Spot 4 Innr", {'on' : True, 'bri' : 254})
-                b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 254})
+                b.set_light("Living Top 1", {'on' : True, 'bri' : 254})
+                b.set_light("Living Top 2", {'on' : True, 'bri' : 254})
+                b.set_light("Living Top 3", {'on' : True, 'bri' : 254})
+                b.set_light("Living Top 4", {'on' : True, 'bri' : 254})
+                b.set_light("Living Top 5", {'on' : True, 'bri' : 254})
                 log.debug("living room light> set light to MAX")
         elif("action" in sensor and sensor["action"] == "hold"):
-            b.set_light("LivRoom Spot 1 Innr", {'on' : True, 'bri' : 1})
-            b.set_light("LivRoom Spot 2 Innr", {'on' : True, 'bri' : 1})
-            b.set_light("LivRoom Spot 3 Innr", {'on' : True, 'bri' : 1})
-            b.set_light("LivRoom Spot 4 Innr", {'on' : True, 'bri' : 1})
-            b.set_light("LivRoom Spot 5 Innr", {'on' : True, 'bri' : 1})
+            b.set_light("Living Top 1", {'on' : True, 'bri' : 1})
+            b.set_light("Living Top 2", {'on' : True, 'bri' : 1})
+            b.set_light("Living Top 3", {'on' : True, 'bri' : 1})
+            b.set_light("Living Top 4", {'on' : True, 'bri' : 1})
+            b.set_light("Living Top 5", {'on' : True, 'bri' : 1})
             log.debug("living room light> set light to min")
     return
 

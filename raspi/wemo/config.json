@@ -1,12 +1,12 @@
 {  
     "devices":{
-        "Christmas Tree":{
+        "Bed heating":{
             "node":30
         },
-        "Bathroom":{
+        "Dryer":{
             "node":37
         },
-        "Workplace":{
+        "Washing machine":{
             "node":40
         }
     },
