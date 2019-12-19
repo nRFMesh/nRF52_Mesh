@@ -998,14 +998,14 @@ int rx_pressure(char * p_msg,uint8_t*data,uint8_t size)
 
 int rx_bme(char * p_msg,uint8_t*data,uint8_t size)
 {
+    char * p_start = p_msg;
     if(size != 12)
     {
         if(size == 8)
         {
-            int add = sprintf(p_msg,"deprecated_bme_reg:");
-            p_msg += add;
-            add+=sprint_buf(p_msg,(const char*)data,size);
-            return add;
+            p_msg += sprintf(p_msg,"deprecated_bme_reg:");
+            p_msg += sprint_buf(p_msg,(const char*)data,size);
+            return (p_msg - p_start);
         }
         else
         {
@@ -1018,12 +1018,19 @@ int rx_bme(char * p_msg,uint8_t*data,uint8_t size)
                 temp |= data[1] << 16;
                 temp |= data[2] <<  8;
                 temp |= data[3];
+        //print integers only and (-) handled manually, so turn to positive and force sign character in sprintf()
+        if(temp<0)
+        {
+            temp *= (-1);
+            p_msg += sprintf(p_msg,"temp:-");
+        }
+        else
+        {
+            p_msg += sprintf(p_msg,"temp:");
+        }
         int32_t mst = temp / 100;
         int32_t lst = temp % 100;
-        if(lst<0)
-        {
-            lst*=-1;
-        }
+        p_msg += sprintf(p_msg,"%ld.%02ld;",mst,lst);
         uint32_t hum  = data[4] << 24;
                 hum |= data[5] << 16;
                 hum |= data[6] <<  8;
@@ -1036,7 +1043,8 @@ int rx_bme(char * p_msg,uint8_t*data,uint8_t size)
                 press |= data[11];
         uint32_t msp = press / (256 * 100);
         uint32_t lsp = (press/256) % 100;
-        return sprintf(p_msg,"temp:%ld.%02ld;hum:%lu.%03lu;press:%lu.%02lu",mst,lst,msh,lsh,msp,lsp);
+        p_msg += sprintf(p_msg,"hum:%lu.%03lu;press:%lu.%02lu",msh,lsh,msp,lsp);
+        return (p_msg - p_start);
     }
 }
 
