@@ -325,10 +325,6 @@ if(cfg.ping(config["bridges"]["LivingRoom"])):
     b.connect()
     log.info("Light Objects retrieval")
     lights = b.get_light_objects('name')
-    print("_________________________")
-    print(lights["Bed Leds Cupboard"])
-    print("_________________________")
-
     log.info("Hue Lights available :")
     for name, light in lights.items():
         log.info(name)
