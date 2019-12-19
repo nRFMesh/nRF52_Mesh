@@ -668,7 +668,7 @@
         "uid"           :"0x0C 76 3D 34 54 A6 62 EA",
         "add"           :"",
         "data"          : [],
-        "channel"       : "10",
+        "channel"       : "2",
         "sleep"         : "60",
         "is_listening"  : "0xBABA",
         "is_router"     : "0",
