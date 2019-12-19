@@ -1,6 +1,6 @@
 {
     "serial":{
-        "port":"/dev/ttyUSB0",
+        "port":"/dev/ttyUSB1",
         "baud":460800
     },
     "mqtt":{
@@ -18,7 +18,7 @@
         "mqtt_2_rf" :true
     },
     "log":{
-        "logfile":"/home/pi/share/rf_uart.log",
+        "logfile":"/home/pi/share/rf_uart2.log",
         "level":"Info"
     }
 }
