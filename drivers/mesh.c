@@ -1060,7 +1060,7 @@ int rx_battery(char * p_msg,uint8_t*data,uint8_t size)
                     bat_val |= data[1];
         uint16_t msv = bat_val / 1000;
         uint16_t lsv = bat_val % 1000;
-        return sprintf(p_msg,"battery:%u.%03u",msv,lsv);
+        return sprintf(p_msg,"voltage:%u.%03u",msv,lsv);
     }
 }
 
