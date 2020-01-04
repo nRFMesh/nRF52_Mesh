@@ -355,14 +355,17 @@ Aknowledge
 
     Nodes/79/ack 1
 
-# Raspberry Python scripts
+# Python scripts
 
     cd ./raspi/
 
 ## Overview
 The server's python scripts running also on a raspberry pi
-* ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
+* ./raspi/hue : aqara sensors from mqtt to hue light automation through the hue gateway REST API
 * ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
+* ./raspi/heat : eurotronics through zigbee2mqtt automation from aqara zigbee2mqtt windows contact sensors
+* ./raspi/bathroom : fan automation controlled with button, shelly light switch and humidity sensor
+* ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
 * ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
 * ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
 * ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
@@ -371,6 +374,40 @@ The server's python scripts running also on a raspberry pi
 * ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
 * ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
 * Data collection into a time series database 
+
+## Eurotronic heat
+
+1. adjust your mqtt configuration in [config.json](raspi/heat/config.json)
+2. adjust the eurotronic heater topic and apertures (apertures are the contact sensors list)
+```json
+    "heatings":{
+        "living heat":{
+            "topic":"lzig/living heat/set",
+            "Apertures":[
+                "balcony door",
+                "balcony window right",
+                "balcony window left"
+            ]
+        }
+    }
+``` 
+3. add the contact sensors to the mqtt subscriptions as well
+4. run the script `python raspi/heat.py`
+
+example eurotronic mqtt payload
+```json
+zig/living heat {
+    "current_heating_setpoint":17,
+    "eurotronic_system_mode":1,
+    "local_temperature":18.49,
+    "occupied_heating_setpoint":21,
+    "unoccupied_heating_setpoint":16,
+    "eurotronic_error_status":0,
+    "pi_heating_demand":0,
+    "battery":100,
+    "linkquality":44
+}
+```
 
 ## ConBee Zigbee to MQTT example
 
@@ -409,19 +446,6 @@ The server's python scripts running also on a raspberry pi
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
     mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
     
-## Eurotronic heat
-zig/living heat {
-    "current_heating_setpoint":17,
-    "eurotronic_system_mode":1,
-    "local_temperature":18.49,
-    "occupied_heating_setpoint":21,
-    "unoccupied_heating_setpoint":16,
-    "eurotronic_error_status":0,
-    "pi_heating_demand":0,
-    "battery":100,
-    "linkquality":44
-}
-
 # Home Smart Mesh detailed design
 
 Functions call graph. Fifos dataflow between interrupts and main loop.

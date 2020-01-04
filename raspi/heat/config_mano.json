@@ -6,7 +6,11 @@
         "client_id":"heat_client",
         "subscriptions":[   "+/balcony door",
                             "+/balcony window right",
-                            "+/balcony window left"
+                            "+/balcony window left",
+                            "+/office window right",
+                            "+/office window left",
+                            "+/bedroom window",
+                            "+/kitchen window"
                         ],
         "actions"   :[],
         "publish" :true,
@@ -20,10 +24,29 @@
                 "balcony window right",
                 "balcony window left"
             ]
+        },
+        "office heat":{
+            "topic":"mzig/office heat/set",
+            "Apertures":[
+                "office window right",
+                "office window left"
+            ]
+        },
+        "bedroom heat":{
+            "topic":"lzig/bedroom heat/set",
+            "Apertures":[
+                "bedroom window"
+            ]
+        },
+        "kitchen heat":{
+            "topic":"lzig/kitchen heat/set",
+            "Apertures":[
+                "kitchen window"
+            ]
         }
     },
     "log":{
         "logfile":"/home/pi/share/heat.log",
-        "level":"Debug"
+        "level":"Info"
     }
 }
