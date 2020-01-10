@@ -99,10 +99,10 @@ def shelly_light_relay(payload):
     log.debug(f"shelly_light_relay> relay_state = {relay_state}. state = {state}")
     if(relay_state == "on") and (state["light_relay"] == False):
         state["light_relay"] = True
-        log.info(f"shelly_light_relay> =>on. state = {state}")
+        log.debug(f"shelly_light_relay> =>on. state = {state}")
     elif(relay_state == "off") and (state["light_relay"] == True):
         state["light_relay"] = False
-        log.info(f"shelly_light_relay> =>off. state = {state}")
+        log.debug(f"shelly_light_relay> =>off. state = {state}")
     return
 
 def shelly_fan_relay(payload):
@@ -111,10 +111,10 @@ def shelly_fan_relay(payload):
     log.debug(f"shelly_fan_relay> relay_state = {relay_state}. state = {state}")
     if(relay_state == "on") and (state["fan_relay"] == False):
         state["fan_relay"] = True
-        log.info(f"shelly_fan_relay> =>on. state = {state}")
+        log.debug(f"shelly_fan_relay> =>on. state = {state}")
     elif(relay_state == "off") and (state["fan_relay"] == True):
         state["fan_relay"] = False
-        log.info(f"shelly_fan_relay> =>off. state = {state}")
+        log.debug(f"shelly_fan_relay> =>off. state = {state}")
     return
 
 def sensor_humidity(payload):
@@ -160,7 +160,7 @@ def mqtt_on_message(client, userdata, msg):
         if(msg.topic == "shellies/shellyswitch25-B8A4EE/input/0"):
             shelly_input(msg.payload)
         elif(msg.topic == "shellies/shellyswitch25-B8A4EE/relay/0"):
-            shelly_fan_relay(msg.payload)
+            shelly_light_relay(msg.payload)
         elif(msg.topic == "shellies/shellyswitch25-B8A4EE/relay/1"):
             shelly_fan_relay(msg.payload)
         elif(msg.topic == "Nodes/82/humidity"):
