@@ -124,11 +124,11 @@ def sensor_humidity(payload):
     start = config["humidity"]["start_fan"]
     if(state["humidity"] >= stop) and (humidity_level < stop):
         if(state["input"] == False):
-            log.debug(f"sensor_humidity> humidity down")
+            log.info(f"sensor_humidity> humidity down")
             stop_fan_relay_on_conditions()
     elif(state["humidity"] <= start) and (humidity_level > start):
         set_fan_relay("on")
-        log.debug(f"sensor_humidity> humidity up")
+        log.info(f"sensor_humidity> humidity up")
     state["humidity"] = humidity_level
     state["humidity_sensor_alive"] = True
     state["humidity_sensor_timer_min"] = config["humidity_sensor_timeout_min"]
