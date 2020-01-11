@@ -39,10 +39,10 @@ def stop_fan_relay_on_conditions():
         if(state["humidity"] > config["humidity"]["stop_fan_on_condition"]):
             log.info(f"stop_fan_relay_on_conditions> stop rejected, humidity too high. state = {state}")
         else:
-            log.debug(f"stop_fan_relay_on_conditions> stop accepted, not humid. state = {state}")
+            log.info(f"stop_fan_relay_on_conditions> stop accepted, not humid. state = {state}")
             set_fan_relay("off")
     else:
-        log.debug(f"stop_fan_relay_on_conditions> stop accepted as humidity unavailable. state = {state}")
+        log.info(f"stop_fan_relay_on_conditions> stop accepted as humidity unavailable. state = {state}")
         set_fan_relay("off")
     return
 
