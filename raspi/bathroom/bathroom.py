@@ -120,16 +120,17 @@ def shelly_fan_relay(payload):
 def sensor_humidity(payload):
     global state
     humidity_level = float(payload)
+    old_humidity = state["humidity"]
+    state["humidity"] = humidity_level
     stop = config["humidity"]["stop_fan"]
     start = config["humidity"]["start_fan"]
-    if(state["humidity"] >= stop) and (humidity_level < stop):
+    if(old_humidity >= stop) and (humidity_level < stop):
         if(state["input"] == False):
             log.info(f"sensor_humidity> humidity down")
             stop_fan_relay_on_conditions()
-    elif(state["humidity"] <= start) and (humidity_level > start):
+    elif(old_humidity <= start) and (humidity_level > start):
         set_fan_relay("on")
         log.info(f"sensor_humidity> humidity up")
-    state["humidity"] = humidity_level
     state["humidity_sensor_alive"] = True
     state["humidity_sensor_timer_min"] = config["humidity_sensor_timeout_min"]
     return
