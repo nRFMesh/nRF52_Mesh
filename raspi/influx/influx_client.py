@@ -81,6 +81,10 @@ def mqtt_on_message(client, userdata, msg):
                     measurement = measurement + " light"
                 else:
                     measurement = measurement + " fan"
+            elif(topic_parts[1] == "shellyplug-s-51D82E"):
+                measurement = "shelly washing machine"
+            elif(topic_parts[1] == "shellyplug-s-01E2B5"):
+                measurement = "shelly dryer"
             else:
                 measurement = topic_parts[1] + " relay " + topic_parts[3]
             sensor = topic_parts[4]
