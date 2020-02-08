@@ -33,6 +33,7 @@
                             "shellies/shellyswitch25-B8A4EE/relay/0/power",
                             "shellies/shellyswitch25-B8A4EE/relay/1/power",
                             "shellies/shellyplug-s-51D82E/relay/0/power",
+                            "shellies/shellyplug-s-021700/relay/0/power",
                             "shellies/shellyplug-s-01E2B5/relay/0/power"
                                     ],
         "publish" :false,
