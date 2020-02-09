@@ -3,7 +3,7 @@
         "host":"10.0.0.42",
         "port":1883,
         "keepalive":60,
-        "client_id":"heat_client",
+        "client_id":"home_status",
         "subscriptions":[   "+/balcony door",
                             "+/balcony window right",
                             "+/balcony window left",
