@@ -30,27 +30,52 @@ def status_notify(notif):
     if(notif == "windows closed"):
         requests.put(config["status"]["blue"]["off"])
         print("status blue off")
-    if(notif == "window open"):
+    elif(notif == "window open"):
         requests.put(config["status"]["blue"]["on"])
         print("status blue on")
+    elif(notif == "heaters off"):
+        requests.put(config["status"]["red"]["off"])
+        print("heaters off")
+    elif(notif == "heater on"):
+        requests.put(config["status"]["red"]["on"])
+        print("heater on")
     return
 
-
-def check_all_contacts():
+def check_all_contacts(states):
     ''' if any is open then all are open and contact => False'''
-    for name,aperture in aperture_state.items():
-        if(aperture == False):
+    for name,value in states.items():
+        if(value == False):
             return False
     #print(f"res={res} for {apertures}")
     return True
+
+def heater_status(heater,payload):
+    global heat_state
+    sensor = json.loads(payload)
+    diff = sensor['local_temperature'] - sensor['current_heating_setpoint']
+    is_switched_off = (diff > 3)
+    log.debug(f"{heater} => contact = {sensor['local_temperature']}")
+    prev_all_off = check_all_contacts(heat_state)
+    heat_state[heater] = is_switched_off
+    current_all_off = check_all_contacts(heat_state)
+    if(current_all_off != prev_all_off):
+        if(current_all_off):
+            status_notify("heaters off")
+            log.info(f"state changed : => all heaters off")
+        else:
+            status_notify("heater on")
+            log.info(f"state changed : => heater {heater} is on")
+    else:
+        log.debug(f" no state change all_contact = {current_all_off}")
+    return
 
 def window_open(aperture,payload):
     global aperture_state
     sensor = json.loads(payload)
     log.debug(f"{aperture} => contact = {sensor['contact']}")
-    prev_all_contacts = check_all_contacts()
+    prev_all_contacts = check_all_contacts(aperture_state)
     aperture_state[aperture] = sensor["contact"]
-    current_all_contacts = check_all_contacts()
+    current_all_contacts = check_all_contacts(aperture_state)
     if(current_all_contacts != prev_all_contacts):
         if(current_all_contacts):
             status_notify("windows closed")
@@ -70,6 +95,8 @@ def mqtt_on_message(client, userdata, msg):
             name = topic_parts[1]
             if(name in config["apertures"]):
                 window_open(name,msg.payload)
+            if(name in config["heaters"]):
+                heater_status(name,msg.payload)
         else:
             log.debug(f"topic: {msg.topic} : heat")
     except Exception as e:

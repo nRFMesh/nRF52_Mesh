@@ -11,10 +11,11 @@
                             "+/office window left",
                             "+/bedroom window",
                             "+/kitchen window",
-                            "lzig/living heat/set",
-                            "mzig/office heat/set",
-                            "lzig/bedroom heat/set",
-                            "lzig/kitchen heat/set"
+                            "lzig/living heat",
+                            "mzig/office heat",
+                            "lzig/bedroom heat",
+                            "lzig/bathroom heat",
+                            "lzig/kitchen heat"
                         ],
         "actions"   :[],
         "publish" :true,
@@ -24,7 +25,8 @@
         "living heat",
         "office heat",
         "bedroom heat",
-        "kitchen heatt"
+        "kitchen heat",
+        "bathroom heat"
     ],
             "Apertures":[
                 "balcony door",
@@ -46,7 +48,7 @@
         }
     },
     "log":{
-        "logfile":"/home/pi/share/heat.log",
+        "logfile":"/home/pi/share/home_status.log",
         "level":"Info"
     }
 }
