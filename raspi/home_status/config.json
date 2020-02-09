@@ -1,0 +1,52 @@
+{  
+    "mqtt":{
+        "host":"10.0.0.42",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"heat_client",
+        "subscriptions":[   "+/balcony door",
+                            "+/balcony window right",
+                            "+/balcony window left",
+                            "+/office window right",
+                            "+/office window left",
+                            "+/bedroom window",
+                            "+/kitchen window",
+                            "lzig/living heat/set",
+                            "mzig/office heat/set",
+                            "lzig/bedroom heat/set",
+                            "lzig/kitchen heat/set"
+                        ],
+        "actions"   :[],
+        "publish" :true,
+        "subscribe" :true
+    },
+    "heaters":[
+        "living heat",
+        "office heat",
+        "bedroom heat",
+        "kitchen heatt"
+    ],
+            "Apertures":[
+                "balcony door",
+                "balcony window right",
+            "balcony window left",
+                "office window right",
+            "office window left",
+            "bedroom window",
+            "kitchen window"
+    ],
+    "status":{
+        "red":{
+            "on":"http://10.0.0.48/settings/?led_power_disable=false",
+            "off":"http://10.0.0.48/settings/?led_power_disable=true"
+        },
+        "blue":{
+            "on":"http://10.0.0.48/settings/?led_status_disable=false",
+            "off":"http://10.0.0.48/settings/?led_status_disable=true"
+        }
+    },
+    "log":{
+        "logfile":"/home/pi/share/heat.log",
+        "level":"Info"
+    }
+}

@@ -1,0 +1,69 @@
+09 15:58:39 root INFO     ====> 'home.py' started logging with level 'Debug' @ '2020-02-09 14:58:39.642896'
+09 15:58:39 root INFO     mqtt> connected to 10.0.0.42:1883 with id: heat_client_WassDell
+09 15:58:39 root INFO     mqtt> connected with result code 0
+09 15:58:39 root INFO     mqtt> Subscription to +/balcony door
+09 15:58:39 root INFO     mqtt> Subscription to +/balcony window right
+09 15:58:39 root INFO     mqtt> Subscription to +/balcony window left
+09 15:58:39 root INFO     mqtt> Subscription to +/office window right
+09 15:58:39 root INFO     mqtt> Subscription to +/office window left
+09 15:58:39 root INFO     mqtt> Subscription to +/bedroom window
+09 15:58:39 root INFO     mqtt> Subscription to +/kitchen window
+09 15:58:39 root INFO     mqtt> Subscription to lzig/living heat/set
+09 15:58:39 root INFO     mqtt> Subscription to mzig/office heat/set
+09 15:58:39 root INFO     mqtt> Subscription to lzig/bedroom heat/set
+09 15:58:39 root INFO     mqtt> Subscription to lzig/kitchen heat/set
+09 15:58:39 root INFO     mqtt> Publishing enabled
+09 15:58:39 root DEBUG    balcony door => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    balcony window right => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    balcony window left => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    office window right => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    office window left => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    bedroom window => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:58:39 root DEBUG    kitchen window => contact = True
+09 15:58:39 root DEBUG     no state change all_contact = True
+09 15:59:56 root DEBUG    office window right => contact = False
+09 15:59:56 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 15:59:57 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=false HTTP/1.1" 200 1601
+09 15:59:57 root INFO     state changed : => window open
+09 15:59:57 root ERROR    topic: mzig/office heat/set size not matching
+09 16:00:10 root DEBUG    office window right => contact = True
+09 16:00:10 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:00:10 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=true HTTP/1.1" 200 1600
+09 16:00:10 root INFO     state changed : => windows closed
+09 16:00:10 root ERROR    topic: mzig/office heat/set size not matching
+09 16:00:48 root DEBUG    kitchen window => contact = False
+09 16:00:48 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:00:48 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=false HTTP/1.1" 200 1601
+09 16:00:48 root INFO     state changed : => window open
+09 16:00:48 root ERROR    topic: lzig/kitchen heat/set size not matching
+09 16:00:58 root DEBUG    kitchen window => contact = True
+09 16:00:58 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:00:58 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=true HTTP/1.1" 200 1600
+09 16:00:58 root INFO     state changed : => windows closed
+09 16:00:58 root ERROR    topic: lzig/kitchen heat/set size not matching
+09 16:01:11 root DEBUG    bedroom window => contact = False
+09 16:01:11 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:01:11 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=false HTTP/1.1" 200 1601
+09 16:01:11 root INFO     state changed : => window open
+09 16:01:11 root ERROR    topic: lzig/bedroom heat/set size not matching
+09 16:01:16 root DEBUG    bedroom window => contact = True
+09 16:01:16 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:01:16 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=true HTTP/1.1" 200 1600
+09 16:01:16 root INFO     state changed : => windows closed
+09 16:01:16 root ERROR    topic: lzig/bedroom heat/set size not matching
+09 16:01:57 root DEBUG    balcony window left => contact = False
+09 16:01:57 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:01:57 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=false HTTP/1.1" 200 1601
+09 16:01:57 root INFO     state changed : => window open
+09 16:01:57 root ERROR    topic: lzig/living heat/set size not matching
+09 16:02:01 root DEBUG    balcony window left => contact = True
+09 16:02:01 urllib3.connectionpool DEBUG    Starting new HTTP connection (1): 10.0.0.48:80
+09 16:02:02 urllib3.connectionpool DEBUG    http://10.0.0.48:80 "PUT /settings/?led_status_disable=true HTTP/1.1" 200 1600
+09 16:02:02 root INFO     state changed : => windows closed
+09 16:02:02 root ERROR    topic: lzig/living heat/set size not matching
