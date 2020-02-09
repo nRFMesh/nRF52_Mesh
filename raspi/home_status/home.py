@@ -113,7 +113,9 @@ for heater in config["heaters"]:
 for aperture in config["apertures"]:
     aperture_state[aperture] = True
 
-
+#set initial led conditions as in case of no change, no further commands wil be sent
+status_notify("heaters off")
+status_notify("windows closed")
 # -------------------- Mqtt Client -------------------- 
 #will start a separate thread for looping
 clientMQTT = mqtt_start(config,mqtt_on_message,True)
