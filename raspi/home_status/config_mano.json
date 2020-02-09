@@ -28,14 +28,14 @@
         "kitchen heat",
         "bathroom heat"
     ],
-            "Apertures":[
-                "balcony door",
-                "balcony window right",
-            "balcony window left",
-                "office window right",
-            "office window left",
-            "bedroom window",
-            "kitchen window"
+    "apertures":[
+        "balcony door",
+        "balcony window right",
+        "balcony window left",
+        "office window right",
+        "office window left",
+        "bedroom window",
+        "kitchen window"
     ],
     "status":{
         "red":{
