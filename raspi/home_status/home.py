@@ -52,8 +52,9 @@ def check_all_contacts(states):
 def heater_status(heater,payload):
     global heat_state
     sensor = json.loads(payload)
-    diff = sensor['local_temperature'] - sensor['current_heating_setpoint']
-    is_switched_off = (diff > 3)
+    #diff = sensor['local_temperature'] - sensor['current_heating_setpoint']
+    #is_target_3_away = (diff > 3)
+    is_switched_off = (sensor["pi_heating_demand"] < 13)    #less than 5% of 255
     log.debug(f"{heater} => contact = {sensor['local_temperature']}")
     prev_all_off = check_all_contacts(heat_state)
     heat_state[heater] = is_switched_off
