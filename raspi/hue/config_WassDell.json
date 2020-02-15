@@ -26,6 +26,7 @@
                             "zig/stairs down move",
                             "zig/dining switch",
                             "zig/night leds button",
+                            "mzig/tree button",
                             "zig/cube"
                         ],
         "actions"   :[],
