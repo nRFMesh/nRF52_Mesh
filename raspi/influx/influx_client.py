@@ -75,8 +75,8 @@ def mqtt_on_message(client, userdata, msg):
                     }
                 ]
         elif( (len(topic_parts) == 5) and (topic_parts[0] == "shellies") ):
-            if(msg.topic in config["names"]):
-                measurement = config["names"][msg.topic]
+            if(msg.topic in config["mqtt"]["names"]):
+                measurement = config["mqtt"]["names"][msg.topic]
                 sensor = topic_parts[4]
                 value = float(str(msg.payload))
                 post = [
