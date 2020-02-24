@@ -39,12 +39,12 @@
     ],
     "status":{
         "red":{
-            "on":"http://10.0.0.48/settings/?led_power_disable=false",
-            "off":"http://10.0.0.48/settings/?led_power_disable=true"
+            "on":"http://192.168.0.109/settings/?led_power_disable=false",
+            "off":"http://192.168.0.109/settings/?led_power_disable=true"
         },
         "blue":{
-            "on":"http://10.0.0.48/settings/?led_status_disable=false",
-            "off":"http://10.0.0.48/settings/?led_status_disable=true"
+            "on":"http://192.168.0.109/settings/?led_status_disable=false",
+            "off":"http://192.168.0.109/settings/?led_status_disable=true"
         }
     },
     "log":{
