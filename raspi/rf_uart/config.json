@@ -18,7 +18,7 @@
         "mqtt_2_rf" :true
     },
     "log":{
-        "logfile":"/home/pi/share/rf_uart2.log",
-        "level":"Info"
+        "logfile":"/home/pi/share/rf_uart4.log",
+        "level":"Error"
     }
 }

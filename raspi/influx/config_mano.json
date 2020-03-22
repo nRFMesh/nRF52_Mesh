@@ -14,7 +14,7 @@
                             "+/bed light button",
                             "+/living heat",
                             "+/kitchen heat",
-                            "+/bed heater",
+                            "+/bed weather",
                             "+/bedroom weather",
                             "+/bedroom heat",
                             "+/bedroom window",
@@ -69,8 +69,10 @@
             "occupied_heating_setpoint":"float",
             "unoccupied_heating_setpoint":"float",
             "pi_heating_demand" :"int"
-        }
-                    
+        },
+        "discard":[
+            "eurotronic_host_flags"
+        ]              
     },
     "influxdb":{
         "host":"localhost",
@@ -78,7 +80,7 @@
         "db":"meshNet"
     },
     "log":{
-        "logfile":"/home/pi/share/influx_client_7.log",
+        "logfile":"/home/pi/share/influx_client_9.log",
         "level":"Info"
     }
 }

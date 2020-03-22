@@ -24,6 +24,12 @@ def check_all_types(fields):
         set_type(fields,type_name,type_val)
     return
 
+def check_discards(fields):
+    for type_name in config["mqtt"]["discard"]:
+        if(type_name in fields):
+            del fields[type_name]
+    return
+
 def last_seen_fresh(last_seen_text):
     last_seen_time = dateutil.parser.parse(last_seen_text).replace(tzinfo=None)
     diff = datetime.datetime.now() - last_seen_time
@@ -57,6 +63,7 @@ def mqtt_on_message(client, userdata, msg):
             if("voltage" in fields):
                 fields["voltage"] = float(fields["voltage"])/1000 #convert voltage from milivolts to Volts
             check_all_types(fields)
+            check_discards(fields)
                 
             is_last_seen_relevant = False
             if("last_seen" in fields):
