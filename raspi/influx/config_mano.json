@@ -40,6 +40,8 @@
             "shellies/shellyplug-s-B86270/relay/0/power":"shelly micro wave",
             "shellies/shellyplug-s-B85D8C/relay/0/power":"shelly dish washer",
             "shellies/shellyplug-s-B85CA1/relay/0/power":"shelly tv routers",
+            "shellies/shellyplug-s-6A5CE5/relay/0/power":"shelly play tv sound",
+            "shellies/shellyplug-s-6A5DCF/relay/0/power":"shelly ethernet repeater",
             "shellies/shellyplug-s-021700/relay/0/power":"shelly entrance",
             "shellies/shellyswitch25-B8A4EE/relay/0/power":"shelly bathroom light",
             "shellies/shellyswitch25-B8A4EE/relay/1/power":"shelly bathroom fan",
