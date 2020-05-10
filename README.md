@@ -452,3 +452,41 @@ Functions call graph. Fifos dataflow between interrupts and main loop.
 
 <img src="images/nrf_mesh.svg" width="600">
 
+# nRF Mesh to serial to mqtt
+
+## nRF52 Mesh Dongle required
+* see details in hackaday project [nRF5 Custom Mesh Network](https://hackaday.io/project/124114-nrf5-custom-mesh-network/details)
+
+* [nRF 52 Dongle Firmware - github](https://github.com/nRFMesh/nRF52_Mesh)
+  
+  * [uart dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/04_uart_dongle)
+  * [usb dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/08_usb_dongle)
+
+## running the scripts
+
+[py/nrf_mesh](./py/nrf_mesh/)
+
+    cu -l /dev/ttyACM0 -s 460800 
+
+<img src="./raspi/nrf_mesh/doc/nrf_serial.gif">
+
+subscribe to topic
+
+    mosquitto_sub -t 'nrf/#' -v | ts
+
+start nrf_mesh
+
+    python3 raspi/nrf_mesh/nrf_mesh.py
+
+<img src="./raspi/nrf_mesh/doc/nrf_mqtt.gif">
+
+## use as a service
+
+```shell
+sudo cp raspi/nrf_mesh/nrf_mesh.service /lib/systemd/system/
+sudo chmod 644 /lib/systemd/system/nrf_mesh.service
+sudo chmod +x raspi/nrf_mesh/nrf_mesh.py
+sudo systemctl daemon-reload
+sudo systemctl enable nrf_mesh.service
+sudo systemctl start nrf_mesh.service
+```

@@ -1,0 +1,29 @@
+{
+    "serial":{
+        "port":"/dev/ttyUSB1",
+        "baud":460800
+    },
+    "mesh":{
+        "channel":2
+    },
+    "mqtt":{
+        "enable":true,
+        "subscribe" :false,
+        "publish" :true,
+        "base_topic" : "nrf",
+        "host":"10.0.0.42",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"nrf_mesh",
+        "subscriptions":[
+            "Nodes/#",
+            "cmd/request/#",
+            "remote_cmd/request/#"
+        ],
+        "actions"   :["dimmer","heat","ping"]
+    },
+    "log":{
+        "logfile":"/home/pi/share/nrf_mesh.log",
+        "level":"Info"
+    }
+}

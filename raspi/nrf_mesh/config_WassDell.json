@@ -1,0 +1,30 @@
+{
+    "serial":{
+        "port":"COM9",
+        "baud":460800
+    },
+    "mesh":{
+        "channel":2,
+        "whitelist":[],
+        "blacklist":[]
+    },
+    "mqtt":{
+        "enable":true,
+        "subscribe" :false,
+        "publish" :true,
+        "base_topic" : "pc_nrf",
+        "last_seen":true,
+        "retain":true,
+        "qos":1,
+        "host":"10.0.0.42",
+        "port":1883,
+        "keepalive":60,
+        "client_id":"nrf_mesh",
+        "subscriptions":[],
+        "actions"   :["dimmer","heat","ping"]
+    },
+    "log":{
+        "logfile":"log_nrf_mesh.log",
+        "level":"Info"
+    }
+}

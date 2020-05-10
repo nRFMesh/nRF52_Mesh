@@ -1,0 +1,244 @@
+#%%
+import sys
+import logging as log
+import argparse
+from time import sleep,time
+import json
+import socket
+import os
+
+# attempt for jupyter
+#nb_dir = os.path.split(os.getcwd())[0]
+#if nb_dir not in sys.path:
+#    sys.path.append(nb_dir)
+#from raspi.rf_uart.mqtt import mqtt_start
+#import raspi.rf_uart.mesh as mesh
+#import raspi.rf_uart.cfg as cfg
+
+from mqtt import mqtt_start
+import mesh as mesh
+import cfg
+
+import datetime
+from tzlocal import get_localzone
+
+#%%
+def mesh_do_action(cmd,remote,params):
+    control = 0x71
+    try:
+        if(cmd == "dimmer"):
+            #TODO
+            log.info("action> dimmer TODO")
+        elif(cmd == "ping"):
+            mesh.send([ control,mesh.pid["ping"],this_node_id,int(remote)])
+    except KeyError:
+        log.error("mqtt_remote_req > KeyError Exception for %s",cmd)
+    except ValueError:
+        log.error("mqtt_remote_req > ValueError Exception for %s , '%s'",cmd, remote)
+    return
+
+def remote_execute_command(cmd,params):
+    control = 0x21
+    try:
+        if(cmd == "set_channel"):
+            mesh.send([ control,mesh.pid["exec_cmd"],this_node_id,int(params["remote"]),
+                        mesh.exec_cmd[cmd],int(params["channel"])]
+                    )
+        elif(cmd == "get_channel"):
+            mesh.send([ control,mesh.pid["exec_cmd"],this_node_id,int(params["remote"]),
+                        mesh.exec_cmd[cmd]]
+            )
+        else:
+            return False
+    except (KeyError,TypeError):
+        log.error("mqtt_remote_req > Error Exception for %s",cmd)
+    return True
+
+def execute_command(cmd,params):
+    try:
+        if(cmd == "set_node_id"):
+            mesh.command(cmd,[int(params["node_id"])])
+        elif(cmd == "get_node_id"):
+            mesh.command(cmd)
+        elif(cmd == "set_channel"):
+            mesh.command(cmd,[int(params["channel"])])
+        elif(cmd == "get_channel"):
+            mesh.command(cmd)
+        elif(cmd == "set_tx_power"):
+            mesh.command(cmd,[int(params["tx_power"])])
+        elif(cmd == "get_tx_power"):
+            mesh.command(cmd)
+        else:
+            return False
+    except KeyError:
+        log.error("mqtt_req > KeyError Exception for %s",cmd)
+    return True
+
+def mqtt_on_message(client, userdata, msg):
+    topics = msg.topic.split('/')
+    cmd = topics[2]
+    params = []
+    if(len(msg.payload) != 0):
+        try:
+            params = json.loads(msg.payload)
+        except json.decoder.JSONDecodeError:
+            log.error("mqtt_req > json.decoder.JSONDecodeError parsing payload: %s",msg.payload)
+    if(topics[1] == "request"):
+        if(topics[0] == "cmd"):
+            if(execute_command(cmd,params)):
+                log.info("mqtt> Command Request : %s",cmd)
+            else:
+                log.error("mqtt> Error: Command Request not executed : %s",cmd)
+        elif(topics[0] == "remote_cmd"):
+            if(remote_execute_command(cmd,params)):
+                log.info("mqtt> Remote Command Request : %s",cmd)
+            else:
+                log.error("mqtt> Error: Remote Command Request not executed : %s",cmd)
+    elif(topics[0] == "Nodes"):
+        action = topics[2]
+        if(action in config["mqtt"]["actions"]):
+            log.info("mqtt> Action %s",action)
+            mesh_do_action(cmd,topics[1],params)
+    return
+
+def get_last_seen_now():
+    time_now = datetime.datetime.now()
+    return str(time_now.astimezone(local_zone))
+
+'''It's important to provide the msg dictionnary here as it might be used in a multitude of ways
+   by other modules
+'''
+def mesh_on_broadcast(msg):
+    sensor_name = mesh.inv_pid[int(msg["pid"])]
+    node_name = mesh.node_name(msg['src'])
+    log.info(f"mesh> {msg['src']} as {node_name} => {sensor_name}")
+    if(config["mqtt"]["enable"] and config["mqtt"]["publish"]):
+        publishing = mesh.publish(msg)
+        use_last_seen = False
+        if("last_seen" in config["mqtt"]):
+            if(config["mqtt"]["last_seen"] == True):
+                last_seen = get_last_seen_now()
+                use_last_seen = True
+        for topic,payload in publishing.items():
+            if(config["mqtt"]["base_topic"]):
+                topic = config["mqtt"]["base_topic"]+ "/" + topic
+            if(use_last_seen):
+                payload["last_seen"] = last_seen
+            clientMQTT.publish(topic,json.dumps(payload),mqtt_qos,mqtt_retain)
+    return
+
+def mesh_on_message(msg):
+    #ack explanation not required
+    if("ack" in msg):
+        log.info(   "ack > %s %s -> %s",
+                    mesh.inv_pid[int(msg["pid"])],
+                    msg["src"],
+                    msg["dest"]
+                    )
+        topic = "Nodes/"+msg["src"]+"/ack"
+        payload = 1
+        clientMQTT.publish(topic,payload)
+    return
+
+''' the return mesntions if the logto the user is handled or if not
+    the raw line will be logged
+'''
+def mesh_on_cmd_response(resp,is_remote):
+    global this_node_id
+    if(is_remote):
+        topic = "remote_cmd/response/"+resp["cmd"]
+    else:
+        topic = "cmd/response/"+resp["cmd"]
+    clientMQTT.publish(topic,json.dumps(resp))
+    if(resp["cmd"] == "get_node_id"):
+        this_node_id = int(resp["node_id"])
+        log.debug("get_node_id() => "+str(this_node_id))
+    return
+
+def loop_forever():
+    while(True):
+        sleep(0.1)
+        mesh.run()
+        if(config["mqtt"]["enable"]):
+            clientMQTT.loop()
+    return
+def loop(nb):
+    while(nb > 0):
+        sleep(0.05)
+        mesh.run()
+        nb = nb - 1
+    return
+
+def remote_set_channel(remote,chan):
+    log.debug("remote_set_channel(nodeid %d @ chan %d)",remote,chan)
+    control = 0x21
+    mesh.send([control,mesh.pid["exec_cmd"],this_node_id,remote,mesh.exec_cmd["set_channel"],remote,chan])
+    loop(2)
+    return
+
+def set_channel(chan):
+    log.debug("cmd > set_channel: %d",chan)
+    mesh.command("set_channel",[chan])
+    loop(2)
+    return
+def get_channel():
+    log.debug("cmd > get_channel()")
+    mesh.command("get_channel",[])
+    loop(2)
+    return
+def get_node_id():
+    log.debug("cmd > get_node_id()")
+    mesh.command("get_node_id",[])
+    loop(2)
+    return
+def ping(target_node):
+    log.debug("msg > ping %d -> %d ",this_node_id,target_node)
+    control = 0x70
+    mesh.send([control,mesh.pid["ping"],this_node_id,target_node])
+    loop(2)
+    return
+
+def test1():
+    remote_set_channel(74,2)
+    set_channel(2)
+    ping(74)
+    loop_forever()
+    return
+# -------------------- main -------------------- 
+#python client.py -p COM4 -n 24 -c 10
+config = cfg.configure_log(__file__)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-f","--function",default="x")
+args = parser.parse_args()
+
+local_zone = get_localzone()
+mqtt_qos = 0
+if("qos" in config["mqtt"]):
+    mqtt_qos = config["mqtt"]["qos"]
+if(mqtt_qos == 2):
+    print("qos 2 not supported")
+    sys.exit(1)
+mqtt_retain = False
+if("retain" in config["mqtt"]):
+    mqtt_retain = config["mqtt"]["qos"]
+
+#will not start a separate thread for looping
+clientMQTT = mqtt_start(config,mqtt_on_message,start_looping=False)
+
+mesh.start(config,mesh_on_broadcast,mesh_on_message,mesh_on_cmd_response)
+
+set_channel(config["mesh"]["channel"])
+
+this_node_id = 0
+get_node_id()
+
+
+
+try:
+    loop_forever()
+except KeyboardInterrupt:
+    log.error("Interrupted by user Keyboard")
+    mesh.stop()
+    sys.exit(0)
+#else use as a module
