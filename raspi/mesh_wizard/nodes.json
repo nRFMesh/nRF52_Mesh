@@ -345,7 +345,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
             },
-    "76":   {   "name"          :"Bedroom tag",
+    "76":   {   "name"          :"bedroom tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x0E AD B5 5F 07 C1 9D 85",
@@ -355,7 +355,7 @@
         "channel"       : "2",
         "sleep"         : "20"
             },
-    "77":   {   "name"          :"Livingroom tag",
+    "77":   {   "name"          :"livingroom tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x80 38 D1 86 F8 C9 EB 23",
@@ -365,7 +365,7 @@
         "channel"       : "2",
         "sleep"         : "20"
             },
-    "78":   {   "name"          :"Hallway tag",
+    "78":   {   "name"          :"hallway tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x09 32 46 24 12 92 4F 8C",
@@ -426,7 +426,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
             },
-    "82":   {   "name"          :"Bathroom tag",
+    "82":   {   "name"          :"bathroom tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x8D 9D CF 47 21 28 93 5C",
@@ -564,7 +564,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
     },
-    "91":   {   "name"          :"Office tag",
+    "91":   {   "name"          :"office tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x40 2D FD 9A 41 D2 D1 72",
@@ -573,7 +573,7 @@
         "channel"       : "2",
         "sleep"         : "20"
     },
-    "92":   {   "name"          :"Livingroom window tag",
+    "92":   {   "name"          :"livingroom window tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x54 AA 4F 3A C2 94 5A B9",
@@ -640,7 +640,7 @@
         "events"          : ["move"],
         "channel"       : "25"
     },
-    "98":   {   "name"          :"Balcony tag",
+    "98":   {   "name"          :"balcony tag",
         "board"         :"nRF52_Sensors",
         "program"       :"nRF52_Sensors",
         "uid"           :"0x8C BC 56 98 C6 3C BE D3",
@@ -756,7 +756,7 @@
         "rtx_timeout"   : "5",
         "rtx_count"     : "3"
     },
-    "110":   {   "name"          :"Kitchen tag",
+    "110":   {   "name"          :"kitchen tag",
         "board"         :"nRF52_Sensors",
         "program"       :"01_sensortag",
         "uid"           :"0x38 4F B4 36 0F 40 06 CE",
