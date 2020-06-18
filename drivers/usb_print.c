@@ -164,7 +164,7 @@ static void usbd_user_ev_handler(app_usbd_event_type_t event)
 
             break;
         case APP_USBD_EVT_STOPPED:
-            app_usbd_disable();
+            // -- app_usbd_disable(); -- commented as this would kill the device when the host disconnects the first connection
             ////bsp_board_leds_off();
             break;
         case APP_USBD_EVT_POWER_DETECTED:
