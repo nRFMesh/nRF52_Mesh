@@ -6,7 +6,7 @@ import sys
 import inspect, os
 
 currdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-nodes = cfg.get_json("../nodes.json")
+nodes = cfg.get_json("../www/nodes.json")
 
 
 #  command example
