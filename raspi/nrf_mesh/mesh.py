@@ -13,7 +13,7 @@ on_cmd_response = None
 
 config = cfg.configure_log(__file__)
 nodes_config_file = '/home/pi/nRF52_Mesh/nodes.json'
-log.info("mesh> using NODES_CONFIG : %s",nodes_config_file)
+log.info("mesh> using local : %s",nodes_config_file)
 nodes = cfg.get_local_nodes(nodes_config_file)
 
 pid = {
