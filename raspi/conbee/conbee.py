@@ -181,9 +181,8 @@ async def websocket_sensor_events():
         log.error("Done with the While loop")
 
 
-
-nodes_config = os.getenv('NODES_CONFIG','/home/pi/nRF52_Mesh/raspi/mesh_wizard/nodes.json')
-log.info("using NODES_CONFIG : %s",nodes_config)
+nodes_config = '/home/pi/nRF52_Mesh/nodes.json'
+log.info("using local config : %s",nodes_config)
 nodes = cfg.get_local_nodes(nodes_config)
 
 config_file = cfg.configure_log(__file__)

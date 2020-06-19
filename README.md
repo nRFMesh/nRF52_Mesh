@@ -123,7 +123,7 @@ When compiling the nRF applications firmware don't forget to call the submodule 
 
 <img src="images/pylink.png" width="360">
 
-* System variable **NODES_CONFIG** should point on a json configuration file, see an example at [node.json](https://raw.githubusercontent.com/HomeSmartMesh/IoT_Frameworks/master/config/nodes.json) or the screenshot below
+* `nodes.json` is provided locally in this repo and the docker command [nodes-server.sh](./nodes-server.sh) can also serve it at http://hostname:8080/nodes.json
 
 <img src="images/nodes.json.png" width="400">
 
