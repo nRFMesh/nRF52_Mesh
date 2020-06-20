@@ -32,7 +32,7 @@
 
     cu -l /dev/ttyACM0 -s 460800 
 
-<img src="./raspi/nrf_mesh/doc/nrf_serial.gif">
+<img src="./images/nrf_serial.gif">
 
 subscribe to topic
 
@@ -43,7 +43,7 @@ start nrf_mesh [py/nrf_mesh](https://github.com/HomeSmartMesh/raspi/tree/master/
 
     python3 nrf_mesh.py
 
-<img src="./raspi/nrf_mesh/doc/nrf_mqtt.gif">
+<img src="./images/nrf_mqtt.gif">
 
 This custom sensors RF mesh can expand to cover a home area. Onces connected to services provided in the [raspi](https://github.com/HomeSmartMesh/raspi) project, including python scripts, influxdb and grafana, the end result dashboard looks like this
 
