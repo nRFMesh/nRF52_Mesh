@@ -63,6 +63,7 @@ only the main applications are listed here, for further details about all applic
 
 ## 01 sensor tag
     application/01_sensortag> make flash
+    application/01_sensortag> make paramw
 
 <img src="images/nRF52832_sensortag.png" width="300">
 
@@ -71,9 +72,11 @@ only the main applications are listed here, for further details about all applic
 * Temperature, Humidity, Pressure : BME280
 * Light : MAX44009
 * Smooth graphana logs with cyclic broadcast ~ 30 sec => battery life ~ 6 month on CR2032
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
 
 ## 04 uart dongle
     application/04_uart_dongle> make flash
+    application/04_uart_dongle> make paramw
 
 <img src="boards/nrf52_dongle/images/dongle.png" width="200">
 
@@ -81,17 +84,20 @@ only the main applications are listed here, for further details about all applic
 * buy : "nRF52832 BLE USB UART dongle"
 * custom firmware and pogo-pins jtag adapter see below
 * RF Mesh repeater + RF Mesh to Host interface
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
 
 ## 08 usb dongle (nRF52840-dongle)
     application/08_usb_dongle> make flash
+    application/08_usb_dongle> make paramw
 
 <img src="./images/nRF52840-dongle-debug.png" width="300">
 
-* buy : "nRF52832 dongle"
+* buy : "nRF52840 usb dongle"
 * custom firmware for RF mesh
 * pogo-pins jtag adapter 3dprint : [Fusion360 CAD model](https://a360.co/2CDqeTA)
 * RF Mesh repeater + RF Mesh to Host interface
-* TODO : add fifo to buffer USB CDC Tx packets (to prevents drops and go > 64 bytes)
+* buffered USB CDC tx and rx
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
 
 ---
 
