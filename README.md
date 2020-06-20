@@ -10,9 +10,14 @@
 * text serial line protocol
 * Multiple Network endpoints
   * No single point of failure
-* Server, Dongles, Sensors : SW Open Source
-* Server, Dongles, Sensors : HW On the shelves
+* Server, Dongles, Sensors
+  * Full Stack Open Source (no softdevices required)
+  * HW On the shelves
   * optional DIY HW
+* Alive trace routing
+  * a heartbeat message that gives info about the age and RF tx/rx hops through the route
+
+see below the [Drivers & Custom Mesh protocol](#Drivers-&-Custom-Mesh-protocol) section for the RF Protocol details
 
 # Description
 * 2 Mbps (e.g. Zgibee is at 250 Kbps to have a higher range), lowering the bitrate does not improve the range enough to get rid of repeaters, and once you need repeaters these are continuous listeners and require permanent power anyway, so the strategy is to have a repeater for every slot of the house and those repeaters can have power amplifiers and the range problem is solved keeping the high bitrate feature.
@@ -49,8 +54,12 @@ This custom sensors RF mesh can expand to cover a home area. Onces connected to 
 
 <img src="./images/grafana-dashboard.png">
 
+---
+
 # nRF52 Applications
     cd ./applications/
+
+only the main applications are listed here, for further details about all applications see below the [More nRF52 Applications](#More-nRF52-Applications) section
 
 ## 01 sensor tag
     application/01_sensortag> make flash
@@ -63,25 +72,6 @@ This custom sensors RF mesh can expand to cover a home area. Onces connected to 
 * Light : MAX44009
 * Smooth graphana logs with cyclic broadcast ~ 30 sec => battery life ~ 6 month on CR2032
 
-## 02 acell tag
-    application/02_accell_tag> make flash
-
-<img src="images/motion_tag.png" width="300">
-
-* Status : experimental, low battery life
-* nRF52832 module
-* MPU-6050 module
-* interrupt pio from MPU-6050
-
-## 03 buttons
-    application/03_buttons> make flash
-
-<img src="images/buttons.png" width="300">
-
-* Status : experiemntal, low battery life
-* nRF52832 module
-* x6 buttons
-
 ## 04 uart dongle
     application/04_uart_dongle> make flash
 
@@ -92,43 +82,10 @@ This custom sensors RF mesh can expand to cover a home area. Onces connected to 
 * custom firmware and pogo-pins jtag adapter see below
 * RF Mesh repeater + RF Mesh to Host interface
 
-## 05 rotary decoder
-    application/05_rotary_decoder> make flash
-
-<img src="images/rf_encoder.png" width="400">
-
-* buy : "600 pulses Optical Rotary encoder"
-* custom wiring +5V, encoder pullups to +3.3 V
-* rf timestamp synchronisation
-* HW capture of timestamp
-* RF Mesh log of modulo 600 position with timestamp
-* 4 ms status on change, otherwise 4 s reminder
-
-
-## 06 bldc 52832
-    application/06_bldc_52832> make flash
-
-<img src="images/bldc_control.png" width="400">
-
-* Status : RF magnetic angle control OK, rest is in development
-* nRF52832 sensor tag board used
-* buy : "L6234d breakout"
-* custom wiring power supply 9.6 V / nRF powered with 3.3 V separately
-* RF bldc control : magnetic angle, voltage ratio, speed, absolute angle
-
-
-## 07 bldc 52840
-    application/07_usb_dongle> make flash
-
-<img src="images/nRF52840-usb-dongle.png" width="300">
-
-* Status : preparation
-* previous application "03 bldc 52832" ported to the nRF52840-dongle
-
 ## 08 usb dongle (nRF52840-dongle)
     application/08_usb_dongle> make flash
 
-<img src="images/nRF52840-dongle-debug.png" width="300">
+<img src="./images/nRF52840-dongle-debug.png" width="300">
 
 * buy : "nRF52832 dongle"
 * custom firmware for RF mesh
@@ -136,17 +93,95 @@ This custom sensors RF mesh can expand to cover a home area. Onces connected to 
 * RF Mesh repeater + RF Mesh to Host interface
 * TODO : add fifo to buffer USB CDC Tx packets (to prevents drops and go > 64 bytes)
 
+---
 
-## Printed Circuit Boards
+# Drivers & Custom Mesh protocol
+
+    cd ./drivers/
+
+## ./drivers/
+
+Contains the custom drivers for this project from which the [mesh.c](./drivers/mesh.c) a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
+* Sleepy nodes (low power) and router nodes (always listening)
+* single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
+* A simple alternative to the Bluetooth Mesh and Zigbee Thread IPV6
+
+
+<img src="./images/mesh.png">
+
+* Low power node : Mesh node that can be a sensor Tag that wakes up on RTC or on sensor value interrupt to log a parameter. Can also be a button that wakes up on a press PIO interrupt.
+* Router node : Mesh node that cooperates with the Low power nodes, the router has to be a device that keeps listening permanently on the same RF channel, this might require ~ 13 mA. Example router devices are light controllers, server’s RF dongle or USB powered sensors and status devices.
+* Server : A Raspberry pi running linux. The RF signals come through the serial port or with a USB adapter, then published on MQTT, from which Python scripts inject signals on the Database, connected to Grafana web server. Note that there can be multiple router dongles connected to servers.
+
+## Protocol Overview
+
+The Home Smart Mesh project introduce an RF Mesh protocol which is a complete stack implementation to allow devices to communicate in a Mesh Network Topology. This protocol implementation is using the nRF SDK 15 it is using the Radio module through a modified Enhanced Shock-burst custom protocol. Implementations range from nRF24L01+ with an STM8L and STM32 to the nRF51 and nRF52 families that add features such as RSSI and bigger packets sizes.
+
+## Protocol Description
+
+* 100% Open source Mesh RF Stack
+* Ported on STM8L, STM32, nRF51 and nRF52
+* Concept designed for Low Power Nodes and Router Nodes
+* Same radio channel configured for the whole network
+* Single channel allows maximum power save with unlimited sleep periods, and random wake up with button press or sensor event.
+* Mesh with flooding broadcast, where every message has its own configurable time to live. This brings multiple advantages of usage simplicity.
+* Short addresses allow efficient packets sizes. Possibility for extensions with short address reuse and exception addresses to allow unlimited network size.
+* For simplicity purpose, security is a matter of application payload content.
+* The stack is so small that the RAM and ROM are left for the application logic, not requiring a network co-processor.
+
+### Protocol Mesh Broadcast
+* A simple flood mechanism is implemented where every router repeats the signal heard decrementing the time to live to avoid infinite propagation.
+* Future extensions can extend the routing by gathering statistics and deciding of the optimal path in a decentralized fashion. Note that small installations in a home do not bring any significant advantage, thus the interest for a simple protocol for such use case.
+
+### Protocol Mesh Directed messages with ack
+* This type of communication uses a source and destination addresses
+* Only the node recognizing itself as destination will send a packet as acknowledge
+* The acknowledge packet is propagated the same way, until it reaches the source, which make it an end to end acknowledge
+* If the source did not got an acknowledge back while it was requested, it can retry the transmission again.
+
+## Packet Format
+
+custom stack vs softdevices : This protocol is using the direct Radio module capabilities and does not require the sofdevices. The softdevices are Nordic firmware that are closed source and distributed as binaries, they have higher privileges than the user application. Softdevices guarantee that the RF functions keep always working as the user application is untrusted. This comes at a big price to pay, as the rest of the SoC cannot be properly used, no free configuration of interrupts for example, they have also a big memory footprint that prevents safe double paged firmware updates.
+
+<img src="./images/packet.png">
+
+The configuration has discarded the usage of S0 and S1 which are intended for compatibility with other protocols which require a certain number of bits on the air that do not map to 8 aligned to form bytes in memory.
+
+<img src="./images/protocol.png">
+
+the RF Payload Format contains another software header. That is the header used to manage the packets in the mesh network.
+
+
+* control: bit 7 defines whether a packet is to be broadcasted or has a target destination. Bits 6 and 5 allow safe communication with acknowledge, and a request response type. That allows the sw stack to handle the acknowledge and re-transmission. bit 3 allows streaming of messages without acknowledge.
+* pid: is defining the application function which maps to a particular payload serialization
+* Source and dest: are the Node Id, and are unique within every mesh. Although 8 bits, exceptions allow further reserved sizes.
+* Time to live : used by the routers to know when to drop the packet.
+
+## Alive trace routing
+
+<img src="./images/alive-trace-route.png">
+
+* All Nodes including the low power, send a periodic “alive” packet
+* The initiator includes a counter that informs about the live cycle count
+* Every retransmission appends information about
+  * Received RSSI (Radio Signal Strength Indicator)
+  * The Node Id of the Router performing the re transmission
+  * Transmission power with which the packet has been re transmitted
+
+<img src="./images/alive-json.png">
+
+* The “alive” packet that reaches the server’s dongle has the full route information
+* Multiple paths can reach the server for the same original broadcast
+* A single “alive” packet can provide link status of the complete mesh netwrok
+* The signal route information is packed in a json structure
+* json structures are broadcasted on the jNodes topics path
+
+---
+
+# Printed Circuit Boards
     cd ./boards/
 
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware
-
-## ./drivers/
-Contains the specific drivers for this project from which the "mesh.c" a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
-* Sleepy nodes (low power) and router nodes (always listening)
-* single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
-* An alternative to the Bluetooth Mesh and Zigbee Thread IPV6 world
 
 ## ./tools/
 Contains the fancy Makefile extensions that allow :
@@ -401,6 +436,62 @@ Aknowledge
 
     Nodes/79/ack 1
 
+# More nRF52 Applications
+    cd ./applications/
+
+## 02 acell tag
+    application/02_accell_tag> make flash
+
+<img src="images/motion_tag.png" width="300">
+
+* Status : experimental, low battery life
+* nRF52832 module
+* MPU-6050 module
+* interrupt pio from MPU-6050
+
+## 03 buttons
+    application/03_buttons> make flash
+
+<img src="images/buttons.png" width="300">
+
+* Status : experiemntal, low battery life
+* nRF52832 module
+* x6 buttons
+
+## 05 rotary decoder
+    application/05_rotary_decoder> make flash
+
+<img src="images/rf_encoder.png" width="400">
+
+* buy : "600 pulses Optical Rotary encoder"
+* custom wiring +5V, encoder pullups to +3.3 V
+* rf timestamp synchronisation
+* HW capture of timestamp
+* RF Mesh log of modulo 600 position with timestamp
+* 4 ms status on change, otherwise 4 s reminder
+
+
+## 06 bldc 52832
+    application/06_bldc_52832> make flash
+
+<img src="./images/bldc_control.png" width="400">
+
+* Status : RF magnetic angle control OK, rest is in development
+* nRF52832 sensor tag board used
+* buy : "L6234d breakout"
+* custom wiring power supply 9.6 V / nRF powered with 3.3 V separately
+* RF bldc control : magnetic angle, voltage ratio, speed, absolute angle
+
+
+## 07 bldc 52840
+    application/07_usb_dongle> make flash
+
+<img src="./images/nrf52840-usb-dongle.png" width="300">
+
+* Status : preparation
+* previous application "03 bldc 52832" ported to the nRF52840-dongle
+
+
 # Python scripts
 
     cd ./raspi/
@@ -429,3 +520,5 @@ The server's python scripts running also on a raspberry pi
 Functions call graph. Fifos dataflow between interrupts and main loop.
 
 <img src="images/nrf_mesh.svg" width="600">
+
+
