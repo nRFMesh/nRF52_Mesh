@@ -1,7 +1,53 @@
-# Presentation and Documentation on [Home Smart Mesh](https://www.homesmartmesh.com/)
-This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/) with focus on software configuration and protocol implementation details
+# Features
+<img src="./images/nRF52-features.png">
 
-Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
+* 2.4 GHz 2 Mbps Mesh Network
+  * tested with 300 packets / second
+* Flash time automated database config
+* Zero install time configuration
+  * No association, No pairing, No factory resets
+* Router = Coordinator = Repeater = Sniffer = CLI
+* text serial line protocol
+* Multiple Network endpoints
+  * No single point of failure
+* Server, Dongles, Sensors : SW Open Source
+* Server, Dongles, Sensors : HW On the shelves
+  * optional DIY HW
+
+# Description
+* 2 Mbps (e.g. Zgibee is at 250 Kbps to have a higher range), lowering the bitrate does not improve the range enough to get rid of repeaters, and once you need repeaters these are continuous listeners and require permanent power anyway, so the strategy is to have a repeater for every slot of the house and those repeaters can have power amplifiers and the range problem is solved keeping the high bitrate feature.
+* successfull stress tests including up to 300 packets / second.
+* This [nodes.json](./nodes.json) configuration file contains the short id for device unique identifier (uid64) and other configurations such as the channel, the sleep time, the required function,... Note that a python script using jLink API automate the flashing process as the uid is read every time from the attached device and matches the parameters to be flashed from the config file.
+* As the short id (8 bits) is flashed, there is no association process required and all sensor devices can act as a pure beacons (no listening required) which considerably increases battery life time. We can keep arguing about the need of an acknowledged protocol for sensors logging, I do not think it is required as the feedback of battery level and rssi are both logged as well so the user knows if the sensor is in a healthy position or not.
+* Router = Coordinator = Repeater = Sniffer = CLI : actually, a configuration activates the repeat functionality in case someone wants a completely stealth sniffer and this config does not require a different FW. There is nothing to coordinate as the mesh is fully dynamic with a flood and time to live concept. And every dongle has a CLI in text mode to report heard packets and takes commands as text input.
+* A consequence of the simplified design allows to have multiple dongles in different locations listening to the network and reporting it to mqtt which avoids any single point of failure. By design there is no id 0 privileged coordinator and end devices do not require to know any particular associated address, they just wake up, broadcast and sleep.
+* As visible in the gif animations below, Open Source SW is provided for all steps, devices firmware and server python code.
+
+
+
+# Static Demo
+
+* [UART : dongle firmware - directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/04_uart_dongle)
+* [USB : dongle firmware - directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/08_usb_dongle)
+
+    cu -l /dev/ttyACM0 -s 460800 
+
+<img src="./raspi/nrf_mesh/doc/nrf_serial.gif">
+
+subscribe to topic
+
+    mosquitto_sub -t 'nrf/#' -v | ts
+
+start nrf_mesh [py/nrf_mesh](https://github.com/HomeSmartMesh/raspi/tree/master/py/nrf_mesh) from [raspi](https://github.com/HomeSmartMesh/raspi/) Project
+
+
+    python3 nrf_mesh.py
+
+<img src="./raspi/nrf_mesh/doc/nrf_mqtt.gif">
+
+This custom sensors RF mesh can expand to cover a home area. Onces connected to services provided in the [raspi](https://github.com/HomeSmartMesh/raspi) project, including python scripts, influxdb and grafana, the end result dashboard looks like this
+
+<img src="./images/grafana-dashboard.png">
 
 # nRF52 Applications
     cd ./applications/
@@ -359,7 +405,10 @@ Aknowledge
 
     cd ./raspi/
 
-## Overview
+## Raspberry pi scripts moved to [github raspi](https://github.com/HomeSmartMesh/raspi) Prject
+
+Below is a description of the `raspi` directory, but the content is no longer updated and represents a draft in compaision to the follow up project with raspberry pi services and IoT Software stack : https://github.com/HomeSmartMesh/raspi
+
 The server's python scripts running also on a raspberry pi
 * ./raspi/hue : aqara sensors from mqtt to hue light automation through the hue gateway REST API
 * ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
@@ -374,119 +423,9 @@ The server's python scripts running also on a raspberry pi
 * ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
 * ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
 * Data collection into a time series database 
-
-## Eurotronic heat
-
-1. adjust your mqtt configuration in [config.json](raspi/heat/config.json)
-2. adjust the eurotronic heater topic and apertures (apertures are the contact sensors list)
-```json
-    "heatings":{
-        "living heat":{
-            "topic":"lzig/living heat/set",
-            "Apertures":[
-                "balcony door",
-                "balcony window right",
-                "balcony window left"
-            ]
-        }
-    }
-``` 
-3. add the contact sensors to the mqtt subscriptions as well
-4. run the script `python raspi/heat.py`
-
-example eurotronic mqtt payload
-```json
-zig/living heat {
-    "current_heating_setpoint":17,
-    "eurotronic_system_mode":1,
-    "local_temperature":18.49,
-    "occupied_heating_setpoint":21,
-    "unoccupied_heating_setpoint":16,
-    "eurotronic_error_status":0,
-    "pi_heating_demand":0,
-    "battery":100,
-    "linkquality":44
-}
-```
-
-## ConBee Zigbee to MQTT example
-
-    jNodes/96/button {"event": "flip", "from": 4, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 4}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 6}
-    jNodes/96/button {"event": "push", "face": 6}
-    jNodes/96/button {"event": "flip", "from": 6, "to": 3}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 3}
-    jNodes/96/button {"rotation": -1377}
-    jNodes/96/button {"rotation": 8140}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 4}
-    jNodes/96/button {"event": "wakeup"}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 1}
-    jNodes/96/button {"event": "flip", "from": 5, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 5}
-    jNodes/96/button {"rotation": 6288}
-    jNodes/96/button {"rotation": -4747}
-
-## rf_stm32
-
-    mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
-    mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
-
-## hue test vector
-
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"light": 24}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
     
 # Home Smart Mesh detailed design
 
 Functions call graph. Fifos dataflow between interrupts and main loop.
 
 <img src="images/nrf_mesh.svg" width="600">
-
-# nRF Mesh to serial to mqtt
-
-## nRF52 Mesh Dongle required
-* see details in hackaday project [nRF5 Custom Mesh Network](https://hackaday.io/project/124114-nrf5-custom-mesh-network/details)
-
-* [nRF 52 Dongle Firmware - github](https://github.com/nRFMesh/nRF52_Mesh)
-  
-  * [uart dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/04_uart_dongle)
-  * [usb dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/08_usb_dongle)
-
-## running the scripts
-
-[py/nrf_mesh](./py/nrf_mesh/)
-
-    cu -l /dev/ttyACM0 -s 460800 
-
-<img src="./raspi/nrf_mesh/doc/nrf_serial.gif">
-
-subscribe to topic
-
-    mosquitto_sub -t 'nrf/#' -v | ts
-
-start nrf_mesh
-
-    python3 raspi/nrf_mesh/nrf_mesh.py
-
-<img src="./raspi/nrf_mesh/doc/nrf_mqtt.gif">
-
-## use as a service
-
-```shell
-sudo cp raspi/nrf_mesh/nrf_mesh.service /lib/systemd/system/
-sudo chmod 644 /lib/systemd/system/nrf_mesh.service
-sudo chmod +x raspi/nrf_mesh/nrf_mesh.py
-sudo systemctl daemon-reload
-sudo systemctl enable nrf_mesh.service
-sudo systemctl start nrf_mesh.service
-```
