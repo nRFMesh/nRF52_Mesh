@@ -513,7 +513,6 @@ The server's python scripts running also on a raspberry pi
 * ./raspi/bathroom : fan automation controlled with button, shelly light switch and humidity sensor
 * ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
 * ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
-* ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
 * ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
 * ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
 * ./raspi/grafana : [Grafana](https://grafana.com/grafana) is used as a dashboard, it is a webserver interface that is installed on the raspberry pi (or on the docker image). Some dashboards examples are provided in this directory, where the queries are matching the way how the influx client has recorded the sensors data. 
