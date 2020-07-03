@@ -1,13 +1,69 @@
-# Presentation and Documentation on [Home Smart Mesh](https://www.homesmartmesh.com/)
-This readme is an extract from [Home Smart Mesh](https://www.homesmartmesh.com/) with focus on software configuration and protocol implementation details
+# Features
+<img src="./images/nRF52-features.png">
 
-Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
+* 2.4 GHz 2 Mbps Mesh Network
+  * tested with 300 packets / second
+* Flash time automated database config
+* Zero install time configuration
+  * No association, No pairing, No factory resets
+* Router = Coordinator = Repeater = Sniffer = CLI
+* text serial line protocol
+* Multiple Network endpoints
+  * No single point of failure
+* Server, Dongles, Sensors
+  * Full Stack Open Source (no softdevices required)
+  * HW On the shelves
+  * optional DIY HW
+* Alive trace routing
+  * a heartbeat message that gives info about the age and RF tx/rx hops through the route
+
+see below the [Drivers & Custom Mesh protocol](#Drivers-&-Custom-Mesh-protocol) section for the RF Protocol details
+
+# Description
+* 2 Mbps (e.g. Zgibee is at 250 Kbps to have a higher range), lowering the bitrate does not improve the range enough to get rid of repeaters, and once you need repeaters these are continuous listeners and require permanent power anyway, so the strategy is to have a repeater for every slot of the house and those repeaters can have power amplifiers and the range problem is solved keeping the high bitrate feature.
+* successfull stress tests including up to 300 packets / second.
+* This [nodes.json](./nodes.json) configuration file contains the short id for device unique identifier (uid64) and other configurations such as the channel, the sleep time, the required function,... Note that a python script using jLink API automate the flashing process as the uid is read every time from the attached device and matches the parameters to be flashed from the config file.
+* As the short id (8 bits) is flashed, there is no association process required and all sensor devices can act as a pure beacons (no listening required) which considerably increases battery life time. We can keep arguing about the need of an acknowledged protocol for sensors logging, I do not think it is required as the feedback of battery level and rssi are both logged as well so the user knows if the sensor is in a healthy position or not.
+* Router = Coordinator = Repeater = Sniffer = CLI : actually, a configuration activates the repeat functionality in case someone wants a completely stealth sniffer and this config does not require a different FW. There is nothing to coordinate as the mesh is fully dynamic with a flood and time to live concept. And every dongle has a CLI in text mode to report heard packets and takes commands as text input.
+* A consequence of the simplified design allows to have multiple dongles in different locations listening to the network and reporting it to mqtt which avoids any single point of failure. By design there is no id 0 privileged coordinator and end devices do not require to know any particular associated address, they just wake up, broadcast and sleep.
+* As visible in the gif animations below, Open Source SW is provided for all steps, devices firmware and server python code.
+
+
+
+# Static Demo
+
+* [UART : dongle firmware - directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/04_uart_dongle)
+* [USB : dongle firmware - directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/08_usb_dongle)
+
+    cu -l /dev/ttyACM0 -s 460800 
+
+<img src="./images/nrf_serial.gif">
+
+subscribe to topic
+
+    mosquitto_sub -t 'nrf/#' -v | ts
+
+start nrf_mesh [py/nrf_mesh](https://github.com/HomeSmartMesh/raspi/tree/master/py/nrf_mesh) from [raspi](https://github.com/HomeSmartMesh/raspi/) Project
+
+
+    python3 nrf_mesh.py
+
+<img src="./images/nrf_mqtt.gif">
+
+This custom sensors RF mesh can expand to cover a home area. Onces connected to services provided in the [raspi](https://github.com/HomeSmartMesh/raspi) project, including python scripts, influxdb and grafana, the end result dashboard looks like this
+
+<img src="./images/grafana-dashboard.png">
+
+---
 
 # nRF52 Applications
     cd ./applications/
 
+only the main applications are listed here, for further details about all applications see below the [More nRF52 Applications](#More-nRF52-Applications) section
+
 ## 01 sensor tag
     application/01_sensortag> make flash
+    application/01_sensortag> make paramw
 
 <img src="images/nRF52832_sensortag.png" width="300">
 
@@ -16,28 +72,11 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 * Temperature, Humidity, Pressure : BME280
 * Light : MAX44009
 * Smooth graphana logs with cyclic broadcast ~ 30 sec => battery life ~ 6 month on CR2032
-
-## 02 acell tag
-    application/02_accell_tag> make flash
-
-<img src="images/motion_tag.png" width="300">
-
-* Status : experimental, low battery life
-* nRF52832 module
-* MPU-6050 module
-* interrupt pio from MPU-6050
-
-## 03 buttons
-    application/03_buttons> make flash
-
-<img src="images/buttons.png" width="300">
-
-* Status : experiemntal, low battery life
-* nRF52832 module
-* x6 buttons
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
 
 ## 04 uart dongle
     application/04_uart_dongle> make flash
+    application/04_uart_dongle> make paramw
 
 <img src="boards/nrf52_dongle/images/dongle.png" width="200">
 
@@ -45,62 +84,110 @@ Link to [this repository](https://github.com/nRFMesh/nRF52_Mesh)
 * buy : "nRF52832 BLE USB UART dongle"
 * custom firmware and pogo-pins jtag adapter see below
 * RF Mesh repeater + RF Mesh to Host interface
-
-## 05 rotary decoder
-    application/05_rotary_decoder> make flash
-
-<img src="images/rf_encoder.png" width="400">
-
-* buy : "600 pulses Optical Rotary encoder"
-* custom wiring +5V, encoder pullups to +3.3 V
-* rf timestamp synchronisation
-* HW capture of timestamp
-* RF Mesh log of modulo 600 position with timestamp
-* 4 ms status on change, otherwise 4 s reminder
-
-
-## 06 bldc 52832
-    application/06_bldc_52832> make flash
-
-<img src="images/bldc_control.png" width="400">
-
-* Status : RF magnetic angle control OK, rest is in development
-* nRF52832 sensor tag board used
-* buy : "L6234d breakout"
-* custom wiring power supply 9.6 V / nRF powered with 3.3 V separately
-* RF bldc control : magnetic angle, voltage ratio, speed, absolute angle
-
-
-## 07 bldc 52840
-    application/07_usb_dongle> make flash
-
-<img src="images/nRF52840-usb-dongle.png" width="300">
-
-* Status : preparation
-* previous application "03 bldc 52832" ported to the nRF52840-dongle
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
 
 ## 08 usb dongle (nRF52840-dongle)
     application/08_usb_dongle> make flash
+    application/08_usb_dongle> make paramw
 
-<img src="images/nRF52840-dongle-debug.png" width="300">
+<img src="./images/nRF52840-dongle-debug.png" width="300">
 
-* buy : "nRF52832 dongle"
+* buy : "nRF52840 usb dongle"
 * custom firmware for RF mesh
 * pogo-pins jtag adapter 3dprint : [Fusion360 CAD model](https://a360.co/2CDqeTA)
 * RF Mesh repeater + RF Mesh to Host interface
-* TODO : add fifo to buffer USB CDC Tx packets (to prevents drops and go > 64 bytes)
+* buffered USB CDC tx and rx
+* `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
+
+---
+
+# Drivers & Custom Mesh protocol
+
+    cd ./drivers/
+
+## ./drivers/
+
+Contains the custom drivers for this project from which the [mesh.c](./drivers/mesh.c) a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
+* Sleepy nodes (low power) and router nodes (always listening)
+* single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
+* A simple alternative to the Bluetooth Mesh and Zigbee Thread IPV6
 
 
-## Printed Circuit Boards
+<img src="./images/mesh.png">
+
+* Low power node : Mesh node that can be a sensor Tag that wakes up on RTC or on sensor value interrupt to log a parameter. Can also be a button that wakes up on a press PIO interrupt.
+* Router node : Mesh node that cooperates with the Low power nodes, the router has to be a device that keeps listening permanently on the same RF channel, this might require ~ 13 mA. Example router devices are light controllers, server’s RF dongle or USB powered sensors and status devices.
+* Server : A Raspberry pi running linux. The RF signals come through the serial port or with a USB adapter, then published on MQTT, from which Python scripts inject signals on the Database, connected to Grafana web server. Note that there can be multiple router dongles connected to servers.
+
+## Protocol Overview
+
+The Home Smart Mesh project introduce an RF Mesh protocol which is a complete stack implementation to allow devices to communicate in a Mesh Network Topology. This protocol implementation is using the nRF SDK 15 it is using the Radio module through a modified Enhanced Shock-burst custom protocol. Implementations range from nRF24L01+ with an STM8L and STM32 to the nRF51 and nRF52 families that add features such as RSSI and bigger packets sizes.
+
+## Protocol Description
+
+* 100% Open source Mesh RF Stack
+* Ported on STM8L, STM32, nRF51 and nRF52
+* Concept designed for Low Power Nodes and Router Nodes
+* Same radio channel configured for the whole network
+* Single channel allows maximum power save with unlimited sleep periods, and random wake up with button press or sensor event.
+* Mesh with flooding broadcast, where every message has its own configurable time to live. This brings multiple advantages of usage simplicity.
+* Short addresses allow efficient packets sizes. Possibility for extensions with short address reuse and exception addresses to allow unlimited network size.
+* For simplicity purpose, security is a matter of application payload content.
+* The stack is so small that the RAM and ROM are left for the application logic, not requiring a network co-processor.
+
+### Protocol Mesh Broadcast
+* A simple flood mechanism is implemented where every router repeats the signal heard decrementing the time to live to avoid infinite propagation.
+* Future extensions can extend the routing by gathering statistics and deciding of the optimal path in a decentralized fashion. Note that small installations in a home do not bring any significant advantage, thus the interest for a simple protocol for such use case.
+
+### Protocol Mesh Directed messages with ack
+* This type of communication uses a source and destination addresses
+* Only the node recognizing itself as destination will send a packet as acknowledge
+* The acknowledge packet is propagated the same way, until it reaches the source, which make it an end to end acknowledge
+* If the source did not got an acknowledge back while it was requested, it can retry the transmission again.
+
+## Packet Format
+
+custom stack vs softdevices : This protocol is using the direct Radio module capabilities and does not require the sofdevices. The softdevices are Nordic firmware that are closed source and distributed as binaries, they have higher privileges than the user application. Softdevices guarantee that the RF functions keep always working as the user application is untrusted. This comes at a big price to pay, as the rest of the SoC cannot be properly used, no free configuration of interrupts for example, they have also a big memory footprint that prevents safe double paged firmware updates.
+
+<img src="./images/packet.png">
+
+The configuration has discarded the usage of S0 and S1 which are intended for compatibility with other protocols which require a certain number of bits on the air that do not map to 8 aligned to form bytes in memory.
+
+<img src="./images/protocol.png">
+
+the RF Payload Format contains another software header. That is the header used to manage the packets in the mesh network.
+
+
+* control: bit 7 defines whether a packet is to be broadcasted or has a target destination. Bits 6 and 5 allow safe communication with acknowledge, and a request response type. That allows the sw stack to handle the acknowledge and re-transmission. bit 3 allows streaming of messages without acknowledge.
+* pid: is defining the application function which maps to a particular payload serialization
+* Source and dest: are the Node Id, and are unique within every mesh. Although 8 bits, exceptions allow further reserved sizes.
+* Time to live : used by the routers to know when to drop the packet.
+
+## Alive trace routing
+
+<img src="./images/alive-trace-route.png">
+
+* All Nodes including the low power, send a periodic “alive” packet
+* The initiator includes a counter that informs about the live cycle count
+* Every retransmission appends information about
+  * Received RSSI (Radio Signal Strength Indicator)
+  * The Node Id of the Router performing the re transmission
+  * Transmission power with which the packet has been re transmitted
+
+<img src="./images/alive-json.png">
+
+* The “alive” packet that reaches the server’s dongle has the full route information
+* Multiple paths can reach the server for the same original broadcast
+* A single “alive” packet can provide link status of the complete mesh netwrok
+* The signal route information is packed in a json structure
+* json structures are broadcasted on the jNodes topics path
+
+---
+
+# Printed Circuit Boards
     cd ./boards/
 
 Schematics, PCBs and boards headers for the SensorTag and the Dongle used by the nRF52 firmware
-
-## ./drivers/
-Contains the specific drivers for this project from which the "mesh.c" a light weight Mesh Protocol connecting all the devices using a custom RF protocol (without softdevice)
-* Sleepy nodes (low power) and router nodes (always listening)
-* single layer ultra simple rpotocol. App into mac with unique ids to small ids mapping
-* An alternative to the Bluetooth Mesh and Zigbee Thread IPV6 world
 
 ## ./tools/
 Contains the fancy Makefile extensions that allow :
@@ -136,7 +223,7 @@ Once in the application directory just use ```make conf``` to call a cmsis [conf
 <img src="images/cmsis-wizard.png" width="400">
 
 ### Automated mesh devices configuration
- User data flashing is done with Pylink which reads in [uicr.py](tools\uicr.py) the registers of the attached device, look it up in the **NODES_CONFIG** file, retrives which parameters should be flashed, the mapping of parameters to CUSTOMER_X registers come from "uicr_map.json".
+ User data flashing is done with Pylink which reads in [uicr.py](tools\uicr.py) the registers of the attached device, look it up in the **config** file, retrives which parameters should be flashed, the mapping of parameters to CUSTOMER_X registers come from "uicr_map.json".
 
 ## simple board switch
 The repo contais a directory for boards declaration "boards/" and a directory for applications "applications/". Although every application targets a particular board, it is possible to use any application for any other board. In the makefile a sinlge line has to be edited
@@ -355,11 +442,70 @@ Aknowledge
 
     Nodes/79/ack 1
 
+# More nRF52 Applications
+    cd ./applications/
+
+## 02 acell tag
+    application/02_accell_tag> make flash
+
+<img src="images/motion_tag.png" width="300">
+
+* Status : experimental, low battery life
+* nRF52832 module
+* MPU-6050 module
+* interrupt pio from MPU-6050
+
+## 03 buttons
+    application/03_buttons> make flash
+
+<img src="images/buttons.png" width="300">
+
+* Status : experiemntal, low battery life
+* nRF52832 module
+* x6 buttons
+
+## 05 rotary decoder
+    application/05_rotary_decoder> make flash
+
+<img src="images/rf_encoder.png" width="400">
+
+* buy : "600 pulses Optical Rotary encoder"
+* custom wiring +5V, encoder pullups to +3.3 V
+* rf timestamp synchronisation
+* HW capture of timestamp
+* RF Mesh log of modulo 600 position with timestamp
+* 4 ms status on change, otherwise 4 s reminder
+
+
+## 06 bldc 52832
+    application/06_bldc_52832> make flash
+
+<img src="./images/bldc_control.png" width="400">
+
+* Status : RF magnetic angle control OK, rest is in development
+* nRF52832 sensor tag board used
+* buy : "L6234d breakout"
+* custom wiring power supply 9.6 V / nRF powered with 3.3 V separately
+* RF bldc control : magnetic angle, voltage ratio, speed, absolute angle
+
+
+## 07 bldc 52840
+    application/07_usb_dongle> make flash
+
+<img src="./images/nrf52840-usb-dongle.png" width="300">
+
+* Status : preparation
+* previous application "03 bldc 52832" ported to the nRF52840-dongle
+
+
 # Python scripts
 
     cd ./raspi/
 
-## Overview
+## Raspberry pi scripts moved to [github raspi](https://github.com/HomeSmartMesh/raspi) Prject
+
+Below is a description of the `raspi` directory, but the content is no longer updated and represents a draft in compaision to the follow up project with raspberry pi services and IoT Software stack : https://github.com/HomeSmartMesh/raspi
+
 The server's python scripts running also on a raspberry pi
 * ./raspi/hue : aqara sensors from mqtt to hue light automation through the hue gateway REST API
 * ./raspi/rf_uart : the interface to the serial port that transfers data between MQTT and the RF mesh
@@ -367,84 +513,12 @@ The server's python scripts running also on a raspberry pi
 * ./raspi/bathroom : fan automation controlled with button, shelly light switch and humidity sensor
 * ./raspi/conbee : the ConBee script to turn the Xiaomi Zibbee devices events into MQTT
 * ./raspi/rf_stm32 : interface to leagacy devices, bed heater and retro light
-* ./raspi/mesh_wizard/ : The web interface for real time view of the mesh with webgl, uses a websocket to connect to the MQTT broquer
 * ./raspi/ruler/ : json configurable rules through sensors and actuators MQTT topics and a separate python rules file
 * ./raspi/influx/ : the [influx](https://www.influxdata.com/time-series-database/) client that listens to MQTT and grabs standard sesnors patterns to be sent to the database
 * ./raspi/grafana : [Grafana](https://grafana.com/grafana) is used as a dashboard, it is a webserver interface that is installed on the raspberry pi (or on the docker image). Some dashboards examples are provided in this directory, where the queries are matching the way how the influx client has recorded the sensors data. 
 * ./raspi/wemo/ : The wemo switch smart socket interface, provides power sensing and sends the Watt value to MQTT
 * ./raspi/milight : The milight RF gateway client (require the wifi to RF milight bridge HW)
 * Data collection into a time series database 
-
-## Eurotronic heat
-
-1. adjust your mqtt configuration in [config.json](raspi/heat/config.json)
-2. adjust the eurotronic heater topic and apertures (apertures are the contact sensors list)
-```json
-    "heatings":{
-        "living heat":{
-            "topic":"lzig/living heat/set",
-            "Apertures":[
-                "balcony door",
-                "balcony window right",
-                "balcony window left"
-            ]
-        }
-    }
-``` 
-3. add the contact sensors to the mqtt subscriptions as well
-4. run the script `python raspi/heat.py`
-
-example eurotronic mqtt payload
-```json
-zig/living heat {
-    "current_heating_setpoint":17,
-    "eurotronic_system_mode":1,
-    "local_temperature":18.49,
-    "occupied_heating_setpoint":21,
-    "unoccupied_heating_setpoint":16,
-    "eurotronic_error_status":0,
-    "pi_heating_demand":0,
-    "battery":100,
-    "linkquality":44
-}
-```
-
-## ConBee Zigbee to MQTT example
-
-    jNodes/96/button {"event": "flip", "from": 4, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 4}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 6}
-    jNodes/96/button {"event": "push", "face": 6}
-    jNodes/96/button {"event": "flip", "from": 6, "to": 3}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 3}
-    jNodes/96/button {"rotation": -1377}
-    jNodes/96/button {"rotation": 8140}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 2}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 2, "to": 6}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 4}
-    jNodes/96/button {"event": "wakeup"}
-    jNodes/96/button {"event": "flip", "from": 4, "to": 1}
-    jNodes/96/button {"event": "shake"}
-    jNodes/96/button {"event": "double_tap", "face": 1}
-    jNodes/96/button {"event": "flip", "from": 5, "to": 1}
-    jNodes/96/button {"event": "flip", "from": 1, "to": 5}
-    jNodes/96/button {"rotation": 6288}
-    jNodes/96/button {"rotation": -4747}
-
-## rf_stm32
-
-    mosquitto_pub -t 'Bed Heater' -m '{"heat":4,"time_mn":1}'
-    mosquitto_pub -t 'Retro Light Upstairs/all' -m '2000'
-
-## hue test vector
-
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/lumi.sensor_motion.aq2/MotionLight 1' -m '{"light": 24}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"presence": true}'
-    mosquitto_pub -t 'zigbee/SML001/MotionLightHue' -m '{"light": 24}'
     
 # Home Smart Mesh detailed design
 
@@ -452,41 +526,4 @@ Functions call graph. Fifos dataflow between interrupts and main loop.
 
 <img src="images/nrf_mesh.svg" width="600">
 
-# nRF Mesh to serial to mqtt
 
-## nRF52 Mesh Dongle required
-* see details in hackaday project [nRF5 Custom Mesh Network](https://hackaday.io/project/124114-nrf5-custom-mesh-network/details)
-
-* [nRF 52 Dongle Firmware - github](https://github.com/nRFMesh/nRF52_Mesh)
-  
-  * [uart dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/04_uart_dongle)
-  * [usb dongle firmware - gihub directory](https://github.com/nRFMesh/nRF52_Mesh/tree/master/applications/08_usb_dongle)
-
-## running the scripts
-
-[py/nrf_mesh](./py/nrf_mesh/)
-
-    cu -l /dev/ttyACM0 -s 460800 
-
-<img src="./raspi/nrf_mesh/doc/nrf_serial.gif">
-
-subscribe to topic
-
-    mosquitto_sub -t 'nrf/#' -v | ts
-
-start nrf_mesh
-
-    python3 raspi/nrf_mesh/nrf_mesh.py
-
-<img src="./raspi/nrf_mesh/doc/nrf_mqtt.gif">
-
-## use as a service
-
-```shell
-sudo cp raspi/nrf_mesh/nrf_mesh.service /lib/systemd/system/
-sudo chmod 644 /lib/systemd/system/nrf_mesh.service
-sudo chmod +x raspi/nrf_mesh/nrf_mesh.py
-sudo systemctl daemon-reload
-sudo systemctl enable nrf_mesh.service
-sudo systemctl start nrf_mesh.service
-```
