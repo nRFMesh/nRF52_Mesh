@@ -1,0 +1,11 @@
+[Unit]
+Description=service using a dongle to listen to old gen uart custom RF devices and forward messages to mqtt
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/pi/nRF52_Mesh/raspi/rf_uart/mesh_controller.py -c 2 -f l
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
