@@ -1,0 +1,85 @@
+{
+	"name": "Philips hue",
+	"zigbeechannel": 15,
+	"bridgeid": "001788FFFE6BCD30",
+	"mac": "00:17:88:6b:cd:30",
+	"dhcp": true,
+	"ipaddress": "10.0.0.38",
+	"netmask": "255.255.255.0",
+	"gateway": "10.0.0.1",
+	"proxyaddress": "none",
+	"proxyport": 0,
+	"UTC": "2018-09-02T11:00:12",
+	"localtime": "2018-09-02T13:00:12",
+	"timezone": "Europe/Berlin",
+	"modelid": "BSB002",
+	"datastoreversion": "71",
+	"swversion": "1806051111",
+	"apiversion": "1.26.0",
+	"swupdate": {
+		"updatestate": 2,
+		"checkforupdate": false,
+		"devicetypes": {
+			"bridge": false,
+			"lights": [
+				"1"
+			],
+			"sensors": []
+		},
+		"url": "",
+		"text": "ZGB_100B_010F - 6.0",
+		"notify": true
+	},
+	"swupdate2": {
+		"checkforupdate": false,
+		"lastchange": "2018-09-01T19:52:32",
+		"bridge": {
+			"state": "noupdates",
+			"lastinstall": "2018-09-01T18:03:57"
+		},
+		"state": "anyreadytoinstall",
+		"autoinstall": {
+			"updatetime": "T14:00:00",
+			"on": false
+		}
+	},
+	"linkbutton": false,
+	"portalservices": false,
+	"portalconnection": "connected",
+	"portalstate": {
+		"signedon": true,
+		"incoming": false,
+		"outgoing": true,
+		"communication": "disconnected"
+	},
+	"internetservices": {
+		"internet": "connected",
+		"remoteaccess": "disconnected",
+		"time": "connected",
+		"swupdate": "connected"
+	},
+	"factorynew": false,
+	"replacesbridgeid": null,
+	"backup": {
+		"status": "idle",
+		"errorcode": 0
+	},
+	"starterkitid": "",
+	"whitelist": {
+		"SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI": {
+			"last use date": "2018-09-01T20:09:55",
+			"create date": "2018-09-01T18:01:13",
+			"name": "Hue 3#Samsung SM-G900F"
+		},
+		"AB7nAWdmY3r9dnBtKduoF4pSru4BGSnur5khotYg": {
+			"last use date": "2018-09-01T18:48:55",
+			"create date": "2018-09-01T18:37:29",
+			"name": "python_hue"
+		},
+		"YXb1he50MGnuM6Jb9ZHpaCMTvuUKIUrdjLw56FOm": {
+			"last use date": "2018-09-02T11:00:12",
+			"create date": "2018-09-01T18:39:58",
+			"name": "python_hue"
+		}
+	}
+}

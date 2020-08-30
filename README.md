@@ -94,10 +94,14 @@ only the main applications are listed here, for further details about all applic
 
 * buy : "nRF52840 usb dongle"
 * custom firmware for RF mesh
-* pogo-pins jtag adapter 3dprint : [Fusion360 CAD model](https://a360.co/2CDqeTA)
 * RF Mesh repeater + RF Mesh to Host interface
 * buffered USB CDC tx and rx
 * `make paramw` detects the device uid and writes the config parameters available in [nodes.json](./nodes.json)
+* pogo-pins jtag adapter 3dprint : 
+  * [Version two CAD Model](https://a360.co/3jr91PD)
+  * [Version one Fusion360 CAD model](https://a360.co/2CDqeTA)
+
+<img src="./images/pogo-versions.jpg" width="400">
 
 ---
 
@@ -369,8 +373,7 @@ don't forget to save
 * ser_send() must be used with a variable in memory as DMA cannot read from Code in Flash
 
 ## Hardware
-
-Why reinvent the wheel ? When it comes to a Server interface as a dongle, we can reuse a usb dongle from the market that includes a **2104** serial to usb converter. Keyword search on shopping websites : **nRF52832 USB dongle**. Aka "nRF52832-YJ-17017-USB-UART"
+A usb dongle from the market that includes a **2104** serial to usb converter. Keyword search on shopping websites : **nRF52832 USB dongle**. Aka "nRF52832-YJ-17017-USB-UART"
 
 <img src="boards/nrf52_dongle/images/dongle.png" width="200">
 <br/>

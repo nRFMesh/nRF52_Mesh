@@ -1,0 +1,172 @@
+{
+	"1": {
+		"state": {
+			"daylight": null,
+			"lastupdated": "none"
+		},
+		"config": {
+			"on": true,
+			"configured": false,
+			"sunriseoffset": 30,
+			"sunsetoffset": -30
+		},
+		"name": "Daylight",
+		"type": "Daylight",
+		"modelid": "PHDL00",
+		"manufacturername": "Philips",
+		"swversion": "1.0"
+	},
+	"2": {
+		"state": {
+			"buttonevent": 1002,
+			"lastupdated": "2018-09-02T10:49:12"
+		},
+		"swupdate": {
+			"state": "noupdates",
+			"lastinstall": null
+		},
+		"config": {
+			"on": true,
+			"battery": 100,
+			"reachable": true,
+			"pending": []
+		},
+		"name": "Hue dimmer switch 1",
+		"type": "ZLLSwitch",
+		"modelid": "RWL021",
+		"manufacturername": "Philips",
+		"productname": "Hue dimmer switch",
+		"swversion": "5.45.1.17846",
+		"uniqueid": "00:17:88:01:04:f7:d9:e8-02-fc00",
+		"capabilities": {
+			"certified": true
+		}
+	},
+	"3": {
+		"state": {
+			"status": 0,
+			"lastupdated": "2018-09-02T10:49:22"
+		},
+		"config": {
+			"on": true,
+			"reachable": true
+		},
+		"name": "Dimmer Switch 2.companion",
+		"type": "CLIPGenericStatus",
+		"modelid": "PHA_STATE",
+		"manufacturername": "Philips",
+		"swversion": "1.0",
+		"uniqueid": "000000",
+		"recycle": true
+	},
+	"4": {
+		"state": {
+			"temperature": 2327,
+			"lastupdated": "2018-09-02T11:13:37"
+		},
+		"swupdate": {
+			"state": "noupdates",
+			"lastinstall": null
+		},
+		"config": {
+			"on": true,
+			"battery": 100,
+			"reachable": true,
+			"alert": "none",
+			"ledindication": false,
+			"usertest": false,
+			"pending": []
+		},
+		"name": "Hue temperature sensor 1",
+		"type": "ZLLTemperature",
+		"modelid": "SML001",
+		"manufacturername": "Philips",
+		"productname": "Hue temperature sensor",
+		"swversion": "6.1.0.18912",
+		"uniqueid": "00:17:88:01:03:29:1b:35-02-0402",
+		"capabilities": {
+			"certified": true
+		}
+	},
+	"5": {
+		"state": {
+			"presence": false,
+			"lastupdated": "2018-09-02T09:15:38"
+		},
+		"swupdate": {
+			"state": "noupdates",
+			"lastinstall": null
+		},
+		"config": {
+			"on": true,
+			"battery": 100,
+			"reachable": true,
+			"alert": "none",
+			"ledindication": false,
+			"usertest": false,
+			"sensitivity": 2,
+			"sensitivitymax": 2,
+			"pending": []
+		},
+		"name": "Stairs sensor",
+		"type": "ZLLPresence",
+		"modelid": "SML001",
+		"manufacturername": "Philips",
+		"productname": "Hue motion sensor",
+		"swversion": "6.1.0.18912",
+		"uniqueid": "00:17:88:01:03:29:1b:35-02-0406",
+		"capabilities": {
+			"certified": true
+		}
+	},
+	"6": {
+		"state": {
+			"lightlevel": 9288,
+			"dark": true,
+			"daylight": false,
+			"lastupdated": "2018-09-02T11:15:16"
+		},
+		"swupdate": {
+			"state": "noupdates",
+			"lastinstall": null
+		},
+		"config": {
+			"on": true,
+			"battery": 100,
+			"reachable": true,
+			"alert": "none",
+			"tholddark": 16000,
+			"tholdoffset": 7000,
+			"ledindication": false,
+			"usertest": false,
+			"pending": []
+		},
+		"name": "Hue ambient light sensor 1",
+		"type": "ZLLLightLevel",
+		"modelid": "SML001",
+		"manufacturername": "Philips",
+		"productname": "Hue ambient light sensor",
+		"swversion": "6.1.0.18912",
+		"uniqueid": "00:17:88:01:03:29:1b:35-02-0400",
+		"capabilities": {
+			"certified": true
+		}
+	},
+	"7": {
+		"state": {
+			"status": 0,
+			"lastupdated": "2018-09-02T10:55:18"
+		},
+		"config": {
+			"on": true,
+			"reachable": true
+		},
+		"name": "MotionSensor 5.Companion",
+		"type": "CLIPGenericStatus",
+		"modelid": "PHA_STATE",
+		"manufacturername": "Philips",
+		"swversion": "1.0",
+		"uniqueid": "MotionSensor 5.Companion",
+		"recycle": true
+	}
+}

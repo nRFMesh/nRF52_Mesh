@@ -1,0 +1,178 @@
+{
+	"1": {
+		"state": {
+			"on": true,
+			"bri": 2,
+			"alert": "none",
+			"mode": "homeautomation",
+			"reachable": true
+		},
+		"swupdate": {
+			"state": "readytoinstall",
+			"lastinstall": "2018-09-01T18:10:49"
+		},
+		"type": "Dimmable light",
+		"name": "Test Small Stand",
+		"modelid": "LWB010",
+		"manufacturername": "Philips",
+		"productname": "Hue white lamp",
+		"capabilities": {
+			"certified": true,
+			"control": {
+				"mindimlevel": 5000,
+				"maxlumen": 806
+			},
+			"streaming": {
+				"renderer": false,
+				"proxy": false
+			}
+		},
+		"config": {
+			"archetype": "classicbulb",
+			"function": "functional",
+			"direction": "omnidirectional"
+		},
+		"uniqueid": "00:17:88:01:02:f9:f5:1f-0b",
+		"swversion": "1.23.0_r20156",
+		"swconfigid": "FF6681C4",
+		"productid": "Philips-LWB010-1-A19DLv4"
+	},
+	"2": {
+		"state": {
+			"on": true,
+			"bri": 0,
+			"alert": "none",
+			"mode": "homeautomation",
+			"reachable": false
+		},
+		"swupdate": {
+			"state": "notupdatable",
+			"lastinstall": null
+		},
+		"type": "Dimmable light",
+		"name": "Hue white lamp 2",
+		"modelid": "LWB010",
+		"manufacturername": "Philips",
+		"productname": "Hue white lamp",
+		"capabilities": {
+			"certified": true,
+			"control": {
+				"mindimlevel": 5000,
+				"maxlumen": 806
+			},
+			"streaming": {
+				"renderer": false,
+				"proxy": false
+			}
+		},
+		"config": {
+			"archetype": "classicbulb",
+			"function": "functional",
+			"direction": "omnidirectional"
+		},
+		"uniqueid": "00:17:88:01:03:5e:4d:6d-0b",
+		"swversion": ""
+	},
+	"3": {
+		"state": {
+			"on": true,
+			"bri": 0,
+			"alert": "none",
+			"mode": "homeautomation",
+			"reachable": false
+		},
+		"swupdate": {
+			"state": "notupdatable",
+			"lastinstall": null
+		},
+		"type": "Dimmable light",
+		"name": "Hue white lamp 3",
+		"modelid": "LWB010",
+		"manufacturername": "Philips",
+		"productname": "Hue white lamp",
+		"capabilities": {
+			"certified": true,
+			"control": {
+				"mindimlevel": 5000,
+				"maxlumen": 806
+			},
+			"streaming": {
+				"renderer": false,
+				"proxy": false
+			}
+		},
+		"config": {
+			"archetype": "classicbulb",
+			"function": "functional",
+			"direction": "omnidirectional"
+		},
+		"uniqueid": "00:17:88:01:03:44:31:69-0b",
+		"swversion": ""
+	},
+	"4": {
+		"state": {
+			"on": false,
+			"bri": 1,
+			"hue": 13580,
+			"sat": 48,
+			"effect": "none",
+			"xy": [
+				0.3869,
+				0.4031
+			],
+			"ct": 258,
+			"alert": "select",
+			"colormode": "xy",
+			"mode": "homeautomation",
+			"reachable": false
+		},
+		"swupdate": {
+			"state": "transferring",
+			"lastinstall": null
+		},
+		"type": "Extended color light",
+		"name": "Cupboard Top",
+		"modelid": "LST002",
+		"manufacturername": "Philips",
+		"productname": "Hue lightstrip plus",
+		"capabilities": {
+			"certified": true,
+			"control": {
+				"mindimlevel": 40,
+				"maxlumen": 1600,
+				"colorgamuttype": "other",
+				"colorgamut": [
+					[
+						0,
+						0
+					],
+					[
+						0,
+						0
+					],
+					[
+						0,
+						0
+					]
+				],
+				"ct": {
+					"min": 153,
+					"max": 500
+				}
+			},
+			"streaming": {
+				"renderer": false,
+				"proxy": false
+			}
+		},
+		"config": {
+			"archetype": "huelightstrip",
+			"function": "mixed",
+			"direction": "omnidirectional"
+		},
+		"uniqueid": "00:17:88:01:03:f5:54:59-0b",
+		"swversion": "1.24.0_r20239",
+		"swconfigid": "0612AD68",
+		"productid": "Philips-LST002-1-LedStripsv3"
+	}
+}

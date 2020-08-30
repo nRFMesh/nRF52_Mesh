@@ -1,0 +1,791 @@
+{
+	"1": {		"name": "Dimmer Switch 2 on0",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-02T10:49:12",
+		"timestriggered": 21,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "1000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			},
+			{
+				"address": "/sensors/3/state/status",
+				"operator": "lt",
+				"value": "1"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "Jwkv0DoeAfj5UHR"
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"2": {		"name": "Dimmer Switch 2 on1",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-02T10:36:10",
+		"timestriggered": 2,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "1000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			},
+			{
+				"address": "/sensors/3/state/status",
+				"operator": "eq",
+				"value": "1"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": true
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 2
+				}
+			}
+		]
+	},
+	"3": {		"name": "Dimmer Switch 2 on2",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "1000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			},
+			{
+				"address": "/sensors/3/state/status",
+				"operator": "eq",
+				"value": "2"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": true
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 3
+				}
+			}
+		]
+	},
+	"4": {		"name": "Dimmer Switch 2 on3",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "1000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			},
+			{
+				"address": "/sensors/3/state/status",
+				"operator": "eq",
+				"value": "3"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": true
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 4
+				}
+			}
+		]
+	},
+	"5": {		"name": "Dimmer Switch 2 on4",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "1000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			},
+			{
+				"address": "/sensors/3/state/status",
+				"operator": "gt",
+				"value": "3"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": true
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 0
+				}
+			}
+		]
+	},
+	"6": {		"name": "Dimmer Switch 2 off",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-02T11:28:46",
+		"timestriggered": 26,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "4000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": false
+				}
+			},
+			{
+				"address": "/sensors/3/state",
+				"method": "PUT",
+				"body": {
+					"status": 0
+				}
+			}
+		]
+	},
+	"7": {		"name": "Dimmer Switch 2 up-press",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-01T20:01:23",
+		"timestriggered": 1,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "2000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"transitiontime": 9,
+					"bri_inc": 30
+				}
+			}
+		]
+	},
+	"8": {		"name": "Dimmer Switch 2 up-long",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-01T20:01:24",
+		"timestriggered": 2,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "2001"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"transitiontime": 9,
+					"bri_inc": 56
+				}
+			}
+		]
+	},
+	"9": {		"name": "Dimmer Switch 2 up-rele",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-01T20:01:24",
+		"timestriggered": 1,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "2003"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"bri_inc": 0
+				}
+			}
+		]
+	},
+	"10": {		"name": "Dimmer Switch 2 dn-press",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:34",
+		"lasttriggered": "2018-09-01T20:01:25",
+		"timestriggered": 2,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "3000"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"transitiontime": 9,
+					"bri_inc": -30
+				}
+			}
+		]
+	},
+	"11": {		"name": "Dimmer Switch 2 dn-long",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:35",
+		"lasttriggered": "2018-09-01T20:01:29",
+		"timestriggered": 8,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "3001"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"transitiontime": 9,
+					"bri_inc": -56
+				}
+			}
+		]
+	},
+	"12": {		"name": "Dimmer Switch 2 dn-rele",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:35",
+		"lasttriggered": "2018-09-01T20:01:29",
+		"timestriggered": 2,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/buttonevent",
+				"operator": "eq",
+				"value": "3003"
+			},
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"bri_inc": 0
+				}
+			}
+		]
+	},
+	"13": {		"name": "Dimmer Switch 2 reset timer",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T18:25:35",
+		"lasttriggered": "2018-09-02T11:28:46",
+		"timestriggered": 115,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/2/state/lastupdated",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/schedules/1",
+				"method": "PUT",
+				"body": {
+					"localtime": "PT00:00:10",
+					"status": "enabled"
+				}
+			}
+		]
+	},
+	"14": {		"name": "MotionSensor 5.day-on",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "2018-09-02T09:14:58",
+		"timestriggered": 8,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "lt",
+				"value": "1"
+			},
+			{
+				"address": "/config/localtime",
+				"operator": "in",
+				"value": "T07:00:00/T23:00:00"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "Jwkv0DoeAfj5UHR"
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"15": {		"name": "MotionSensor 5.day-dark-on",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "lt",
+				"value": "1"
+			},
+			{
+				"address": "/config/localtime",
+				"operator": "in",
+				"value": "T07:00:00/T23:00:00"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "Jwkv0DoeAfj5UHR"
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"16": {		"name": "MotionSensor 5.night-on",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "2018-09-01T21:58:18",
+		"timestriggered": 6,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "lt",
+				"value": "1"
+			},
+			{
+				"address": "/config/localtime",
+				"operator": "in",
+				"value": "T23:00:00/T07:00:00"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "OczC5IZ9LtRudUV"
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"17": {		"name": "MotionSensor 5.night-dark-on",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "lt",
+				"value": "1"
+			},
+			{
+				"address": "/config/localtime",
+				"operator": "in",
+				"value": "T23:00:00/T07:00:00"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/6/state/dark",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "OczC5IZ9LtRudUV"
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"18": {		"name": "MotionSensor 5.dim",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "2018-09-02T09:15:53",
+		"timestriggered": 12,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "false"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "ddx",
+				"value": "PT00:00:15"
+			},
+			{
+				"address": "/groups/1/state/any_on",
+				"operator": "eq",
+				"value": "true"
+			}
+		],
+		"actions": [
+			{
+				"address": "/scenes/Am6Gi4f3AfIbU0a",
+				"method": "PUT",
+				"body": {
+					"storelightstate": true
+				}
+			},
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"bri_inc": -128
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 2
+				}
+			}
+		]
+	},
+	"19": {		"name": "MotionSensor 5.recover",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "none",
+		"timestriggered": 0,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "gt",
+				"value": "1"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "true"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "dx"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"scene": "Am6Gi4f3AfIbU0a"
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 1
+				}
+			}
+		]
+	},
+	"20": {		"name": "MotionSensor 5.off",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:01",
+		"lasttriggered": "2018-09-02T09:16:23",
+		"timestriggered": 11,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "false"
+			},
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "gt",
+				"value": "1"
+			},
+			{
+				"address": "/sensors/7/state/status",
+				"operator": "ddx",
+				"value": "PT00:00:30"
+			}
+		],
+		"actions": [
+			{
+				"address": "/groups/1/action",
+				"method": "PUT",
+				"body": {
+					"on": false
+				}
+			},
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 0
+				}
+			}
+		]
+	},
+	"21": {		"name": "MotionSensor 5.arm",
+		"owner": "SQkJqlYFrLNoYighcL6od7FekjGqK3DP-XurmLmI",
+		"created": "2018-09-01T19:55:02",
+		"lasttriggered": "2018-09-02T11:28:46",
+		"timestriggered": 25,
+		"status": "enabled",
+		"recycle": true,
+		"conditions": [
+			{
+				"address": "/groups/1/state/any_on",
+				"operator": "eq",
+				"value": "false"
+			},
+			{
+				"address": "/sensors/5/state/presence",
+				"operator": "eq",
+				"value": "false"
+			}
+		],
+		"actions": [
+			{
+				"address": "/sensors/7/state",
+				"method": "PUT",
+				"body": {
+					"status": 0
+				}
+			}
+		]
+	}
+}
