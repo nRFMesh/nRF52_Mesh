@@ -229,10 +229,10 @@ conf:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
 
 paramr:
-	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -r
+	python ../../tools/uicr.py ../uicr_map.json -r
 
 paramw:
-	C:\Python27\python.exe ../../tools/uicr.py ../uicr_map.json -w
+	python ../../tools/uicr.py ../uicr_map.json -w
 
 #TODO why 'applications' does not exist ?
 doc1:

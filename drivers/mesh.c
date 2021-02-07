@@ -956,11 +956,18 @@ int rx_temperature(char * p_msg,uint8_t*data,uint8_t size)
                 temp |= data[0];
         int32_t mst = temp / 100;
         int32_t lst = temp % 100;
-        if(lst<0)
+        if(temp<0)
         {
-            lst*=-1;
+            if(mst<0){
+                mst*=-1;
+            }
+            if(lst<0){
+                lst*=-1;
+            }
+            return sprintf(p_msg,"temp:-%ld.%02ld",mst,lst);
+        }else{
+            return sprintf(p_msg,"temp:%ld.%02ld",mst,lst);
         }
-        return sprintf(p_msg,"temp:%ld.%02ld",mst,lst);
     }
 }
 

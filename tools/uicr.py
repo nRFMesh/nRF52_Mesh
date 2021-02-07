@@ -26,7 +26,7 @@ else:
 
 uicr = cfg.get_json(uicr_cfongi_file)
 jlink = pylink.JLink()
-jlink.open(os.environ['SEG_JLEDU'])
+jlink.open()#os.environ['SEG_JLEDU']
 node_id = 0
 node = {}
 
