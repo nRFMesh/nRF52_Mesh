@@ -1,3 +1,5 @@
+this repo is in hybernation mode and based on the nRF-SDK, new development targetting openthread on nRF52840 sensor tag based on nRF-Connect/Zephyr is ongoing on this repo https://github.com/HomeSmartMesh/sdk-hsm-sensortag
+
 # Features
 <img src="./images/nRF52-features.png">
 
