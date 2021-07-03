@@ -1,3 +1,12 @@
+# Discourse forum
+get support, give feedback or simply chat to brainstorm about ideas on the forum
+
+[![discourse](./images/discourse.svg)](https://homesmartmesh.discourse.group/c/microcontrollers/nrf5x/7)
+
+[forum category : microcontrollers / nRF5x](https://homesmartmesh.discourse.group/c/microcontrollers/nrf5x/7)
+
+
+# New repo nRF52 Zephyr Mesh Ultrawideband
 this repo is in hybernation mode and based on the nRF-SDK, new development targetting openthread on nRF52840 sensor tag based on nRF-Connect/Zephyr is ongoing on this repo https://github.com/HomeSmartMesh/sdk-hsm-sensortag
 
 # Features
